@@ -17,49 +17,101 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   OTHER: "Other",
 };
 
+// Labels lean toward what students actually say, with the formal name in
+// parentheses only where the abbreviation alone would be ambiguous.
 export const LOCATION_LABELS: Record<CampusLocation, string> = {
+  // Libraries and central campus
   MILLS_LIBRARY: "Mills Library",
   THODE_LIBRARY: "Thode Library",
-  MUSC: "MUSC (Student Centre)",
-  ABB: "ABB (Arthur Bourns)",
-  JHE: "JHE (John Hodgins Engineering)",
-  BSB: "BSB (Burke Science)",
-  MDCL: "MDCL (DeGroote Centre for Learning)",
-  HATCH: "Hatch Centre",
+  MUSC: "MUSC",
+  GILMOUR_HALL: "Gilmour Hall",
+  UNIVERSITY_HALL: "University Hall",
+  HAMILTON_HALL: "Hamilton Hall",
+  CHESTER_NEW_HALL: "Chester New Hall",
   TSH: "TSH (Togo Salmon Hall)",
   KTH: "KTH (Kenneth Taylor Hall)",
-  ETB: "ETB (Engineering Technology)",
-  PGCLL: "PGCLL (Peter George Centre)",
-  DBAC: "DBAC / The Pulse",
-  IAHS: "IAHS (Applied Health Sciences)",
   LRW: "L.R. Wilson Hall",
-  RESIDENCE: "Residence",
-  BUS_STOP_OR_TRANSIT: "Bus Stop / Transit",
-  OUTDOOR_CAMPUS_GROUNDS: "Outdoor / Campus Grounds",
+  // Nobody calls this building "the Refectory" — they name the venues inside it.
+  REFECTORY: "The Phoenix / Bridges Café",
+  THE_HUB: "The Hub",
+
+  // Science
+  BSB: "BSB (Burke Science)",
+  ABB: "ABB (Arthur Bourns)",
+  GSB: "GSB (General Sciences)",
+  LIFE_SCIENCES: "Life Sciences Building",
+  PSYCHOLOGY: "Psychology Building",
+  MDCL: "MDCL",
+  IAHS: "IAHS (Applied Health Sciences)",
+
+  // Engineering
+  JHE: "JHE (John Hodgins)",
+  HATCH: "Hatch Centre",
+  ETB: "ETB (Engineering Technology)",
+  ITB: "ITB (Information Technology)",
+
+  // Business
+  DSB: "DeGroote School of Business",
+
+  // Athletics
+  DBAC: "The Pulse (DBAC)",
+  IVOR_WYNNE: "Ivor Wynne Centre",
+  RON_JOYCE_STADIUM: "Ron Joyce Stadium",
+
+  // Residences and residence life
+  COMMONS_BUILDING: "Commons Building",
+  PGCLL: "PGCLL (Peter George Centre)",
+  LES_PRINCE: "Les Prince Hall",
+  BATES: "Bates Residence",
+  BRANDON_HALL: "Brandon Hall",
+  WOODSTOCK_HALL: "Woodstock Hall",
+  HEDDEN_HALL: "Hedden Hall",
+  MARY_KEYES: "Mary Keyes Residence",
+  MATTHEWS_HALL: "Matthews Hall",
+  MOULTON_HALL: "Moulton Hall",
+  WALLINGFORD_HALL: "Wallingford Hall",
+  MCKAY_HALL: "McKay Hall",
+  WHIDDEN_HALL: "Whidden Hall",
+  EDWARDS_HALL: "Edwards Hall",
+
+  // Off-campus and unpositioned
+  HSR_BUS: "HSR Bus",
+  CAMPUS_BUS_TERMINAL: "Campus Bus Terminal",
+  OUTDOOR_CAMPUS_GROUNDS: "Outdoors on campus",
   OTHER: "Somewhere else on campus",
   UNKNOWN: "Not sure",
 };
 
-// Buildings that sit close enough together that an item found in one could
-// plausibly have been lost near the other. Used as a softer signal than an
-// exact location match in the matching engine.
-export const NEARBY_LOCATIONS: Partial<Record<CampusLocation, CampusLocation[]>> = {
-  MILLS_LIBRARY: ["MUSC", "KTH", "TSH"],
-  MUSC: ["MILLS_LIBRARY", "KTH", "BUS_STOP_OR_TRANSIT"],
-  THODE_LIBRARY: ["JHE", "ABB", "HATCH", "ETB"],
-  JHE: ["THODE_LIBRARY", "HATCH", "ETB", "ABB"],
-  HATCH: ["JHE", "ETB", "THODE_LIBRARY"],
-  ETB: ["JHE", "HATCH", "THODE_LIBRARY"],
-  ABB: ["THODE_LIBRARY", "BSB", "JHE"],
-  BSB: ["ABB", "MDCL", "THODE_LIBRARY"],
-  MDCL: ["BSB", "IAHS", "DBAC"],
-  IAHS: ["MDCL", "DBAC"],
-  KTH: ["TSH", "MILLS_LIBRARY", "MUSC"],
-  TSH: ["KTH", "MILLS_LIBRARY", "LRW"],
-  LRW: ["TSH", "PGCLL"],
-  PGCLL: ["LRW", "RESIDENCE"],
-  DBAC: ["MDCL", "IAHS"],
-};
+// Grouping for the location picker. ~40 options is too many for a flat
+// <select> on a phone, so the UI renders a grouped, searchable combobox.
+export const LOCATION_GROUPS: { label: string; locations: CampusLocation[] }[] = [
+  {
+    label: "Libraries & Central Campus",
+    locations: [
+      "MILLS_LIBRARY", "THODE_LIBRARY", "MUSC", "GILMOUR_HALL", "UNIVERSITY_HALL",
+      "HAMILTON_HALL", "CHESTER_NEW_HALL", "TSH", "KTH", "LRW", "REFECTORY", "THE_HUB",
+    ],
+  },
+  {
+    label: "Science & Health",
+    locations: ["BSB", "ABB", "GSB", "LIFE_SCIENCES", "PSYCHOLOGY", "MDCL", "IAHS"],
+  },
+  { label: "Engineering", locations: ["JHE", "HATCH", "ETB", "ITB"] },
+  { label: "Business", locations: ["DSB"] },
+  { label: "Athletics", locations: ["DBAC", "IVOR_WYNNE", "RON_JOYCE_STADIUM"] },
+  {
+    label: "Residence",
+    locations: [
+      "COMMONS_BUILDING", "PGCLL", "LES_PRINCE", "BATES", "BRANDON_HALL",
+      "WOODSTOCK_HALL", "HEDDEN_HALL", "MARY_KEYES", "MATTHEWS_HALL",
+      "MOULTON_HALL", "WALLINGFORD_HALL", "MCKAY_HALL", "WHIDDEN_HALL", "EDWARDS_HALL",
+    ],
+  },
+  {
+    label: "Transit & Other",
+    locations: ["HSR_BUS", "CAMPUS_BUS_TERMINAL", "OUTDOOR_CAMPUS_GROUNDS", "OTHER", "UNKNOWN"],
+  },
+];
 
 export const POST_TYPE_LABELS: Record<PostType, string> = {
   LOST: "Lost",

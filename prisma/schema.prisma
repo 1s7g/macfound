@@ -115,26 +115,71 @@ enum Category {
   OTHER
 }
 
-// Fixed vocabulary of campus locations. Verify against the official campus map
-// before launch — matching quality depends entirely on this list being right.
+// Fixed vocabulary of campus locations.
+//
+// Every value here has real coordinates in src/lib/campus.ts, sourced from
+// OpenStreetMap rather than from memory. Proximity is computed from those
+// coordinates — there is deliberately no hand-maintained "nearby buildings"
+// list, because the first one we wrote had five wrong pairs in it (MDCL and
+// DBAC were listed as neighbours; they are 450m apart).
 enum CampusLocation {
+  // Libraries and central campus
   MILLS_LIBRARY
   THODE_LIBRARY
   MUSC // McMaster University Student Centre
-  ABB // Arthur Bourns Building
-  JHE // John Hodgins Engineering
-  BSB // Burke Science Building
-  MDCL // Michael G. DeGroote Centre for Learning
-  HATCH // Hatch Centre for Engineering Experiential Learning
+  GILMOUR_HALL
+  UNIVERSITY_HALL
+  HAMILTON_HALL
+  CHESTER_NEW_HALL
   TSH // Togo Salmon Hall
   KTH // Kenneth Taylor Hall
-  ETB // Engineering Technology Building
-  PGCLL // Peter George Centre for Living and Learning
-  DBAC // David Braley Athletic Centre
-  IAHS // Institute for Applied Health Sciences
   LRW // L.R. Wilson Hall
-  RESIDENCE
-  BUS_STOP_OR_TRANSIT
+  REFECTORY
+  THE_HUB
+
+  // Science
+  BSB // Burke Science Building
+  ABB // Arthur Bourns Building
+  GSB // General Sciences Building
+  LIFE_SCIENCES
+  PSYCHOLOGY
+  MDCL // Michael G. DeGroote Centre for Learning and Discovery
+  IAHS // Institute for Applied Health Sciences
+
+  // Engineering
+  JHE // John Hodgins Engineering
+  HATCH // Gerald Hatch Centre
+  ETB // Engineering Technology Building
+  ITB // Information Technology Building
+
+  // Business
+  DSB // DeGroote School of Business (main campus, not Ron Joyce in Burlington)
+
+  // Athletics
+  DBAC // David Braley Athletic Centre
+  IVOR_WYNNE
+  RON_JOYCE_STADIUM
+
+  // Residences and residence life
+  COMMONS_BUILDING
+  PGCLL // Peter George Centre for Living and Learning
+  LES_PRINCE
+  BATES
+  BRANDON_HALL
+  WOODSTOCK_HALL
+  HEDDEN_HALL
+  MARY_KEYES
+  MATTHEWS_HALL
+  MOULTON_HALL
+  WALLINGFORD_HALL
+  MCKAY_HALL
+  WHIDDEN_HALL
+  EDWARDS_HALL
+
+  // Off-campus and unpositioned. These have no coordinates, so the matcher
+  // scores them by exact equality only.
+  HSR_BUS
+  CAMPUS_BUS_TERMINAL
   OUTDOOR_CAMPUS_GROUNDS
   OTHER
   UNKNOWN
