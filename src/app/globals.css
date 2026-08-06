@@ -1,26 +1,33 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * MacFound theme.
+ *
+ * Locked to light for now — the scaffold's prefers-color-scheme block flipped
+ * the page background to near-black while every component still painted dark
+ * text on it, which made the sign-in form unreadable in a dark-mode browser.
+ * Committing to one scheme is the honest fix until the real pages exist; dark
+ * mode is worth doing properly once the component set has settled, not
+ * half-applied across a UI that's about to change.
+ *
+ * The maroon is McMaster's colour, used as an accent. The university's logos
+ * and wordmark are deliberately not used anywhere — this is a student project
+ * and it says so.
+ */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+@theme {
+  --color-brand: #7a003c;
+  --color-brand-dark: #5e002e;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #ffffff;
+  color: var(--color-stone-900);
+  font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
 }

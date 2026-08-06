@@ -86,6 +86,20 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// Fixed-window rate limiter, backed by the database rather than memory.
+//
+// Serverless functions don't share memory between invocations, so an in-process
+// counter would reset constantly and enforce nothing. This matters most for the
+// sign-in flow: a 6-digit code is only 1,000,000 possibilities, which is
+// brute-forceable in minutes without a cap on verification attempts.
+model RateLimit {
+  key       String   @id // e.g. "signin:verify:someone@mcmaster.ca"
+  count     Int      @default(0)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
 // ---------------------------------------------------------------------------
 // Core domain
 // ---------------------------------------------------------------------------
