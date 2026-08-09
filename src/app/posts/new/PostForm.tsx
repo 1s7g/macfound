@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 
+import { ImageUpload } from "@/components/ImageUpload";
 import { CATEGORIES, CATEGORY_LABELS, LOCATION_GROUPS, LOCATION_LABELS } from "@/lib/vocabulary";
 import { submitPost, type PostFormState } from "./actions";
 
@@ -148,6 +149,8 @@ export function PostForm({
           className={inputClass(state.errors?.locationDetail)}
         />
       </Field>
+
+      <ImageUpload disabled={pending} />
 
       {isFound && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">

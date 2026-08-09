@@ -103,9 +103,50 @@ function endOfToday(): Date {
   return now;
 }
 
-export async function createPost(authorId: string, input: CreatePostInput) {
+/** Public host every Vercel Blob URL sits under. */
+const BLOB_HOST_SUFFIX = ".public.blob.vercel-storage.com";
+
+/**
+ * Keep only URLs that really point at our blob storage.
+ *
+ * Image URLs arrive as form fields, so a crafted submission could put any URL
+ * on the page — hotlinking someone else's bandwidth at best, embedding a
+ * tracking pixel or shock image on a McMaster-branded board at worst. The
+ * upload route is the only legitimate source of these, and everything it
+ * produces lives under the blob host.
+ */
+export function sanitizeImageUrls(urls: string[], limit = 3): string[] {
+  const seen = new Set<string>();
+
+  return urls
+    .filter((raw) => {
+      let parsed: URL;
+      try {
+        parsed = new URL(raw);
+      } catch {
+        return false;
+      }
+      if (parsed.protocol !== "https:") return false;
+      if (!parsed.hostname.endsWith(BLOB_HOST_SUFFIX)) return false;
+      if (seen.has(parsed.href)) return false;
+      seen.add(parsed.href);
+      return true;
+    })
+    .slice(0, limit);
+}
+
+export async function createPost(
+  authorId: string,
+  input: CreatePostInput,
+  imageUrls: string[] = [],
+) {
+  const images = sanitizeImageUrls(imageUrls);
+
   return db.post.create({
     data: {
+      images: {
+        create: images.map((url, position) => ({ url, position })),
+      },
       authorId,
       type: input.type,
       title: input.title,

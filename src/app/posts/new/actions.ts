@@ -60,7 +60,11 @@ export async function submitPost(
 
   let postId: string;
   try {
-    const post = await createPost(user.id, parsed.data);
+    const post = await createPost(
+      user.id,
+      parsed.data,
+      formData.getAll("imageUrls").map(String),
+    );
     postId = post.id;
   } catch (error) {
     console.error("Failed to create post for", user.id, error);

@@ -89,6 +89,26 @@ export default async function PostPage({
             <time dateTime={post.createdAt.toISOString()}>{formatDay(post.createdAt)}</time>
           </p>
 
+          {post.images.length > 0 && (
+            <ul className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {post.images.map((image) => (
+                <li key={image.id}>
+                  <a href={image.url} target="_blank" rel="noreferrer">
+                    {/* Blob serves these; next/image would need remotePatterns
+                        config for no benefit at these sizes. */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={image.url}
+                      alt={`Photo of ${post.title}`}
+                      loading="lazy"
+                      className="aspect-square w-full rounded-lg border border-stone-200 object-cover transition hover:opacity-90"
+                    />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+
           <p className="mt-5 whitespace-pre-wrap leading-relaxed text-stone-800">
             {post.description}
           </p>
