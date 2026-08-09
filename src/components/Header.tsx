@@ -1,9 +1,18 @@
 import Link from "next/link";
 
 import { signOut } from "@/lib/auth";
+import { unreadCount } from "@/lib/notifications";
 import type { SessionUser } from "@/lib/session";
 
-export function Header({ user, active }: { user: SessionUser; active?: "lost" | "found" }) {
+export async function Header({
+  user,
+  active,
+}: {
+  user: SessionUser;
+  active?: "lost" | "found";
+}) {
+  const unread = await unreadCount(user.id);
+
   return (
     <header className="border-b border-stone-200 bg-white">
       <div className="mx-auto flex w-full max-w-3xl items-center gap-4 px-4 py-3">
@@ -21,6 +30,20 @@ export function Header({ user, active }: { user: SessionUser; active?: "lost" | 
         </nav>
 
         <div className="ml-auto flex items-center gap-3">
+          <Link
+            href="/notifications"
+            className="relative rounded-md px-2 py-1 text-sm text-stone-600 transition hover:bg-stone-100"
+          >
+            Alerts
+            {unread > 0 && (
+              <span
+                aria-label={`${unread} unread`}
+                className="ml-1 inline-flex min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-4 text-white"
+              >
+                {unread > 9 ? "9+" : unread}
+              </span>
+            )}
+          </Link>
           <span className="hidden text-sm text-stone-500 sm:inline" title={user.email}>
             {user.name ?? user.email}
           </span>

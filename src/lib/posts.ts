@@ -223,6 +223,17 @@ export async function getPost(id: string, viewerId: string) {
           author: { select: { id: true, name: true } },
         },
       },
+      claims: {
+        orderBy: { createdAt: "asc" },
+        select: {
+          id: true,
+          answer: true,
+          status: true,
+          createdAt: true,
+          claimantId: true,
+          claimant: { select: { id: true, name: true } },
+        },
+      },
       _count: { select: { claims: true } },
     },
   });
@@ -235,9 +246,19 @@ export async function getPost(id: string, viewerId: string) {
   // It must never reach a non-author's browser: it arrives in the server
   // component payload, so "don't render it" would still ship it in the HTML
   // stream where anyone can read it from view-source.
+  // Everything sensitive is removed here rather than hidden in the UI. A server
+  // component's props are streamed to the browser inside the RSC payload, so
+  // "don't render it" still ships it to anyone who opens view-source.
+  //
+  //  - secretDetail is the answer a claimant has to produce.
+  //  - other people's claim answers would hand a chancer the exact wording that
+  //    a genuine owner used, which is precisely what the flow exists to prevent.
   return {
     ...post,
     secretDetail: isAuthor ? post.secretDetail : null,
+    claims: isAuthor
+      ? post.claims
+      : post.claims.filter((claim) => claim.claimantId === viewerId),
     isAuthor,
   };
 }

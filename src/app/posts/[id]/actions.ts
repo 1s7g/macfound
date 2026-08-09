@@ -1,0 +1,197 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+import { db } from "@/lib/db";
+import { notifyUnlessSelf } from "@/lib/notifications";
+import { consume } from "@/lib/rate-limit";
+import { requireUser } from "@/lib/session";
+import { ClaimStatus, PostStatus, PostType } from "@/generated/prisma/enums";
+
+export type ActionState = { error?: string; ok?: boolean };
+
+const commentSchema = z
+  .string()
+  .trim()
+  .min(2, "Say a little more than that.")
+  .max(1000, "Keep replies under 1000 characters.");
+
+const claimSchema = z
+  .string()
+  .trim()
+  .min(10, "Describe the detail properly — a few words isn't enough to verify.")
+  .max(500, "Keep it under 500 characters.");
+
+export async function addComment(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const user = await requireUser();
+  const postId = String(formData.get("postId") ?? "");
+
+  const parsed = commentSchema.safeParse(formData.get("body"));
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  const limit = await consume(`comment:${user.id}`, 20, 60 * 60);
+  if (!limit.allowed) return { error: "You're commenting a lot. Try again shortly." };
+
+  const post = await db.post.findUnique({
+    where: { id: postId },
+    select: { id: true, authorId: true, title: true, status: true },
+  });
+  if (!post) return { error: "That post no longer exists." };
+  if (post.status !== PostStatus.OPEN) {
+    return { error: "This post is closed, so replies are turned off." };
+  }
+
+  await db.comment.create({
+    data: { postId: post.id, authorId: user.id, body: parsed.data },
+  });
+
+  await notifyUnlessSelf(post.authorId, user.id, "NEW_COMMENT", {
+    title: post.title,
+    body: parsed.data.slice(0, 140),
+    href: `/posts/${post.id}`,
+    actorName: user.name ?? undefined,
+  });
+
+  revalidatePath(`/posts/${post.id}`);
+  return { ok: true };
+}
+
+/**
+ * Claim a found item.
+ *
+ * The claimant never sees the withheld detail — they describe what they believe
+ * is on the item, and the finder compares. Verification is a human judgement,
+ * not a string match, which is what makes it robust: a real owner phrases it
+ * their own way, and a chancer guessing has nothing to go on.
+ */
+export async function submitClaim(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const user = await requireUser();
+  const postId = String(formData.get("postId") ?? "");
+
+  const parsed = claimSchema.safeParse(formData.get("answer"));
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  const limit = await consume(`claim:${user.id}`, 5, 60 * 60);
+  if (!limit.allowed) {
+    return { error: "You've made several claims recently. Try again later." };
+  }
+
+  const post = await db.post.findUnique({
+    where: { id: postId },
+    select: { id: true, authorId: true, title: true, type: true, status: true },
+  });
+  if (!post) return { error: "That post no longer exists." };
+  if (post.type !== PostType.FOUND) return { error: "Only found items can be claimed." };
+  if (post.status !== PostStatus.OPEN) return { error: "This item has already been closed." };
+  if (post.authorId === user.id) return { error: "You can't claim your own post." };
+
+  try {
+    await db.claim.create({
+      data: { postId: post.id, claimantId: user.id, answer: parsed.data },
+    });
+  } catch {
+    // Unique constraint on (postId, claimantId) — one claim per person per post.
+    return { error: "You've already claimed this item. The finder is reviewing it." };
+  }
+
+  await notifyUnlessSelf(post.authorId, user.id, "CLAIM_SUBMITTED", {
+    title: post.title,
+    body: parsed.data.slice(0, 140),
+    href: `/posts/${post.id}`,
+    actorName: user.name ?? undefined,
+  });
+
+  revalidatePath(`/posts/${post.id}`);
+  return { ok: true };
+}
+
+/** Finder approves or rejects a claim. Approving also closes the post. */
+export async function decideClaim(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const claimId = String(formData.get("claimId") ?? "");
+  const approve = String(formData.get("decision") ?? "") === "approve";
+
+  const claim = await db.claim.findUnique({
+    where: { id: claimId },
+    select: {
+      id: true,
+      claimantId: true,
+      status: true,
+      post: { select: { id: true, authorId: true, title: true } },
+    },
+  });
+
+  // Authorisation, not just UI gating: only the finder may decide, and only once.
+  if (!claim || claim.post.authorId !== user.id || claim.status !== ClaimStatus.PENDING) {
+    return;
+  }
+
+  await db.$transaction(async (tx) => {
+    await tx.claim.update({
+      where: { id: claim.id },
+      data: {
+        status: approve ? ClaimStatus.APPROVED : ClaimStatus.REJECTED,
+        decidedAt: new Date(),
+      },
+    });
+
+    if (approve) {
+      await tx.post.update({
+        where: { id: claim.post.id },
+        data: { status: PostStatus.RESOLVED, resolvedAt: new Date() },
+      });
+      // Any other pending claims are moot once the item has an owner.
+      await tx.claim.updateMany({
+        where: { postId: claim.post.id, status: ClaimStatus.PENDING },
+        data: { status: ClaimStatus.REJECTED, decidedAt: new Date() },
+      });
+    }
+  });
+
+  await notifyUnlessSelf(
+    claim.claimantId,
+    user.id,
+    approve ? "CLAIM_APPROVED" : "CLAIM_REJECTED",
+    {
+      title: claim.post.title,
+      body: approve
+        ? "The finder confirmed it's yours — message them to arrange pickup."
+        : "The finder didn't think the details matched.",
+      href: `/posts/${claim.post.id}`,
+    },
+  );
+
+  revalidatePath(`/posts/${claim.post.id}`);
+  revalidatePath("/found");
+}
+
+/** Author marks their own post resolved (or reopens it). */
+export async function setPostResolved(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const postId = String(formData.get("postId") ?? "");
+  const resolved = String(formData.get("resolved") ?? "") === "true";
+
+  const post = await db.post.findUnique({
+    where: { id: postId },
+    select: { id: true, authorId: true, type: true },
+  });
+  if (!post || post.authorId !== user.id) return;
+
+  await db.post.update({
+    where: { id: post.id },
+    data: {
+      status: resolved ? PostStatus.RESOLVED : PostStatus.OPEN,
+      resolvedAt: resolved ? new Date() : null,
+    },
+  });
+
+  revalidatePath(`/posts/${post.id}`);
+  revalidatePath(post.type === PostType.FOUND ? "/found" : "/lost");
+}

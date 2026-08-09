@@ -152,10 +152,10 @@ export function PostForm({
       {isFound && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
           <Field
-            label="Verification detail (strongly recommended)"
+            label="Hold back one detail (strongly recommended)"
             name="secretDetail"
             error={state.errors?.secretDetail}
-            hint="Something only the real owner would know — a sticker, a lock screen, what's inside. This is never shown publicly; claimants have to describe it to prove the item is theirs."
+            hint="Write down a detail you left OUT of the description — the name inside, what's on the keychain, the lock screen photo. Never shown publicly. When someone claims the item you'll see what they said next to this, and you decide if they really own it."
           >
             <input
               id="secretDetail"
@@ -163,7 +163,7 @@ export function PostForm({
               type="text"
               maxLength={200}
               defaultValue={v.secretDetail}
-              placeholder="e.g. the name written inside the lid"
+              placeholder="e.g. &quot;S. Chen&quot; written inside the lid"
               className={inputClass(state.errors?.secretDetail)}
             />
           </Field>
