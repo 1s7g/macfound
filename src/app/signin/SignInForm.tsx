@@ -5,11 +5,12 @@ import { requestSignInCode, type SignInState } from "./actions";
 
 const initialState: SignInState = {};
 
-export function SignInForm({ domain }: { domain: string }) {
+export function SignInForm({ domain, next }: { domain: string; next: string }) {
   const [state, formAction, pending] = useActionState(requestSignInCode, initialState);
 
   return (
     <form action={formAction} className="space-y-4">
+      <input type="hidden" name="next" value={next} />
       <div>
         <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-stone-700">
           McMaster email

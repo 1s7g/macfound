@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { ALLOWED_EMAIL_DOMAIN, isAllowedEmail, normalizeEmail, signIn } from "@/lib/auth";
+import { safeRedirect } from "@/lib/safe-redirect";
 import {
   consume,
   POLICY,
@@ -74,5 +75,8 @@ export async function requestSignInCode(
     return { error: "We couldn't send your code. Please try again." };
   }
 
-  redirect(`/signin/code?email=${encodeURIComponent(email)}`);
+  const next = safeRedirect(formData.get("next")?.toString());
+  redirect(
+    `/signin/code?email=${encodeURIComponent(email)}&next=${encodeURIComponent(next)}`,
+  );
 }

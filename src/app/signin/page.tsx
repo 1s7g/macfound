@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { ALLOWED_EMAIL_DOMAIN, auth } from "@/lib/auth";
+import { safeRedirect } from "@/lib/safe-redirect";
 import { SignInForm } from "./SignInForm";
 
 export const metadata: Metadata = {
@@ -9,9 +10,14 @@ export const metadata: Metadata = {
   description: "Sign in with your McMaster email to post lost and found items.",
 };
 
-export default async function SignInPage() {
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const next = safeRedirect((await searchParams).next);
   const session = await auth();
-  if (session?.user) redirect("/");
+  if (session?.user) redirect(next);
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-6 py-12">
@@ -24,7 +30,7 @@ export default async function SignInPage() {
         </p>
       </div>
 
-      <SignInForm domain={ALLOWED_EMAIL_DOMAIN} />
+      <SignInForm domain={ALLOWED_EMAIL_DOMAIN} next={next} />
 
       <p className="mt-8 text-center text-xs leading-relaxed text-stone-500">
         A student project, not affiliated with or endorsed by McMaster

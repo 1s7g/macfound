@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { auth, isAllowedEmail, normalizeEmail } from "@/lib/auth";
+import { safeRedirect } from "@/lib/safe-redirect";
 
 export const metadata: Metadata = {
   title: "Enter your code · MacFound",
@@ -19,12 +20,13 @@ export const metadata: Metadata = {
 export default async function EnterCodePage({
   searchParams,
 }: {
-  searchParams: Promise<{ email?: string; error?: string }>;
+  searchParams: Promise<{ email?: string; error?: string; next?: string }>;
 }) {
-  const session = await auth();
-  if (session?.user) redirect("/");
+  const { email: rawEmail, error, next: rawNext } = await searchParams;
+  const next = safeRedirect(rawNext);
 
-  const { email: rawEmail, error } = await searchParams;
+  const session = await auth();
+  if (session?.user) redirect(next);
   const email = rawEmail ? normalizeEmail(rawEmail) : "";
 
   // Don't render a verification form for an address that could never sign in.
@@ -44,7 +46,7 @@ export default async function EnterCodePage({
 
       <form action="/api/auth/callback/mcmaster" method="GET" className="space-y-4">
         <input type="hidden" name="email" value={email} />
-        <input type="hidden" name="callbackUrl" value="/" />
+        <input type="hidden" name="callbackUrl" value={next} />
 
         <div>
           <label htmlFor="token" className="mb-1.5 block text-sm font-medium text-stone-700">
