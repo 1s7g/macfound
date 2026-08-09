@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { runMatching } from "@/lib/matching";
 import { createPost, createPostSchema } from "@/lib/posts";
 import { consume } from "@/lib/rate-limit";
 import { requireUser } from "@/lib/session";
@@ -69,6 +70,15 @@ export async function submitPost(
   } catch (error) {
     console.error("Failed to create post for", user.id, error);
     return { formError: "Something went wrong saving your post. Please try again.", values: raw };
+  }
+
+  // Match against the other board straight away, so the counterpart's author
+  // hears about it now rather than whenever they next visit. Wrapped because a
+  // matcher failure must never cost someone their post — it can be re-run.
+  try {
+    await runMatching(postId);
+  } catch (error) {
+    console.error("Matching failed for new post", postId, error);
   }
 
   // Both feeds are cached route segments; the new post must appear immediately.

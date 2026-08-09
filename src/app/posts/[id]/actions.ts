@@ -195,3 +195,36 @@ export async function setPostResolved(formData: FormData): Promise<void> {
   revalidatePath(`/posts/${post.id}`);
   revalidatePath(post.type === PostType.FOUND ? "/found" : "/lost");
 }
+
+/**
+ * Hide a match suggestion.
+ *
+ * Either side of a pair may dismiss it — a bad suggestion is noise for both
+ * of them, and there's no reason to make the other person dismiss it again.
+ */
+export async function dismissMatch(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const matchId = String(formData.get("matchId") ?? "");
+  const postId = String(formData.get("postId") ?? "");
+
+  const match = await db.match.findUnique({
+    where: { id: matchId },
+    select: {
+      id: true,
+      source: { select: { id: true, authorId: true } },
+      candidate: { select: { id: true, authorId: true } },
+    },
+  });
+
+  if (!match) return;
+  const involved =
+    match.source.authorId === user.id || match.candidate.authorId === user.id;
+  if (!involved) return;
+
+  await db.match.update({
+    where: { id: match.id },
+    data: { dismissedAt: new Date() },
+  });
+
+  revalidatePath(`/posts/${postId}`);
+}

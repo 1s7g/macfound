@@ -6,10 +6,11 @@ import { Header } from "@/components/Header";
 import { formatDay } from "@/components/PostCard";
 import { locationsNear } from "@/lib/campus";
 import { CAMPUS_SAFETY, nearestDropOffPoints } from "@/lib/campus-safety";
+import { confidenceLabel, getMatchesForPost } from "@/lib/matching";
 import { expiryDate, getPost } from "@/lib/posts";
 import { requireUser } from "@/lib/session";
 import { CATEGORY_LABELS, LOCATION_LABELS } from "@/lib/vocabulary";
-import { decideClaim, setPostResolved } from "./actions";
+import { decideClaim, dismissMatch, setPostResolved } from "./actions";
 import { ClaimForm } from "./ClaimForm";
 import { CommentForm } from "./CommentForm";
 
@@ -28,6 +29,8 @@ export default async function PostPage({
 
   const post = await getPost(id, user.id);
   if (!post) notFound();
+
+  const matches = await getMatchesForPost(post.id);
 
   const isFound = post.type === "FOUND";
   const isOpen = post.status === "OPEN";
@@ -157,6 +160,63 @@ export default async function PostPage({
             </p>
           )}
         </article>
+
+        {/* --- Possible matches -------------------------------------------- */}
+
+        {isOpen && matches.length > 0 && (
+          <section className="mt-8 border-t border-stone-200 pt-6">
+            <h2 className="font-medium text-stone-900">
+              {isFound ? "People looking for something like this" : "Might these be yours?"}
+            </h2>
+            <p className="mt-0.5 mb-3 text-sm text-stone-500">
+              Suggested automatically from the wording, category, place and dates.
+              Worth a look, not a guarantee.
+            </p>
+
+            <ul className="space-y-2">
+              {matches.map((match) => (
+                <li
+                  key={match.id}
+                  className="rounded-xl border border-stone-200 bg-white p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <Link href={`/posts/${match.other.id}`} className="min-w-0 flex-1">
+                      <p className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">
+                          {confidenceLabel(match.score)}
+                        </span>
+                        <span className="truncate font-medium text-stone-900">
+                          {match.other.title}
+                        </span>
+                      </p>
+                      <p className="mt-1.5 text-xs text-stone-500">
+                        {LOCATION_LABELS[match.other.location]}
+                        {" · "}
+                        {match.daysApart === 0
+                          ? "same day"
+                          : `${match.daysApart} day${match.daysApart === 1 ? "" : "s"} apart`}
+                        {match.categoryHit && " · same category"}
+                      </p>
+                    </Link>
+
+                    {post.isAuthor && (
+                      <form action={dismissMatch}>
+                        <input type="hidden" name="matchId" value={match.id} />
+                        <input type="hidden" name="postId" value={post.id} />
+                        <button
+                          type="submit"
+                          className="shrink-0 rounded-md px-2 py-1 text-xs text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
+                        >
+                          Not it
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* --- Claims ------------------------------------------------------ */}
 
