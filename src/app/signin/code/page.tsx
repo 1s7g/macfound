@@ -32,17 +32,44 @@ export default async function EnterCodePage({
   // Don't render a verification form for an address that could never sign in.
   if (!email || !isAllowedEmail(email)) redirect("/signin");
 
+  // Mirrors the condition in lib/email.ts that logs the code instead of sending
+  // it. Without this notice the page says "check your email" while the code is
+  // sitting in a terminal — which is exactly how a real dev session got stuck.
+  const isDevMailFallback =
+    process.env.NODE_ENV !== "production" && !process.env.AUTH_RESEND_KEY;
+
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-6 py-12">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-stone-900">
-          Check your email
+          {isDevMailFallback ? "Enter your code" : "Check your email"}
         </h1>
         <p className="mt-1 text-stone-600">
-          We sent a 6-digit code to <span className="font-medium text-stone-900">{email}</span>.
-          It expires in 10 minutes.
+          {isDevMailFallback ? (
+            <>
+              A 6-digit code was generated for{" "}
+              <span className="font-medium text-stone-900">{email}</span>. It
+              expires in 10 minutes.
+            </>
+          ) : (
+            <>
+              We sent a 6-digit code to{" "}
+              <span className="font-medium text-stone-900">{email}</span>. It
+              expires in 10 minutes.
+            </>
+          )}
         </p>
       </div>
+
+      {isDevMailFallback && (
+        <p className="mb-5 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm leading-relaxed text-sky-900">
+          <strong className="font-medium">Development mode.</strong> No email was
+          sent — your code was printed in the terminal running{" "}
+          <code className="rounded bg-sky-100 px-1 py-0.5 font-mono text-xs">npm run dev</code>.
+          Set <code className="rounded bg-sky-100 px-1 py-0.5 font-mono text-xs">AUTH_RESEND_KEY</code>{" "}
+          to send real email locally.
+        </p>
+      )}
 
       <form action="/api/auth/callback/mcmaster" method="GET" className="space-y-4">
         <input type="hidden" name="email" value={email} />
@@ -82,9 +109,9 @@ export default async function EnterCodePage({
       </form>
 
       <p className="mt-6 text-center text-sm text-stone-500">
-        Didn&rsquo;t get it? Check spam, or{" "}
+        {isDevMailFallback ? "Can't find it in the terminal? " : "Didn't get it? Check spam, or "}
         <Link href="/signin" className="font-medium text-brand underline underline-offset-2">
-          try a different address
+          {isDevMailFallback ? "request a new code" : "try a different address"}
         </Link>
         .
       </p>
