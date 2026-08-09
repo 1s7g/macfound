@@ -32,7 +32,6 @@ export async function submitPost(
     location: String(formData.get("location") ?? ""),
     locationDetail: String(formData.get("locationDetail") ?? ""),
     occurredOn: String(formData.get("occurredOn") ?? ""),
-    secretDetail: String(formData.get("secretDetail") ?? ""),
   };
 
   const parsed = createPostSchema.safeParse(raw);

@@ -6,9 +6,12 @@
 //    reason this app is more than a CRUD forum.
 //  - Location and Category are enums, not free text. Free-text locations make
 //    matching almost impossible; a fixed vocabulary makes it cheap and accurate.
-//  - Post.secretDetail is never sent to the client for anyone but the author.
-//    It's the anti-theft mechanism: a finder withholds one identifying detail,
-//    and a claimant has to produce it.
+//  - Claiming a found item is a structured step rather than a free-for-all:
+//    the claimant writes an identifying description, and the finder — who has
+//    the item in hand — decides. An earlier version stored a single "withheld
+//    detail" on the post to compare against, but that anchored finders to one
+//    right answer and would have them reject owners who described something
+//    else equally identifying.
 
 generator client {
   provider = "prisma-client"
@@ -216,10 +219,6 @@ model Post {
   // Matching compares these, so it must be user-supplied.
   occurredOn DateTime
 
-  // FOUND posts only: one identifying detail deliberately withheld from the
-  // public page, used to verify claims. Never serialize this to a non-author.
-  secretDetail String?
-
   status     PostStatus @default(OPEN)
   resolvedAt DateTime?
 
@@ -241,6 +240,17 @@ model Post {
   @@index([type, status, createdAt])
   @@index([category, location, status])
   @@index([authorId])
+
+  // Matching narrows by type + status + date before scoring.
+  @@index([type, status, occurredOn], map: "Post_type_status_occurredOn_idx")
+
+  // Trigram indexes backing similarity() in the matcher. Declared here rather
+  // than only in raw SQL: Prisma can see column indexes it doesn't know about
+  // and generates a DROP for them on the next diff. (An expression index —
+  // Post_fts_idx, over the weighted tsvector — is invisible to Prisma and does
+  // survive, which is why it stays in raw SQL.)
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin, map: "Post_title_trgm_idx")
+  @@index([description(ops: raw("gin_trgm_ops"))], type: Gin, map: "Post_description_trgm_idx")
 }
 
 model PostImage {

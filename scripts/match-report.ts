@@ -28,7 +28,7 @@ async function main() {
     console.log(`\n[${post.type}] ${post.title}`);
     for (const m of matches) {
       console.log(
-        `   ${m.score.toFixed(2)}  ${confidenceLabel(m.score).padEnd(15)}` +
+        `   ${m.score.toFixed(2)}  ${confidenceLabel(m.score, m.textScore).padEnd(15)}` +
           `text=${m.textScore.toFixed(2)} cat=${m.categoryHit ? "Y" : "n"} ` +
           `loc=${m.locationHit ? "Y" : "n"} ${String(m.daysApart).padStart(2)}d  ` +
           `-> ${titles.get(m.candidateId) ?? m.candidateId}`,

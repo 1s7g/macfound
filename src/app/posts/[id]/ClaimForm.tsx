@@ -13,8 +13,8 @@ export function ClaimForm({ postId }: { postId: string }) {
   if (state.ok) {
     return (
       <p className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900">
-        Claim sent. The finder will compare what you wrote against the detail they
-        held back, and you&rsquo;ll be notified either way.
+        Claim sent. The finder will check it against the item they&rsquo;re
+        holding and may ask a follow-up. You&rsquo;ll be notified either way.
       </p>
     );
   }
@@ -39,10 +39,10 @@ export function ClaimForm({ postId }: { postId: string }) {
         Prove it&rsquo;s yours
       </label>
       <p className="mt-1 mb-2.5 text-xs leading-relaxed text-stone-500">
-        The finder deliberately left one detail out of the description. Describe
-        something about this item that isn&rsquo;t mentioned above — a marking, a
-        name, what&rsquo;s inside, a scratch. They&rsquo;ll compare it to what
-        they know.
+        Describe something about this item that isn&rsquo;t in the post above —
+        a marking, a name, what&rsquo;s inside, a scratch, where you think you
+        left it. Anything the real owner would know and a stranger
+        wouldn&rsquo;t. The finder has the item in front of them.
       </p>
 
       <textarea

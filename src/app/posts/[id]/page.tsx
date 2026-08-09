@@ -143,12 +143,13 @@ export default async function PostPage({
             )}
           </dl>
 
-          {post.isAuthor && isFound && (
+          {post.isAuthor && isFound && isOpen && (
             <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-900">
-              <strong className="font-medium">Only you can see this:</strong>{" "}
-              {post.secretDetail
-                ? `the detail you held back is “${post.secretDetail}”. Compare it against what claimants describe.`
-                : "you didn't hold back a detail, so there's no way to check whether a claimant really owns this. Anyone can say it's theirs."}
+              <strong className="font-medium">You decide who gets this.</strong>{" "}
+              When someone claims it, they&rsquo;ll describe something identifying.
+              You&rsquo;re holding the item, so you can judge — and if
+              you&rsquo;re unsure, reply and ask about something the description
+              doesn&rsquo;t mention.
             </p>
           )}
 
@@ -183,7 +184,7 @@ export default async function PostPage({
                     <Link href={`/posts/${match.other.id}`} className="min-w-0 flex-1">
                       <p className="flex flex-wrap items-center gap-2">
                         <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">
-                          {confidenceLabel(match.score)}
+                          {confidenceLabel(match.score, match.textScore)}
                         </span>
                         <span className="truncate font-medium text-stone-900">
                           {match.other.title}
@@ -222,9 +223,16 @@ export default async function PostPage({
 
         {(canClaim || myClaim || (post.isAuthor && pendingClaims.length > 0)) && (
           <section className="mt-8 border-t border-stone-200 pt-6">
-            <h2 className="mb-3 font-medium text-stone-900">
+            <h2 className="mb-1 font-medium text-stone-900">
               {post.isAuthor ? "Claims on this item" : "Is this yours?"}
             </h2>
+            {post.isAuthor && pendingClaims.length > 0 && (
+              <p className="mb-3 text-sm text-stone-500">
+                Does what they describe match the item you have? Approve only if
+                you&rsquo;re satisfied — otherwise reply below and ask them
+                something more specific first.
+              </p>
+            )}
 
             {canClaim && <ClaimForm postId={post.id} />}
 

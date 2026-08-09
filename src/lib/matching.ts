@@ -33,6 +33,22 @@ const WEIGHTS = {
 
 /** Below this a pair isn't worth storing. */
 export const PERSIST_THRESHOLD = 0.35;
+
+/**
+ * Minimum textual overlap for a cross-category pair to count as a match at all.
+ *
+ * Location and date are corroborating evidence, not identifying evidence: that
+ * two things were in Thode four days apart says Thode is busy, not that they're
+ * the same object. Without this gate they carried 0.35 between them, which was
+ * enough on its own to suggest a green backpack to someone who lost an AirPods
+ * case.
+ *
+ * So a pair needs some evidence of item identity before place and time get a
+ * vote — either the same category, or enough shared wording to suggest the
+ * category labels just differ (a "wallet" filed under Keys by one person and
+ * Other by another).
+ */
+const MIN_TEXT_ACROSS_CATEGORIES = 0.15;
 /** Below this we store the suggestion but don't interrupt anyone about it. */
 export const NOTIFY_THRESHOLD = 0.55;
 /**
@@ -239,6 +255,13 @@ export async function runMatching(postId: string): Promise<ScoredMatch[]> {
 
     const { score: timing, daysApart } = dateScore(lostAt, foundAt);
 
+    // Identity gate — see MIN_TEXT_ACROSS_CATEGORIES. Nothing about where or
+    // when two items turned up can make a backpack into an earbud case.
+    if (!sameCategory && textScore < MIN_TEXT_ACROSS_CATEGORIES) continue;
+
+    // A timeline that can't happen isn't a weak match, it's not a match.
+    if (timing === 0) continue;
+
     const score = combineScores({
       textScore,
       sameCategory,
@@ -334,6 +357,7 @@ export async function getMatchesForPost(postId: string) {
     select: {
       id: true,
       score: true,
+      textScore: true,
       daysApart: true,
       categoryHit: true,
       locationHit: true,
@@ -369,6 +393,7 @@ export async function getMatchesForPost(postId: string) {
     .map((match) => ({
       id: match.id,
       score: match.score,
+      textScore: match.textScore,
       daysApart: match.daysApart,
       categoryHit: match.categoryHit,
       locationHit: match.locationHit,
@@ -376,8 +401,17 @@ export async function getMatchesForPost(postId: string) {
     }));
 }
 
-/** Confidence band, for wording the UI honestly rather than showing a number. */
-export function confidenceLabel(score: number): string {
+/**
+ * Confidence band, for wording the UI honestly rather than showing a number.
+ *
+ * Capped when the descriptions don't actually overlap. Two water bottles in the
+ * same building in the same week score well on category, place and date, but
+ * calling that a "Likely match" oversells it — nothing about the items
+ * themselves says they're the same one. Showing it is useful; claiming
+ * confidence in it isn't.
+ */
+export function confidenceLabel(score: number, textScore = 1): string {
+  if (textScore < MIN_TEXT_TO_NOTIFY) return "Possible match";
   if (score >= 0.75) return "Strong match";
   if (score >= 0.55) return "Likely match";
   return "Possible match";

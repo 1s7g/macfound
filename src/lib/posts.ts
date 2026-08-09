@@ -51,13 +51,6 @@ export const createPostSchema = z
       .string()
       .min(1, "When did this happen?")
       .refine((value) => !Number.isNaN(Date.parse(value)), "That date isn't valid."),
-    // FOUND posts only. Withheld from the public page and used to verify claims.
-    secretDetail: z
-      .string()
-      .trim()
-      .max(200, "Keep the verification detail short.")
-      .optional()
-      .or(z.literal("")),
   })
   .superRefine((value, ctx) => {
     const when = parseLocalDate(value.occurredOn);
@@ -155,9 +148,6 @@ export async function createPost(
       location: input.location,
       locationDetail: input.locationDetail?.trim() || null,
       occurredOn: parseLocalDate(input.occurredOn),
-      // Only meaningful on FOUND posts — a LOST post has nothing to verify against.
-      secretDetail:
-        input.type === PostType.FOUND ? input.secretDetail?.trim() || null : null,
     },
     select: { id: true },
   });
@@ -232,9 +222,8 @@ export async function getFeed(
 export type FeedPost = Awaited<ReturnType<typeof getFeed>>["posts"][number];
 
 /**
- * A single post. `secretDetail` is selected only for the author — it is the
- * answer to the claim question, so leaking it to anyone else would defeat the
- * whole verification flow.
+ * A single post. Claims are filtered by viewer: the author sees all of them,
+ * anyone else sees only their own.
  */
 export async function getPost(id: string, viewerId: string) {
   const post = await db.post.findUnique({
@@ -252,7 +241,6 @@ export async function getPost(id: string, viewerId: string) {
       createdAt: true,
       resolvedAt: true,
       authorId: true,
-      secretDetail: true,
       author: { select: { id: true, name: true, email: true } },
       images: { select: { id: true, url: true }, orderBy: { position: "asc" } },
       comments: {
@@ -287,16 +275,12 @@ export async function getPost(id: string, viewerId: string) {
   // It must never reach a non-author's browser: it arrives in the server
   // component payload, so "don't render it" would still ship it in the HTML
   // stream where anyone can read it from view-source.
-  // Everything sensitive is removed here rather than hidden in the UI. A server
-  // component's props are streamed to the browser inside the RSC payload, so
-  // "don't render it" still ships it to anyone who opens view-source.
-  //
-  //  - secretDetail is the answer a claimant has to produce.
-  //  - other people's claim answers would hand a chancer the exact wording that
-  //    a genuine owner used, which is precisely what the flow exists to prevent.
+  // Other people's claim answers are stripped here rather than hidden in the
+  // UI. A server component's props are streamed to the browser inside the RSC
+  // payload, so "don't render it" still ships them to anyone who opens
+  // view-source — handing a chancer the exact wording a genuine owner used.
   return {
     ...post,
-    secretDetail: isAuthor ? post.secretDetail : null,
     claims: isAuthor
       ? post.claims
       : post.claims.filter((claim) => claim.claimantId === viewerId),

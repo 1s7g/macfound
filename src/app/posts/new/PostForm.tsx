@@ -152,31 +152,10 @@ export function PostForm({
 
       <ImageUpload disabled={pending} />
 
-      {isFound && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-          <Field
-            label="Hold back one detail (strongly recommended)"
-            name="secretDetail"
-            error={state.errors?.secretDetail}
-            hint="Write down a detail you left OUT of the description — the name inside, what's on the keychain, the lock screen photo. Never shown publicly. When someone claims the item you'll see what they said next to this, and you decide if they really own it."
-          >
-            <input
-              id="secretDetail"
-              name="secretDetail"
-              type="text"
-              maxLength={200}
-              defaultValue={v.secretDetail}
-              placeholder="e.g. &quot;S. Chen&quot; written inside the lid"
-              className={inputClass(state.errors?.secretDetail)}
-            />
-          </Field>
-
-          {nearestDropOffHint && (
-            <p className="mt-3 border-t border-amber-200 pt-3 text-xs leading-relaxed text-amber-900">
-              {nearestDropOffHint}
-            </p>
-          )}
-        </div>
+      {isFound && nearestDropOffHint && (
+        <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs leading-relaxed text-amber-900">
+          {nearestDropOffHint}
+        </p>
       )}
 
       {state.formError && (
