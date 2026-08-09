@@ -328,7 +328,9 @@ export async function getMatchesForPost(postId: string) {
       candidate: { status: PostStatus.OPEN },
     },
     orderBy: { score: "desc" },
-    take: 5,
+    // Over-fetch: a pair can be stored in both directions, so deduplicating
+    // below shrinks this list. Taking 5 here would sometimes show only 2 or 3.
+    take: 20,
     select: {
       id: true,
       score: true,
@@ -346,14 +348,32 @@ export async function getMatchesForPost(postId: string) {
 
   // A Match row is directional, but the suggestion is useful from both ends.
   // Present whichever post isn't the one being viewed.
-  return matches.map((match) => ({
-    id: match.id,
-    score: match.score,
-    daysApart: match.daysApart,
-    categoryHit: match.categoryHit,
-    locationHit: match.locationHit,
-    other: match.sourceId === postId ? match.candidate : match.source,
-  }));
+  //
+  // Both directions of a pair usually exist — runMatching stores A->B when A is
+  // posted and B->A when B is. That's deliberate in the database, since each row
+  // notifies a different author, but on screen it rendered the same item twice.
+  // Collapse per counterpart, keeping the higher-scoring row.
+  const byOtherPost = new Map<string, (typeof matches)[number] & { otherId: string }>();
+
+  for (const match of matches) {
+    const other = match.sourceId === postId ? match.candidate : match.source;
+    const existing = byOtherPost.get(other.id);
+    if (!existing || match.score > existing.score) {
+      byOtherPost.set(other.id, { ...match, otherId: other.id });
+    }
+  }
+
+  return [...byOtherPost.values()]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+    .map((match) => ({
+      id: match.id,
+      score: match.score,
+      daysApart: match.daysApart,
+      categoryHit: match.categoryHit,
+      locationHit: match.locationHit,
+      other: match.sourceId === postId ? match.candidate : match.source,
+    }));
 }
 
 /** Confidence band, for wording the UI honestly rather than showing a number. */

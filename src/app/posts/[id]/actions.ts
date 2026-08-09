@@ -221,10 +221,21 @@ export async function dismissMatch(formData: FormData): Promise<void> {
     match.source.authorId === user.id || match.candidate.authorId === user.id;
   if (!involved) return;
 
-  await db.match.update({
-    where: { id: match.id },
+  // Dismiss both directions of the pair. runMatching stores A->B and B->A as
+  // separate rows, so hiding only the one that was clicked leaves its mirror
+  // to resurface the same suggestion on the next render.
+  await db.match.updateMany({
+    where: {
+      dismissedAt: null,
+      OR: [
+        { sourceId: match.source.id, candidateId: match.candidate.id },
+        { sourceId: match.candidate.id, candidateId: match.source.id },
+      ],
+    },
     data: { dismissedAt: new Date() },
   });
 
   revalidatePath(`/posts/${postId}`);
+  revalidatePath(`/posts/${match.source.id}`);
+  revalidatePath(`/posts/${match.candidate.id}`);
 }
