@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { signOut } from "@/lib/auth";
+import { unreadMessageCount } from "@/lib/messages";
 import { unreadCount } from "@/lib/notifications";
 import type { SessionUser } from "@/lib/session";
 
@@ -11,7 +12,10 @@ export async function Header({
   user: SessionUser;
   active?: "lost" | "found";
 }) {
-  const unread = await unreadCount(user.id);
+  const [unread, unreadMessages] = await Promise.all([
+    unreadCount(user.id),
+    unreadMessageCount(user.id),
+  ]);
 
   return (
     <header className="border-b border-stone-200 bg-white">
@@ -29,7 +33,21 @@ export async function Header({
           </NavLink>
         </nav>
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-1 sm:gap-3">
+          <Link
+            href="/messages"
+            className="relative rounded-md px-2 py-1 text-sm text-stone-600 transition hover:bg-stone-100"
+          >
+            Messages
+            {unreadMessages > 0 && (
+              <span
+                aria-label={`${unreadMessages} unread messages`}
+                className="ml-1 inline-flex min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-4 text-white"
+              >
+                {unreadMessages > 9 ? "9+" : unreadMessages}
+              </span>
+            )}
+          </Link>
           <Link
             href="/notifications"
             className="relative rounded-md px-2 py-1 text-sm text-stone-600 transition hover:bg-stone-100"

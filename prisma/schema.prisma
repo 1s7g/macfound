@@ -49,8 +49,8 @@ model User {
   notifications Notification[]
   reportsFiled  Report[]       @relation("ReportAuthor")
 
-  conversationsAsFinder  Conversation[] @relation("ConversationFinder")
-  conversationsAsSeeker  Conversation[] @relation("ConversationSeeker")
+  conversationsStarted  Conversation[] @relation("ConversationInitiator")
+  conversationsReceived Conversation[] @relation("ConversationPostAuthor")
 }
 
 model Account {
@@ -209,8 +209,8 @@ model Post {
   title       String
   description String
 
-  category Category
-  location CampusLocation
+  category       Category
+  location       CampusLocation
   // Free-text refinement of the location ("3rd floor near the printers").
   // Useful for humans; the enum above is what the matcher uses.
   locationDetail String?
@@ -240,10 +240,8 @@ model Post {
   @@index([type, status, createdAt])
   @@index([category, location, status])
   @@index([authorId])
-
   // Matching narrows by type + status + date before scoring.
   @@index([type, status, occurredOn], map: "Post_type_status_occurredOn_idx")
-
   // Trigram indexes backing similarity() in the matcher. Declared here rather
   // than only in raw SQL: Prisma can see column indexes it doesn't know about
   // and generates a DROP for them on the next diff. (An expression index —
@@ -271,8 +269,8 @@ model Comment {
   body      String
   createdAt DateTime @default(now())
 
-  post    Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  author  User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post    Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author  User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   reports Report[]
 
   @@index([postId, createdAt])
@@ -290,11 +288,11 @@ model Match {
   sourceId    String // the newly created post that triggered the search
   candidateId String // the pre-existing post it might pair with
 
-  score        Float // 0..1 combined score
-  textScore    Float // full-text + trigram similarity component
-  categoryHit  Boolean
-  locationHit  Boolean
-  daysApart    Int
+  score       Float // 0..1 combined score
+  textScore   Float // full-text + trigram similarity component
+  categoryHit Boolean
+  locationHit Boolean
+  daysApart   Int
 
   notifiedAt  DateTime?
   dismissedAt DateTime?
@@ -341,35 +339,43 @@ model Claim {
 
 // Always anchored to a post: DMs exist to resolve a specific item, not to be a
 // general chat app. Keeps moderation scope small and intent obvious.
+//
+// Participants are named by role in the conversation, not by role in the
+// world. An earlier version called them finder/seeker, which is only correct
+// on FOUND posts — on a LOST post the author is the person who lost the thing
+// and the initiator is the one who found it.
 model Conversation {
-  id        String   @id @default(cuid())
-  postId    String
-  finderId  String // the post author
-  seekerId  String // the person who initiated
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  postId       String
+  postAuthorId String
+  initiatorId  String
+  createdAt    DateTime @default(now())
 
-  post     Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  finder   User      @relation("ConversationFinder", fields: [finderId], references: [id], onDelete: Cascade)
-  seeker   User      @relation("ConversationSeeker", fields: [seekerId], references: [id], onDelete: Cascade)
-  messages Message[]
+  post       Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postAuthor User      @relation("ConversationPostAuthor", fields: [postAuthorId], references: [id], onDelete: Cascade)
+  initiator  User      @relation("ConversationInitiator", fields: [initiatorId], references: [id], onDelete: Cascade)
+  messages   Message[]
 
-  @@unique([postId, seekerId])
-  @@index([finderId])
-  @@index([seekerId])
+  // One thread per person per post — stops a dozen parallel threads about the
+  // same item, and makes "open the conversation" idempotent.
+  @@unique([postId, initiatorId])
+  @@index([postAuthorId])
+  @@index([initiatorId])
 }
 
 model Message {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   conversationId String
   senderId       String
   body           String
   readAt         DateTime?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime  @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
 
   @@index([conversationId, createdAt])
+  @@index([senderId, readAt])
 }
 
 // ---------------------------------------------------------------------------

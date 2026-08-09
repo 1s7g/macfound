@@ -10,6 +10,7 @@ import { confidenceLabel, getMatchesForPost } from "@/lib/matching";
 import { expiryDate, getPost } from "@/lib/posts";
 import { requireUser } from "@/lib/session";
 import { CATEGORY_LABELS, LOCATION_LABELS } from "@/lib/vocabulary";
+import { startConversation } from "@/app/messages/actions";
 import { decideClaim, dismissMatch, setPostResolved } from "./actions";
 import { ClaimForm } from "./ClaimForm";
 import { CommentForm } from "./CommentForm";
@@ -221,10 +222,17 @@ export default async function PostPage({
 
         {/* --- Claims ------------------------------------------------------ */}
 
-        {(canClaim || myClaim || (post.isAuthor && pendingClaims.length > 0)) && (
+        {(canClaim ||
+          myClaim ||
+          (!post.isAuthor && isOpen) ||
+          (post.isAuthor && pendingClaims.length > 0)) && (
           <section className="mt-8 border-t border-stone-200 pt-6">
             <h2 className="mb-1 font-medium text-stone-900">
-              {post.isAuthor ? "Claims on this item" : "Is this yours?"}
+              {post.isAuthor
+                ? "Claims on this item"
+                : isFound
+                  ? "Is this yours?"
+                  : "Seen this?"}
             </h2>
             {post.isAuthor && pendingClaims.length > 0 && (
               <p className="mb-3 text-sm text-stone-500">
@@ -233,8 +241,28 @@ export default async function PostPage({
                 something more specific first.
               </p>
             )}
+            {!post.isAuthor && !isFound && (
+              <p className="mb-3 text-sm text-stone-500">
+                If you&rsquo;ve found this or know where it is, message them
+                directly.
+              </p>
+            )}
 
             {canClaim && <ClaimForm postId={post.id} />}
+
+            {/* Available on both boards: on a LOST post there's nothing to
+                claim, but the finder still needs a way to reach the owner. */}
+            {!post.isAuthor && isOpen && (
+              <form action={startConversation} className="mt-3">
+                <input type="hidden" name="postId" value={post.id} />
+                <button
+                  type="submit"
+                  className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-100"
+                >
+                  Message {post.author.name ?? "them"}
+                </button>
+              </form>
+            )}
 
             {myClaim && !post.isAuthor && <MyClaimStatus status={myClaim.status} />}
 
