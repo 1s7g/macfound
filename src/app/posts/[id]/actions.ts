@@ -1,9 +1,19 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { db } from "@/lib/db";
+import { isModerator } from "@/lib/admin";
+import { runMatching } from "@/lib/matching";
+import {
+  createPostSchema,
+  deletePost,
+  updatePost,
+} from "@/lib/posts";
+import { REPORT_REASONS } from "@/lib/report-reasons";
+import { fileReport, hasReportedPost } from "@/lib/reports";
 import { notifyUnlessSelf } from "@/lib/notifications";
 import { consume } from "@/lib/rate-limit";
 import { requireUser } from "@/lib/session";
@@ -238,4 +248,132 @@ export async function dismissMatch(formData: FormData): Promise<void> {
   revalidatePath(`/posts/${postId}`);
   revalidatePath(`/posts/${match.source.id}`);
   revalidatePath(`/posts/${match.candidate.id}`);
+}
+
+// --- Owning your own post --------------------------------------------------
+
+export type EditState = {
+  errors?: Partial<Record<string, string>>;
+  formError?: string;
+  values?: Record<string, string>;
+};
+
+export async function saveEdit(
+  _prev: EditState,
+  formData: FormData,
+): Promise<EditState | never> {
+  const user = await requireUser();
+  const postId = String(formData.get("postId") ?? "");
+
+  const raw = {
+    type: String(formData.get("type") ?? ""),
+    title: String(formData.get("title") ?? ""),
+    description: String(formData.get("description") ?? ""),
+    category: String(formData.get("category") ?? ""),
+    location: String(formData.get("location") ?? ""),
+    locationDetail: String(formData.get("locationDetail") ?? ""),
+    occurredOn: String(formData.get("occurredOn") ?? ""),
+  };
+
+  const parsed = createPostSchema.safeParse(raw);
+  if (!parsed.success) {
+    const errors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) {
+      const field = String(issue.path[0] ?? "form");
+      errors[field] ??= issue.message;
+    }
+    return { errors, values: raw };
+  }
+
+  const updated = await updatePost(postId, user.id, parsed.data);
+  if (!updated) return { formError: "You can't edit that post." };
+
+  // The words, category, place and date all feed the matcher, so an edit can
+  // change who this should be matched against. Re-running is cheap and keeps
+  // suggestions honest; a failure here must not lose the user's edit.
+  try {
+    await runMatching(updated.id);
+  } catch (error) {
+    console.error("Re-matching failed after edit", updated.id, error);
+  }
+
+  revalidatePath(`/posts/${updated.id}`);
+  revalidatePath(updated.type === PostType.FOUND ? "/found" : "/lost");
+  revalidatePath("/me");
+  redirect(`/posts/${updated.id}`);
+}
+
+export async function removeOwnPost(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const postId = String(formData.get("postId") ?? "");
+
+  const deleted = await deletePost(postId, user.id);
+  if (!deleted) return;
+
+  revalidatePath(deleted.type === PostType.FOUND ? "/found" : "/lost");
+  revalidatePath("/me");
+  redirect(deleted.type === PostType.FOUND ? "/found" : "/lost");
+}
+
+// --- Reporting -------------------------------------------------------------
+
+export async function reportPost(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const user = await requireUser();
+  const postId = String(formData.get("postId") ?? "");
+  const commentId = String(formData.get("commentId") ?? "");
+  const reason = String(formData.get("reason") ?? "");
+  const detail = String(formData.get("detail") ?? "");
+
+  if (!REPORT_REASONS.includes(reason as (typeof REPORT_REASONS)[number])) {
+    return { error: "Pick a reason." };
+  }
+
+  const limit = await consume(`report:${user.id}`, 10, 60 * 60);
+  if (!limit.allowed) return { error: "You've filed several reports. Try again later." };
+
+  if (postId && (await hasReportedPost(user.id, postId))) {
+    return { ok: true };
+  }
+
+  await fileReport({
+    reporterId: user.id,
+    postId: postId || undefined,
+    commentId: commentId || undefined,
+    reason: reason as (typeof REPORT_REASONS)[number],
+    detail,
+  });
+
+  revalidatePath("/admin/reports");
+  return { ok: true };
+}
+
+// --- Moderation ------------------------------------------------------------
+
+/** Guarded by ADMIN_EMAILS, re-checked here rather than trusted from the page. */
+export async function moderateReport(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  if (!isModerator(user.email)) return;
+
+  const reportId = String(formData.get("reportId") ?? "");
+  const postId = String(formData.get("postId") ?? "");
+  const action = String(formData.get("action") ?? "");
+
+  const { removePost, resolveReport, resolveReportsForPost } = await import(
+    "@/lib/reports"
+  );
+
+  if (action === "remove" && postId) {
+    await removePost(postId);
+    await resolveReportsForPost(postId);
+    revalidatePath(`/posts/${postId}`);
+    revalidatePath("/lost");
+    revalidatePath("/found");
+  } else {
+    await resolveReport(reportId);
+  }
+
+  revalidatePath("/admin/reports");
 }

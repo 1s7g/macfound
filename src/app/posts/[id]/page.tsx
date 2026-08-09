@@ -13,6 +13,8 @@ import { CATEGORY_LABELS, LOCATION_LABELS } from "@/lib/vocabulary";
 import { startConversation } from "@/app/messages/actions";
 import { decideClaim, dismissMatch, setPostResolved } from "./actions";
 import { ClaimForm } from "./ClaimForm";
+import { PostOwnerControls } from "./PostOwnerControls";
+import { ReportButton } from "./ReportButton";
 import { CommentForm } from "./CommentForm";
 
 export const metadata: Metadata = { title: "Post · MacFound" };
@@ -330,6 +332,16 @@ export default async function PostPage({
                   : "This post is closed."}
               </span>
             </form>
+
+            <div className="mt-4">
+              <PostOwnerControls postId={post.id} isOpen={isOpen} />
+            </div>
+          </section>
+        )}
+
+        {!post.isAuthor && (
+          <section className="mt-8 border-t border-stone-200 pt-6">
+            <ReportButton postId={post.id} />
           </section>
         )}
 

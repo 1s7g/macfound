@@ -2,11 +2,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { CAMPUS_SAFETY } from "@/lib/campus-safety";
+import { getStats } from "@/lib/posts";
 import { getUser } from "@/lib/session";
 
 export default async function Home() {
   // Signed-in students have no use for a marketing page.
   if (await getUser()) redirect("/lost");
+
+  const stats = await getStats();
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-xl flex-col justify-center px-6 py-12">
@@ -24,6 +27,27 @@ export default async function Home() {
       >
         Sign in with McMaster email
       </Link>
+
+      {/* Only shown once there's something to show. An empty board advertising
+          "0 items reunited" argues against itself. */}
+      {stats.total > 0 && (
+        <dl className="mt-10 flex gap-8 border-t border-stone-200 pt-6">
+          <div>
+            <dt className="text-xs uppercase tracking-wide text-stone-400">Reunited</dt>
+            <dd className="mt-0.5 text-2xl font-semibold text-stone-900">
+              {stats.reunited}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wide text-stone-400">Open right now</dt>
+            <dd className="mt-0.5 text-2xl font-semibold text-stone-900">{stats.open}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wide text-stone-400">Posted in total</dt>
+            <dd className="mt-0.5 text-2xl font-semibold text-stone-900">{stats.total}</dd>
+          </div>
+        </dl>
+      )}
 
       <p className="mt-10 border-t border-stone-200 pt-6 text-sm leading-relaxed text-stone-500">
         Already handed in somewhere? McMaster&rsquo;s official lost &amp; found is{" "}

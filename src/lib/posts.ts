@@ -293,3 +293,103 @@ export function expiryDate(createdAt: Date): Date {
   expires.setDate(expires.getDate() + POST_RETENTION_DAYS);
   return expires;
 }
+
+// --- Ownership: edit, delete, and your own history -------------------------
+
+/**
+ * Update a post the viewer owns.
+ *
+ * Images aren't touched here. Replacing them means uploading new blobs and
+ * orphaning old ones, which belongs with the cleanup job rather than bolted
+ * onto an edit.
+ */
+export async function updatePost(
+  postId: string,
+  authorId: string,
+  input: CreatePostInput,
+) {
+  const post = await db.post.findUnique({
+    where: { id: postId },
+    select: { id: true, authorId: true },
+  });
+
+  // Ownership is re-checked here, not just in the UI that renders the button.
+  if (!post || post.authorId !== authorId) return null;
+
+  return db.post.update({
+    where: { id: post.id },
+    data: {
+      title: input.title,
+      description: input.description,
+      category: input.category,
+      location: input.location,
+      locationDetail: input.locationDetail?.trim() || null,
+      occurredOn: parseLocalDate(input.occurredOn),
+    },
+    select: { id: true, type: true },
+  });
+}
+
+/**
+ * Delete a post and its photos.
+ *
+ * Rows cascade from the schema; the blobs don't, so they're removed explicitly.
+ * Blob deletion is best-effort — a storage hiccup shouldn't leave someone
+ * unable to take down their own post, which is exactly when they most want to.
+ */
+export async function deletePost(postId: string, authorId: string) {
+  const post = await db.post.findUnique({
+    where: { id: postId },
+    select: { id: true, authorId: true, type: true, images: { select: { url: true } } },
+  });
+
+  if (!post || post.authorId !== authorId) return null;
+
+  if (post.images.length > 0) {
+    try {
+      const { del } = await import("@vercel/blob");
+      await del(post.images.map((image) => image.url));
+    } catch (error) {
+      console.error("Failed to delete blobs for post", postId, error);
+    }
+  }
+
+  await db.post.delete({ where: { id: post.id } });
+  return { type: post.type };
+}
+
+/** Everything the viewer has posted, newest first, whatever its status. */
+export async function getMyPosts(authorId: string) {
+  return db.post.findMany({
+    where: { authorId },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      type: true,
+      title: true,
+      status: true,
+      category: true,
+      location: true,
+      occurredOn: true,
+      createdAt: true,
+      images: { select: { url: true }, orderBy: { position: "asc" }, take: 1 },
+      _count: { select: { comments: true, claims: true } },
+    },
+  });
+}
+
+/**
+ * Headline numbers.
+ *
+ * "Reunited" is the only figure that actually says the app works — posts and
+ * users measure activity, not outcomes.
+ */
+export async function getStats() {
+  const [reunited, open, total] = await Promise.all([
+    db.post.count({ where: { status: PostStatus.RESOLVED } }),
+    db.post.count({ where: { status: PostStatus.OPEN } }),
+    db.post.count(),
+  ]);
+
+  return { reunited, open, total };
+}

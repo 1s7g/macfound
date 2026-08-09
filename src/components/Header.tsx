@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 import { signOut } from "@/lib/auth";
+import { isModerator } from "@/lib/admin";
 import { unreadMessageCount } from "@/lib/messages";
+import { openReportCount } from "@/lib/reports";
 import { unreadCount } from "@/lib/notifications";
 import type { SessionUser } from "@/lib/session";
 
@@ -12,9 +14,11 @@ export async function Header({
   user: SessionUser;
   active?: "lost" | "found";
 }) {
-  const [unread, unreadMessages] = await Promise.all([
+  const moderator = isModerator(user.email);
+  const [unread, unreadMessages, openReports] = await Promise.all([
     unreadCount(user.id),
     unreadMessageCount(user.id),
+    moderator ? openReportCount() : Promise.resolve(0),
   ]);
 
   return (
@@ -62,9 +66,26 @@ export async function Header({
               </span>
             )}
           </Link>
-          <span className="hidden text-sm text-stone-500 sm:inline" title={user.email}>
+          {moderator && (
+            <Link
+              href="/admin/reports"
+              className="rounded-md px-2 py-1 text-sm text-stone-600 transition hover:bg-stone-100"
+            >
+              Reports
+              {openReports > 0 && (
+                <span className="ml-1 inline-flex min-w-4 items-center justify-center rounded-full bg-red-700 px-1 text-[10px] font-semibold leading-4 text-white">
+                  {openReports > 9 ? "9+" : openReports}
+                </span>
+              )}
+            </Link>
+          )}
+          <Link
+            href="/me"
+            className="hidden text-sm text-stone-500 transition hover:text-stone-800 sm:inline"
+            title={user.email}
+          >
             {user.name ?? user.email}
-          </span>
+          </Link>
           <form
             action={async () => {
               "use server";

@@ -21,6 +21,7 @@ const REQUIRED_VARS = [
   "ALLOWED_EMAIL_DOMAIN",
   "AUTH_RESEND_KEY",
   "EMAIL_FROM",
+  "BLOB_READ_WRITE_TOKEN",
 ] as const;
 
 export async function GET() {
