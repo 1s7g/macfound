@@ -41,17 +41,17 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
         required
         maxLength={2000}
         placeholder="Write a message…"
-        className="w-full rounded-lg border border-stone-300 bg-white px-3.5 py-2.5 text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-brand focus:ring-2 focus:ring-brand/20"
+        className="w-full rounded-lg border border-line-strong bg-raised px-3.5 py-2.5 text-ink outline-none transition placeholder:text-subtle focus:border-brand focus:ring-2 focus:ring-brand/25"
       />
       {state.error && (
-        <p role="alert" className="mt-1.5 text-sm text-red-700">
+        <p role="alert" className="mt-1.5 text-sm text-danger">
           {state.error}
         </p>
       )}
       <button
         type="submit"
         disabled={pending}
-        className="mt-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-dark disabled:opacity-60"
+        className="mt-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-hover disabled:opacity-60"
       >
         {pending ? "Sending…" : "Send"}
       </button>

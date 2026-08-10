@@ -17,12 +17,12 @@ export default async function MessagesPage() {
       <Header user={user} />
 
       <main className="mx-auto w-full max-w-2xl px-4 py-6">
-        <h1 className="text-xl font-semibold tracking-tight text-stone-900">Messages</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-ink">Messages</h1>
 
         {conversations.length === 0 ? (
-          <p className="mt-6 rounded-xl border border-dashed border-stone-300 bg-white p-8 text-center leading-relaxed text-stone-600">
+          <p className="mt-6 rounded-xl border border-dashed border-line-strong bg-raised p-8 text-center leading-relaxed text-muted">
             No conversations yet. Open a post and use{" "}
-            <span className="font-medium text-stone-800">Message</span> to get in
+            <span className="font-medium text-ink">Message</span> to get in
             touch about an item.
           </p>
         ) : (
@@ -31,30 +31,30 @@ export default async function MessagesPage() {
               <li key={conversation.id}>
                 <Link
                   href={`/messages/${conversation.id}`}
-                  className={`block rounded-xl border p-4 transition hover:border-stone-300 ${
+                  className={`block rounded-xl border p-4 transition hover:border-line-strong ${
                     conversation.unread > 0
                       ? "border-brand/30 bg-brand/5"
-                      : "border-stone-200 bg-white"
+                      : "border-line bg-raised"
                   }`}
                 >
                   <div className="flex items-baseline justify-between gap-3">
-                    <p className="truncate font-medium text-stone-900">
+                    <p className="truncate font-medium text-ink">
                       {conversation.other.name ?? "A student"}
                     </p>
-                    <span className="shrink-0 text-xs text-stone-400">
+                    <span className="shrink-0 text-xs text-subtle">
                       {formatDay(conversation.lastActivity)}
                     </span>
                   </div>
 
-                  <p className="mt-0.5 truncate text-sm text-stone-500">
+                  <p className="mt-0.5 truncate text-sm text-subtle">
                     {conversation.post.type === "FOUND" ? "Found" : "Lost"} ·{" "}
                     {conversation.post.title}
                   </p>
 
                   {conversation.lastMessage && (
-                    <p className="mt-1.5 line-clamp-1 text-sm text-stone-700">
+                    <p className="mt-1.5 line-clamp-1 text-sm text-ink">
                       {conversation.lastMessage.senderId === user.id && (
-                        <span className="text-stone-400">You: </span>
+                        <span className="text-subtle">You: </span>
                       )}
                       {conversation.lastMessage.body}
                     </p>

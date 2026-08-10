@@ -20,7 +20,7 @@ export function ReportButton({ postId }: { postId: string }) {
 
   if (state.ok) {
     return (
-      <p className="text-sm text-stone-500">
+      <p className="text-sm text-subtle">
         Thanks — reported. A moderator will take a look.
       </p>
     );
@@ -31,7 +31,7 @@ export function ReportButton({ postId }: { postId: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-sm text-stone-400 underline underline-offset-2 transition hover:text-stone-700"
+        className="text-sm text-subtle underline underline-offset-2 transition hover:text-ink"
       >
         Report this post
       </button>
@@ -39,14 +39,14 @@ export function ReportButton({ postId }: { postId: string }) {
   }
 
   return (
-    <form action={formAction} className="rounded-xl border border-stone-200 bg-white p-4">
+    <form action={formAction} className="rounded-xl border border-line bg-raised p-4">
       <input type="hidden" name="postId" value={postId} />
 
-      <p className="text-sm font-medium text-stone-800">What&rsquo;s wrong with it?</p>
+      <p className="text-sm font-medium text-ink">What&rsquo;s wrong with it?</p>
 
       <div className="mt-2.5 space-y-1.5">
         {REPORT_REASONS.map((reason, index) => (
-          <label key={reason} className="flex items-start gap-2 text-sm text-stone-700">
+          <label key={reason} className="flex items-start gap-2 text-sm text-ink">
             <input
               type="radio"
               name="reason"
@@ -60,7 +60,7 @@ export function ReportButton({ postId }: { postId: string }) {
         ))}
       </div>
 
-      <label htmlFor="detail" className="mt-3 block text-sm font-medium text-stone-800">
+      <label htmlFor="detail" className="mt-3 block text-sm font-medium text-ink">
         Anything else? (optional)
       </label>
       <textarea
@@ -68,11 +68,11 @@ export function ReportButton({ postId }: { postId: string }) {
         name="detail"
         rows={2}
         maxLength={500}
-        className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+        className="mt-1 w-full rounded-lg border border-line-strong px-3 py-2 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/25"
       />
 
       {state.error && (
-        <p role="alert" className="mt-1.5 text-sm text-red-700">
+        <p role="alert" className="mt-1.5 text-sm text-danger">
           {state.error}
         </p>
       )}
@@ -81,14 +81,14 @@ export function ReportButton({ postId }: { postId: string }) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-stone-900 px-3.5 py-1.5 text-sm font-medium text-white transition hover:bg-stone-700 disabled:opacity-60"
+          className="rounded-lg bg-inverse px-3.5 py-1.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-60"
         >
           {pending ? "Sending…" : "Send report"}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="rounded-lg px-3 py-1.5 text-sm text-stone-500 transition hover:bg-stone-100"
+          className="rounded-lg px-3 py-1.5 text-sm text-subtle transition hover:bg-sunken"
         >
           Cancel
         </button>

@@ -41,20 +41,20 @@ export default async function EnterCodePage({
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-6 py-12">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-stone-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">
           {isDevMailFallback ? "Enter your code" : "Check your email"}
         </h1>
-        <p className="mt-1 text-stone-600">
+        <p className="mt-1 text-muted">
           {isDevMailFallback ? (
             <>
               A 6-digit code was generated for{" "}
-              <span className="font-medium text-stone-900">{email}</span>. It
+              <span className="font-medium text-ink">{email}</span>. It
               expires in 10 minutes.
             </>
           ) : (
             <>
               We sent a 6-digit code to{" "}
-              <span className="font-medium text-stone-900">{email}</span>. It
+              <span className="font-medium text-ink">{email}</span>. It
               expires in 10 minutes.
             </>
           )}
@@ -62,11 +62,11 @@ export default async function EnterCodePage({
       </div>
 
       {isDevMailFallback && (
-        <p className="mb-5 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm leading-relaxed text-sky-900">
+        <p className="mb-5 rounded-lg border border-line bg-sunken px-4 py-3 text-sm leading-relaxed text-ink">
           <strong className="font-medium">Development mode.</strong> No email was
           sent — your code was printed in the terminal running{" "}
-          <code className="rounded bg-sky-100 px-1 py-0.5 font-mono text-xs">npm run dev</code>.
-          Set <code className="rounded bg-sky-100 px-1 py-0.5 font-mono text-xs">AUTH_RESEND_KEY</code>{" "}
+          <code className="rounded bg-sunken px-1 py-0.5 font-mono text-xs">npm run dev</code>.
+          Set <code className="rounded bg-sunken px-1 py-0.5 font-mono text-xs">AUTH_RESEND_KEY</code>{" "}
           to send real email locally.
         </p>
       )}
@@ -76,7 +76,7 @@ export default async function EnterCodePage({
         <input type="hidden" name="callbackUrl" value={next} />
 
         <div>
-          <label htmlFor="token" className="mb-1.5 block text-sm font-medium text-stone-700">
+          <label htmlFor="token" className="mb-1.5 block text-sm font-medium text-ink">
             Sign-in code
           </label>
           <input
@@ -90,27 +90,27 @@ export default async function EnterCodePage({
             maxLength={6}
             autoComplete="one-time-code"
             placeholder="000000"
-            className="w-full rounded-lg border border-stone-300 bg-white px-3.5 py-2.5 text-center font-mono text-2xl tracking-[0.4em] text-stone-900 outline-none transition placeholder:text-stone-300 focus:border-brand focus:ring-2 focus:ring-brand/20"
+            className="w-full rounded-lg border border-line-strong bg-raised px-3.5 py-2.5 text-center font-mono text-2xl tracking-[0.4em] text-ink outline-none transition placeholder:text-subtle focus:border-brand focus:ring-2 focus:ring-brand/25"
           />
         </div>
 
         {error && (
-          <p role="alert" className="text-sm text-red-700">
+          <p role="alert" className="text-sm text-danger">
             That code wasn&rsquo;t right or has expired. Check the latest email and try again.
           </p>
         )}
 
         <button
           type="submit"
-          className="w-full rounded-lg bg-brand px-4 py-2.5 font-medium text-white transition hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-brand/40"
+          className="w-full rounded-lg bg-brand px-4 py-2.5 font-medium text-white transition hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand/40"
         >
           Sign in
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-stone-500">
+      <p className="mt-6 text-center text-sm text-subtle">
         {isDevMailFallback ? "Can't find it in the terminal? " : "Didn't get it? Check spam, or "}
-        <Link href="/signin" className="font-medium text-brand underline underline-offset-2">
+        <Link href="/signin" className="font-medium text-brand-text underline underline-offset-2">
           {isDevMailFallback ? "request a new code" : "try a different address"}
         </Link>
         .

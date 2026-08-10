@@ -34,10 +34,10 @@ export default async function EditPostPage({
     <>
       <Header user={user} active={post.type === "FOUND" ? "found" : "lost"} />
       <main className="mx-auto w-full max-w-2xl px-4 py-6">
-        <Link href={`/posts/${post.id}`} className="text-sm text-stone-500 transition hover:text-stone-800">
+        <Link href={`/posts/${post.id}`} className="text-sm text-subtle transition hover:text-ink">
           ← Back to post
         </Link>
-        <h1 className="mt-3 mb-6 text-xl font-semibold tracking-tight text-stone-900">
+        <h1 className="mt-3 mb-6 text-xl font-semibold tracking-tight text-ink">
           Edit your post
         </h1>
         <EditForm

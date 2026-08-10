@@ -32,20 +32,20 @@ export default async function ConversationPage({
       <main className="mx-auto flex w-full max-w-2xl flex-col px-4 py-6">
         <Link
           href="/messages"
-          className="text-sm text-stone-500 transition hover:text-stone-800"
+          className="text-sm text-subtle transition hover:text-ink"
         >
           ← All messages
         </Link>
 
-        <div className="mt-3 border-b border-stone-200 pb-4">
-          <h1 className="text-lg font-semibold tracking-tight text-stone-900">
+        <div className="mt-3 border-b border-line pb-4">
+          <h1 className="text-lg font-semibold tracking-tight text-ink">
             {conversation.other.name ?? "A student"}
           </h1>
-          <p className="mt-0.5 text-sm text-stone-500">
+          <p className="mt-0.5 text-sm text-subtle">
             About{" "}
             <Link
               href={`/posts/${conversation.post.id}`}
-              className="font-medium text-brand underline underline-offset-2"
+              className="font-medium text-brand-text underline underline-offset-2"
             >
               {conversation.post.title}
             </Link>{" "}
@@ -55,7 +55,7 @@ export default async function ConversationPage({
         </div>
 
         {conversation.messages.length === 0 ? (
-          <p className="mt-6 rounded-xl border border-dashed border-stone-300 bg-white p-6 text-center text-sm leading-relaxed text-stone-600">
+          <p className="mt-6 rounded-xl border border-dashed border-line-strong bg-raised p-6 text-center text-sm leading-relaxed text-muted">
             No messages yet. Say hello — mention which item you mean and how
             you&rsquo;d like to arrange the handoff.
           </p>
@@ -72,7 +72,7 @@ export default async function ConversationPage({
                     className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
                       mine
                         ? "rounded-br-sm bg-brand text-white"
-                        : "rounded-bl-sm border border-stone-200 bg-white text-stone-900"
+                        : "rounded-bl-sm border border-line bg-raised text-ink"
                     }`}
                   >
                     <p className="whitespace-pre-wrap text-sm leading-relaxed">
@@ -80,7 +80,7 @@ export default async function ConversationPage({
                     </p>
                     <p
                       className={`mt-1 text-[11px] ${
-                        mine ? "text-white/70" : "text-stone-400"
+                        mine ? "text-white/70" : "text-subtle"
                       }`}
                     >
                       {message.createdAt.toLocaleTimeString("en-CA", {
@@ -97,7 +97,7 @@ export default async function ConversationPage({
 
         <MessageComposer conversationId={conversation.id} />
 
-        <p className="mt-6 border-t border-stone-200 pt-4 text-xs leading-relaxed text-stone-500">
+        <p className="mt-6 border-t border-line pt-4 text-xs leading-relaxed text-subtle">
           Meet somewhere public and busy to hand an item over — a library desk or
           the student centre. Don&rsquo;t share your address, and don&rsquo;t send
           money to anyone claiming to have your item.

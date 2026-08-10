@@ -10,10 +10,10 @@ import { CATEGORY_LABELS, LOCATION_LABELS, POST_STATUS_LABELS } from "@/lib/voca
 export const metadata: Metadata = { title: "Your posts · MacFound" };
 
 const STATUS_STYLES = {
-  OPEN: "bg-stone-100 text-stone-700",
+  OPEN: "bg-sunken text-ink",
   RESOLVED: "bg-brand text-white",
-  EXPIRED: "bg-stone-100 text-stone-500",
-  REMOVED: "bg-red-100 text-red-800",
+  EXPIRED: "bg-sunken text-subtle",
+  REMOVED: "bg-danger-subtle text-danger",
 } as const;
 
 export default async function MyPostsPage() {
@@ -28,21 +28,21 @@ export default async function MyPostsPage() {
       <Header user={user} />
 
       <main className="mx-auto w-full max-w-3xl px-4 py-6">
-        <h1 className="text-xl font-semibold tracking-tight text-stone-900">Your posts</h1>
-        <p className="mt-0.5 text-sm text-stone-500">
+        <h1 className="text-xl font-semibold tracking-tight text-ink">Your posts</h1>
+        <p className="mt-0.5 text-sm text-subtle">
           {posts.length === 0
             ? "Nothing yet."
             : `${posts.length} total · ${open} open · ${reunited} reunited`}
         </p>
 
         {posts.length === 0 ? (
-          <div className="mt-6 rounded-xl border border-dashed border-stone-300 bg-white p-8 text-center">
-            <p className="text-stone-600">You haven&rsquo;t posted anything yet.</p>
+          <div className="mt-6 rounded-xl border border-dashed border-line-strong bg-raised p-8 text-center">
+            <p className="text-muted">You haven&rsquo;t posted anything yet.</p>
             <div className="mt-4 flex justify-center gap-2">
-              <Link href="/posts/new?type=lost" className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-dark">
+              <Link href="/posts/new?type=lost" className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-hover">
                 Report something lost
               </Link>
-              <Link href="/posts/new?type=found" className="rounded-lg border border-stone-300 px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-100">
+              <Link href="/posts/new?type=found" className="rounded-lg border border-line-strong px-4 py-2 text-sm font-medium text-ink transition hover:bg-sunken">
                 Post something found
               </Link>
             </div>
@@ -50,23 +50,23 @@ export default async function MyPostsPage() {
         ) : (
           <ul className="mt-5 space-y-2.5">
             {posts.map((post) => (
-              <li key={post.id} className="rounded-xl border border-stone-200 bg-white p-4">
+              <li key={post.id} className="rounded-xl border border-line bg-raised p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[post.status]}`}>
                         {POST_STATUS_LABELS[post.status]}
                       </span>
-                      <span className="text-xs text-stone-500">
+                      <span className="text-xs text-subtle">
                         {post.type === "FOUND" ? "Found" : "Lost"} · {CATEGORY_LABELS[post.category]}
                       </span>
                     </div>
 
-                    <Link href={`/posts/${post.id}`} className="mt-1.5 block truncate font-medium text-stone-900 hover:underline">
+                    <Link href={`/posts/${post.id}`} className="mt-1.5 block truncate font-medium text-ink hover:underline">
                       {post.title}
                     </Link>
 
-                    <p className="mt-1 text-xs text-stone-500">
+                    <p className="mt-1 text-xs text-subtle">
                       {LOCATION_LABELS[post.location]} · posted {formatDay(post.createdAt)}
                       {post._count.claims > 0 && ` · ${post._count.claims} claim${post._count.claims === 1 ? "" : "s"}`}
                       {post._count.comments > 0 && ` · ${post._count.comments} repl${post._count.comments === 1 ? "y" : "ies"}`}
@@ -80,11 +80,11 @@ export default async function MyPostsPage() {
                 </div>
 
                 {post.status === "OPEN" && (
-                  <div className="mt-3 flex gap-3 border-t border-stone-100 pt-3 text-sm">
-                    <Link href={`/posts/${post.id}/edit`} className="font-medium text-brand hover:underline">
+                  <div className="mt-3 flex gap-3 border-t border-line pt-3 text-sm">
+                    <Link href={`/posts/${post.id}/edit`} className="font-medium text-brand-text hover:underline">
                       Edit
                     </Link>
-                    <Link href={`/posts/${post.id}`} className="text-stone-500 hover:text-stone-800">
+                    <Link href={`/posts/${post.id}`} className="text-subtle hover:text-ink">
                       Manage
                     </Link>
                   </div>

@@ -22,17 +22,17 @@ export default async function SignInPage({
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-6 py-12">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-stone-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">
           MacFound
         </h1>
-        <p className="mt-1 text-stone-600">
+        <p className="mt-1 text-muted">
           Lost &amp; found for McMaster. Sign in to post or claim an item.
         </p>
       </div>
 
       <SignInForm domain={ALLOWED_EMAIL_DOMAIN} next={next} />
 
-      <p className="mt-8 text-center text-xs leading-relaxed text-stone-500">
+      <p className="mt-8 text-center text-xs leading-relaxed text-subtle">
         A student project, not affiliated with or endorsed by McMaster
         University.
       </p>

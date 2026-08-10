@@ -1,9 +1,9 @@
 import Link from "next/link";
 
-import { signOut } from "@/lib/auth";
+import { CountBadge } from "@/components/ui";
 import { isModerator } from "@/lib/admin";
+import { signOut } from "@/lib/auth";
 import { unreadMessageCount } from "@/lib/messages";
-import { openReportCount } from "@/lib/reports";
 import { unreadCount } from "@/lib/notifications";
 import type { SessionUser } from "@/lib/session";
 
@@ -18,74 +18,45 @@ export async function Header({
   const [unread, unreadMessages, openReports] = await Promise.all([
     unreadCount(user.id),
     unreadMessageCount(user.id),
-    moderator ? openReportCount() : Promise.resolve(0),
+    moderator ? openReportCountSafe() : Promise.resolve(0),
   ]);
 
   return (
-    <header className="border-b border-stone-200 bg-white">
-      <div className="mx-auto flex w-full max-w-3xl items-center gap-4 px-4 py-3">
-        <Link href="/lost" className="font-semibold tracking-tight text-stone-900">
+    <header className="sticky top-0 z-20 border-b border-line bg-surface/85 backdrop-blur-md">
+      <div className="mx-auto flex h-14 w-full max-w-3xl items-center gap-1 px-4">
+        <Link
+          href="/lost"
+          className="mr-2 shrink-0 text-[15px] font-semibold tracking-tight text-ink"
+        >
           MacFound
         </Link>
 
-        <nav className="flex items-center gap-1 text-sm">
-          <NavLink href="/lost" current={active === "lost"}>
+        {/* Segmented control: the two boards are the app's primary axis, so they
+            read as one switch rather than two unrelated links. */}
+        <nav className="flex rounded-control bg-sunken p-0.5 text-sm">
+          <NavPill href="/lost" current={active === "lost"}>
             Lost
-          </NavLink>
-          <NavLink href="/found" current={active === "found"}>
+          </NavPill>
+          <NavPill href="/found" current={active === "found"}>
             Found
-          </NavLink>
+          </NavPill>
         </nav>
 
-        <div className="ml-auto flex items-center gap-1 sm:gap-3">
-          <Link
-            href="/messages"
-            className="relative rounded-md px-2 py-1 text-sm text-stone-600 transition hover:bg-stone-100"
-          >
-            Messages
-            {unreadMessages > 0 && (
-              <span
-                aria-label={`${unreadMessages} unread messages`}
-                className="ml-1 inline-flex min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-4 text-white"
-              >
-                {unreadMessages > 9 ? "9+" : unreadMessages}
-              </span>
-            )}
-          </Link>
-          <Link
-            href="/notifications"
-            className="relative rounded-md px-2 py-1 text-sm text-stone-600 transition hover:bg-stone-100"
-          >
-            Alerts
-            {unread > 0 && (
-              <span
-                aria-label={`${unread} unread`}
-                className="ml-1 inline-flex min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold leading-4 text-white"
-              >
-                {unread > 9 ? "9+" : unread}
-              </span>
-            )}
-          </Link>
+        <div className="ml-auto flex items-center">
+          <IconLink href="/messages" label="Messages" count={unreadMessages} />
+          <IconLink href="/notifications" label="Alerts" count={unread} />
           {moderator && (
-            <Link
-              href="/admin/reports"
-              className="rounded-md px-2 py-1 text-sm text-stone-600 transition hover:bg-stone-100"
-            >
-              Reports
-              {openReports > 0 && (
-                <span className="ml-1 inline-flex min-w-4 items-center justify-center rounded-full bg-red-700 px-1 text-[10px] font-semibold leading-4 text-white">
-                  {openReports > 9 ? "9+" : openReports}
-                </span>
-              )}
-            </Link>
+            <IconLink href="/admin/reports" label="Reports" count={openReports} danger />
           )}
+
           <Link
             href="/me"
-            className="hidden text-sm text-stone-500 transition hover:text-stone-800 sm:inline"
             title={user.email}
+            className="ml-1 hidden max-w-28 truncate rounded-control px-2.5 py-1.5 text-sm text-muted transition-colors hover:bg-sunken hover:text-ink sm:block"
           >
             {user.name ?? user.email}
           </Link>
+
           <form
             action={async () => {
               "use server";
@@ -94,7 +65,7 @@ export async function Header({
           >
             <button
               type="submit"
-              className="rounded-md px-2 py-1 text-sm text-stone-500 transition hover:bg-stone-100 hover:text-stone-800"
+              className="rounded-control px-2.5 py-1.5 text-sm text-subtle transition-colors hover:bg-sunken hover:text-ink"
             >
               Sign out
             </button>
@@ -105,7 +76,13 @@ export async function Header({
   );
 }
 
-function NavLink({
+/** Only moderators pay for this query; keeps the import out of the hot path. */
+async function openReportCountSafe(): Promise<number> {
+  const { openReportCount } = await import("@/lib/reports");
+  return openReportCount();
+}
+
+function NavPill({
   href,
   current,
   children,
@@ -118,13 +95,36 @@ function NavLink({
     <Link
       href={href}
       aria-current={current ? "page" : undefined}
-      className={
+      className={[
+        "rounded-[calc(var(--radius-control)-0.15rem)] px-3 py-1 font-medium transition-colors",
         current
-          ? "rounded-md bg-brand px-3 py-1.5 font-medium text-white"
-          : "rounded-md px-3 py-1.5 text-stone-600 transition hover:bg-stone-100"
-      }
+          ? "bg-raised text-ink shadow-card"
+          : "text-muted hover:text-ink",
+      ].join(" ")}
     >
       {children}
+    </Link>
+  );
+}
+
+function IconLink({
+  href,
+  label,
+  count,
+  danger,
+}: {
+  href: string;
+  label: string;
+  count: number;
+  danger?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center rounded-control px-2.5 py-1.5 text-sm text-muted transition-colors hover:bg-sunken hover:text-ink"
+    >
+      {label}
+      <CountBadge count={count} tone={danger ? "danger" : "brand"} />
     </Link>
   );
 }

@@ -23,9 +23,9 @@ export function PostOwnerControls({
 
   if (confirming) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-        <p className="text-sm font-medium text-red-900">Delete this post?</p>
-        <p className="mt-1 text-sm leading-relaxed text-red-800">
+      <div className="rounded-xl border border-line bg-danger-subtle p-4">
+        <p className="text-sm font-medium text-danger">Delete this post?</p>
+        <p className="mt-1 text-sm leading-relaxed text-danger">
           This removes the post, its photos, replies and any claims. It
           can&rsquo;t be undone. If the item turned up, mark it resolved instead
           — that keeps the record and counts towards items reunited.
@@ -35,7 +35,7 @@ export function PostOwnerControls({
             <input type="hidden" name="postId" value={postId} />
             <button
               type="submit"
-              className="rounded-lg bg-red-700 px-3.5 py-1.5 text-sm font-medium text-white transition hover:bg-red-800"
+              className="rounded-lg bg-danger px-3.5 py-1.5 text-sm font-medium text-white transition hover:opacity-90"
             >
               Yes, delete it
             </button>
@@ -43,7 +43,7 @@ export function PostOwnerControls({
           <button
             type="button"
             onClick={() => setConfirming(false)}
-            className="rounded-lg border border-red-300 px-3.5 py-1.5 text-sm font-medium text-red-800 transition hover:bg-red-100"
+            className="rounded-lg border border-line-strong px-3.5 py-1.5 text-sm font-medium text-danger transition hover:bg-danger-subtle"
           >
             Keep it
           </button>
@@ -57,7 +57,7 @@ export function PostOwnerControls({
       {isOpen && (
         <Link
           href={`/posts/${postId}/edit`}
-          className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-100"
+          className="rounded-lg border border-line-strong bg-raised px-4 py-2 text-sm font-medium text-ink transition hover:bg-sunken"
         >
           Edit post
         </Link>
@@ -65,7 +65,7 @@ export function PostOwnerControls({
       <button
         type="button"
         onClick={() => setConfirming(true)}
-        className="rounded-lg px-3 py-2 text-sm text-stone-500 transition hover:bg-stone-100 hover:text-red-700"
+        className="rounded-lg px-3 py-2 text-sm text-subtle transition hover:bg-sunken hover:text-danger"
       >
         Delete
       </button>

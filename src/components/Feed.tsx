@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { FeedFilters } from "@/components/FeedFilters";
 import { PostCard } from "@/components/PostCard";
+import { ButtonLink, EmptyState } from "@/components/ui";
 import { CAMPUS_SAFETY } from "@/lib/campus-safety";
 import { FEED_PAGE_SIZE, getFeed } from "@/lib/posts";
 import type { Category, CampusLocation, PostType } from "@/generated/prisma/enums";
@@ -28,28 +29,25 @@ export async function Feed({
   const lastPage = Math.max(0, Math.ceil(total / FEED_PAGE_SIZE) - 1);
 
   return (
-    <div className="space-y-4">
-      {/* Stacked on phones: side by side, the button squeezes the subtitle into
-          three ragged lines. Full-width below it reads better and is an easier
-          tap target. */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div className="space-y-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight text-stone-900">
+          <h1 className="text-title font-semibold text-ink">
             {isLost ? "Lost items" : "Found items"}
           </h1>
-          <p className="mt-0.5 text-sm text-stone-500">
+          <p className="mt-1 text-sm text-muted">
             {isLost
               ? "Things people are looking for. Recognise something? Say so."
               : "Things people have picked up. See yours? Claim it."}
           </p>
         </div>
 
-        <Link
+        <ButtonLink
           href={`/posts/new?type=${isLost ? "lost" : "found"}`}
-          className="shrink-0 rounded-lg bg-brand px-4 py-2.5 text-center text-sm font-medium text-white transition hover:bg-brand-dark sm:py-2"
+          className="shrink-0"
         >
           {isLost ? "I lost something" : "I found something"}
-        </Link>
+        </ButtonLink>
       </div>
 
       <FeedFilters
@@ -60,10 +58,10 @@ export async function Feed({
       />
 
       {posts.length === 0 ? (
-        <EmptyState isLost={isLost} hasFilters={hasFilters} basePath={basePath} />
+        <FeedEmpty isLost={isLost} hasFilters={hasFilters} basePath={basePath} />
       ) : (
         <>
-          <p className="text-sm text-stone-500">
+          <p className="text-xs font-medium uppercase tracking-wide text-subtle">
             {total} open {total === 1 ? "post" : "posts"}
           </p>
           <ul className="space-y-2.5">
@@ -80,7 +78,7 @@ export async function Feed({
   );
 }
 
-function EmptyState({
+function FeedEmpty({
   isLost,
   hasFilters,
   basePath,
@@ -91,45 +89,39 @@ function EmptyState({
 }) {
   if (hasFilters) {
     return (
-      <div className="rounded-xl border border-dashed border-stone-300 bg-white p-8 text-center">
-        <p className="text-stone-700">Nothing matches those filters.</p>
-        <Link
-          href={basePath}
-          className="mt-2 inline-block text-sm font-medium text-brand underline underline-offset-2"
-        >
-          Clear filters
-        </Link>
-      </div>
+      <EmptyState
+        title="Nothing matches those filters."
+        action={
+          <ButtonLink href={basePath} variant="secondary">
+            Clear filters
+          </ButtonLink>
+        }
+      />
     );
   }
 
   return (
-    <div className="rounded-xl border border-dashed border-stone-300 bg-white p-8 text-center">
-      <p className="text-stone-700">
-        {isLost ? "Nothing reported lost right now." : "Nothing handed in here yet."}
-      </p>
-      <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-stone-500">
-        {isLost ? (
-          <>
-            Lost something? Post it — and check {CAMPUS_SAFETY.name} at{" "}
-            {CAMPUS_SAFETY.building}, where items are held for{" "}
-            {CAMPUS_SAFETY.retentionDays} days.
-          </>
-        ) : (
-          <>
-            Found something? Post it here, or drop it at one of the official
-            boxes — {CAMPUS_SAFETY.name} keeps items for{" "}
-            {CAMPUS_SAFETY.retentionDays} days.
-          </>
-        )}
-      </p>
-      <Link
-        href={`/posts/new?type=${isLost ? "lost" : "found"}`}
-        className="mt-4 inline-block rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-dark"
-      >
-        {isLost ? "Report a lost item" : "Post a found item"}
-      </Link>
-    </div>
+    <EmptyState
+      title={isLost ? "Nothing reported lost right now." : "Nothing handed in here yet."}
+      action={
+        <ButtonLink href={`/posts/new?type=${isLost ? "lost" : "found"}`}>
+          {isLost ? "Report a lost item" : "Post a found item"}
+        </ButtonLink>
+      }
+    >
+      {isLost ? (
+        <>
+          Lost something? Post it — and check {CAMPUS_SAFETY.name} at{" "}
+          {CAMPUS_SAFETY.building}, where items are held for{" "}
+          {CAMPUS_SAFETY.retentionDays} days.
+        </>
+      ) : (
+        <>
+          Found something? Post it here, or drop it at one of the official boxes —{" "}
+          {CAMPUS_SAFETY.name} keeps items for {CAMPUS_SAFETY.retentionDays} days.
+        </>
+      )}
+    </EmptyState>
   );
 }
 
@@ -155,19 +147,22 @@ function Pagination({
   };
 
   return (
-    <nav className="flex items-center justify-between pt-2" aria-label="Pagination">
+    <nav
+      className="flex items-center justify-between border-t border-line pt-4"
+      aria-label="Pagination"
+    >
       {page > 0 ? (
-        <Link href={href(page - 1)} className="text-sm font-medium text-brand hover:underline">
+        <Link href={href(page - 1)} className="text-sm font-medium text-brand-text hover:underline">
           ← Newer
         </Link>
       ) : (
         <span />
       )}
-      <span className="text-sm text-stone-500">
+      <span className="text-sm text-subtle">
         Page {page + 1} of {lastPage + 1}
       </span>
       {page < lastPage ? (
-        <Link href={href(page + 1)} className="text-sm font-medium text-brand hover:underline">
+        <Link href={href(page + 1)} className="text-sm font-medium text-brand-text hover:underline">
           Older →
         </Link>
       ) : (

@@ -25,7 +25,7 @@ export default async function NotificationsPage() {
 
       <main className="mx-auto w-full max-w-2xl px-4 py-6">
         <div className="flex items-center justify-between gap-4">
-          <h1 className="text-xl font-semibold tracking-tight text-stone-900">
+          <h1 className="text-xl font-semibold tracking-tight text-ink">
             Notifications
           </h1>
           {unread > 0 && (
@@ -39,7 +39,7 @@ export default async function NotificationsPage() {
             >
               <button
                 type="submit"
-                className="rounded-lg border border-stone-300 px-3 py-1.5 text-sm text-stone-700 transition hover:bg-stone-100"
+                className="rounded-lg border border-line-strong px-3 py-1.5 text-sm text-ink transition hover:bg-sunken"
               >
                 Mark all read
               </button>
@@ -48,7 +48,7 @@ export default async function NotificationsPage() {
         </div>
 
         {notifications.length === 0 ? (
-          <p className="mt-6 rounded-xl border border-dashed border-stone-300 bg-white p-8 text-center text-stone-600">
+          <p className="mt-6 rounded-xl border border-dashed border-line-strong bg-raised p-8 text-center text-muted">
             Nothing yet. You&rsquo;ll hear from us when someone replies to a post,
             claims an item, or a possible match turns up.
           </p>
@@ -60,13 +60,13 @@ export default async function NotificationsPage() {
                 <li key={n.id}>
                   <Link
                     href={payload.href}
-                    className={`block rounded-xl border p-4 transition hover:border-stone-300 ${
+                    className={`block rounded-xl border p-4 transition hover:border-line-strong ${
                       n.readAt
-                        ? "border-stone-200 bg-white"
+                        ? "border-line bg-raised"
                         : "border-brand/30 bg-brand/5"
                     }`}
                   >
-                    <p className="flex items-center gap-2 text-sm font-medium text-stone-900">
+                    <p className="flex items-center gap-2 text-sm font-medium text-ink">
                       {!n.readAt && (
                         <span
                           aria-label="Unread"
@@ -75,16 +75,16 @@ export default async function NotificationsPage() {
                       )}
                       {NOTIFICATION_LABELS[n.type]}
                     </p>
-                    <p className="mt-0.5 truncate text-sm text-stone-700">
+                    <p className="mt-0.5 truncate text-sm text-ink">
                       {payload.title}
                     </p>
                     {payload.body && (
-                      <p className="mt-1 line-clamp-2 text-sm text-stone-500">
+                      <p className="mt-1 line-clamp-2 text-sm text-subtle">
                         {payload.actorName ? `${payload.actorName}: ` : ""}
                         {payload.body}
                       </p>
                     )}
-                    <p className="mt-1.5 text-xs text-stone-400">
+                    <p className="mt-1.5 text-xs text-subtle">
                       {formatDay(n.createdAt)}
                     </p>
                   </Link>

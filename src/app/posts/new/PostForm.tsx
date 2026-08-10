@@ -153,13 +153,13 @@ export function PostForm({
       <ImageUpload disabled={pending} />
 
       {isFound && nearestDropOffHint && (
-        <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs leading-relaxed text-amber-900">
+        <p className="rounded-xl border border-line bg-warning-subtle p-4 text-xs leading-relaxed text-warning">
           {nearestDropOffHint}
         </p>
       )}
 
       {state.formError && (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-danger">
           {state.formError}
         </p>
       )}
@@ -167,7 +167,7 @@ export function PostForm({
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-lg bg-brand px-4 py-2.5 font-medium text-white transition hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-brand/40 disabled:opacity-60 sm:w-auto"
+        className="w-full rounded-lg bg-brand px-4 py-2.5 font-medium text-white transition hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand/40 disabled:opacity-60 sm:w-auto"
       >
         {pending ? "Posting…" : isFound ? "Post found item" : "Post lost item"}
       </button>
@@ -190,16 +190,16 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={name} className="mb-1.5 block text-sm font-medium text-stone-800">
+      <label htmlFor={name} className="mb-1.5 block text-sm font-medium text-ink">
         {label}
       </label>
       {children}
       {error ? (
-        <p role="alert" className="mt-1.5 text-sm text-red-700">
+        <p role="alert" className="mt-1.5 text-sm text-danger">
           {error}
         </p>
       ) : (
-        hint && <p className="mt-1.5 text-xs leading-relaxed text-stone-500">{hint}</p>
+        hint && <p className="mt-1.5 text-xs leading-relaxed text-subtle">{hint}</p>
       )}
     </div>
   );
@@ -207,10 +207,10 @@ function Field({
 
 function inputClass(error?: string): string {
   return [
-    "w-full rounded-lg border bg-white px-3.5 py-2.5 text-stone-900 outline-none transition",
-    "placeholder:text-stone-400 focus:ring-2",
+    "w-full rounded-lg border bg-raised px-3.5 py-2.5 text-ink outline-none transition",
+    "placeholder:text-subtle focus:ring-2",
     error
-      ? "border-red-400 focus:border-red-500 focus:ring-red-500/20"
-      : "border-stone-300 focus:border-brand focus:ring-brand/20",
+      ? "border-danger focus:border-danger"
+      : "border-line-strong focus:border-brand focus:ring-brand/25",
   ].join(" ");
 }

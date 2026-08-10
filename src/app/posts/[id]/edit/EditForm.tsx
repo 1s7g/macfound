@@ -98,10 +98,10 @@ export function EditForm({
       </Field>
 
       {state.formError && (
-        <p role="alert" className="text-sm text-red-700">{state.formError}</p>
+        <p role="alert" className="text-sm text-danger">{state.formError}</p>
       )}
 
-      <p className="text-xs text-stone-500">
+      <p className="text-xs text-subtle">
         Photos can&rsquo;t be changed after posting yet. Delete and repost if you
         need different ones.
       </p>
@@ -109,11 +109,11 @@ export function EditForm({
       <div className="flex items-center gap-3">
         <button
           type="submit" disabled={pending}
-          className="rounded-lg bg-brand px-4 py-2.5 font-medium text-white transition hover:bg-brand-dark disabled:opacity-60"
+          className="rounded-lg bg-brand px-4 py-2.5 font-medium text-white transition hover:bg-brand-hover disabled:opacity-60"
         >
           {pending ? "Saving…" : "Save changes"}
         </button>
-        <Link href={`/posts/${post.id}`} className="text-sm text-stone-500 transition hover:text-stone-800">
+        <Link href={`/posts/${post.id}`} className="text-sm text-subtle transition hover:text-ink">
           Cancel
         </Link>
       </div>
@@ -128,18 +128,18 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={name} className="mb-1.5 block text-sm font-medium text-stone-800">{label}</label>
+      <label htmlFor={name} className="mb-1.5 block text-sm font-medium text-ink">{label}</label>
       {children}
-      {error && <p role="alert" className="mt-1.5 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="mt-1.5 text-sm text-danger">{error}</p>}
     </div>
   );
 }
 
 function inputClass(error?: string): string {
   return [
-    "w-full rounded-lg border bg-white px-3.5 py-2.5 text-stone-900 outline-none transition focus:ring-2",
+    "w-full rounded-lg border bg-raised px-3.5 py-2.5 text-ink outline-none transition focus:ring-2",
     error
-      ? "border-red-400 focus:border-red-500 focus:ring-red-500/20"
-      : "border-stone-300 focus:border-brand focus:ring-brand/20",
+      ? "border-danger focus:border-danger"
+      : "border-line-strong focus:border-brand focus:ring-brand/25",
   ].join(" ");
 }

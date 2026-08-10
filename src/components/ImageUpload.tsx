@@ -71,7 +71,7 @@ export function ImageUpload({ disabled }: { disabled?: boolean }) {
 
   return (
     <div>
-      <span className="mb-1.5 block text-sm font-medium text-stone-800">
+      <span className="mb-1.5 block text-sm font-medium text-ink">
         Photos (optional, up to {MAX_IMAGES})
       </span>
 
@@ -83,14 +83,14 @@ export function ImageUpload({ disabled }: { disabled?: boolean }) {
               <img
                 src={image.url}
                 alt={image.name}
-                className="h-24 w-24 rounded-lg border border-stone-200 object-cover"
+                className="h-24 w-24 rounded-lg border border-line object-cover"
               />
               <input type="hidden" name="imageUrls" value={image.url} />
               <button
                 type="button"
                 onClick={() => remove(image.url)}
                 aria-label={`Remove ${image.name}`}
-                className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-stone-900 text-sm leading-none text-white transition hover:bg-stone-700"
+                className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-inverse text-sm leading-none text-white transition hover:opacity-90"
               >
                 ×
               </button>
@@ -107,21 +107,21 @@ export function ImageUpload({ disabled }: { disabled?: boolean }) {
           multiple
           disabled={disabled || busy}
           onChange={(event) => handleFiles(event.target.files)}
-          className="block w-full cursor-pointer rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-600 outline-none transition file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-stone-900 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:bg-stone-700 focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:opacity-60"
+          className="block w-full cursor-pointer rounded-lg border border-line-strong bg-raised px-3 py-2 text-sm text-muted outline-none transition file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-inverse file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:opacity-90 focus:border-brand focus:ring-2 focus:ring-brand/25 disabled:opacity-60"
         />
       )}
 
-      {busy && <p className="mt-1.5 text-xs text-stone-500">Uploading…</p>}
+      {busy && <p className="mt-1.5 text-xs text-subtle">Uploading…</p>}
 
       {error && (
-        <p role="alert" className="mt-1.5 text-sm text-red-700">
+        <p role="alert" className="mt-1.5 text-sm text-danger">
           {error}
         </p>
       )}
 
-      <p className="mt-1.5 text-xs leading-relaxed text-stone-500">
+      <p className="mt-1.5 text-xs leading-relaxed text-subtle">
         A photo makes an item far easier to recognise.{" "}
-        <strong className="font-medium text-stone-700">
+        <strong className="font-medium text-ink">
           Don&rsquo;t photograph student cards, IDs, or documents
         </strong>{" "}
         — describe them instead. Photo links are public and permanent.

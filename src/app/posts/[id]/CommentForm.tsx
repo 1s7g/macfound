@@ -29,17 +29,17 @@ export function CommentForm({ postId }: { postId: string }) {
         required
         maxLength={1000}
         placeholder="Seen this? Know whose it is? Say so here."
-        className="w-full rounded-lg border border-stone-300 bg-white px-3.5 py-2.5 text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-brand focus:ring-2 focus:ring-brand/20"
+        className="w-full rounded-lg border border-line-strong bg-raised px-3.5 py-2.5 text-ink outline-none transition placeholder:text-subtle focus:border-brand focus:ring-2 focus:ring-brand/25"
       />
       {state.error && (
-        <p role="alert" className="mt-1.5 text-sm text-red-700">
+        <p role="alert" className="mt-1.5 text-sm text-danger">
           {state.error}
         </p>
       )}
       <button
         type="submit"
         disabled={pending}
-        className="mt-2 rounded-lg bg-stone-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-stone-700 disabled:opacity-60"
+        className="mt-2 rounded-lg bg-inverse px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-60"
       >
         {pending ? "Posting…" : "Post reply"}
       </button>

@@ -27,17 +27,17 @@ export default async function NewPostPage({
       <main className="mx-auto w-full max-w-2xl px-4 py-6">
         <Link
           href={isFound ? "/found" : "/lost"}
-          className="text-sm text-stone-500 transition hover:text-stone-800"
+          className="text-sm text-subtle transition hover:text-ink"
         >
           ← Back to {isFound ? "found" : "lost"} items
         </Link>
 
-        <h1 className="mt-3 text-xl font-semibold tracking-tight text-stone-900">
+        <h1 className="mt-3 text-xl font-semibold tracking-tight text-ink">
           {isFound ? "Post something you found" : "Report something you lost"}
         </h1>
-        <p className="mt-1 mb-6 text-sm leading-relaxed text-stone-600">
+        <p className="mt-1 mb-6 text-sm leading-relaxed text-muted">
           {isFound
-            ? "Describe it well enough that the owner recognises it — but hold back one detail for the verification field."
+            ? "Describe it well enough that the owner recognises it — but leave one small detail out, so you can tell a real owner from a chancer."
             : "The more specific you are, the better the odds someone recognises it."}
         </p>
 

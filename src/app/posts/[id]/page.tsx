@@ -51,7 +51,7 @@ export default async function PostPage({
       <main className="mx-auto w-full max-w-2xl px-4 py-6">
         <Link
           href={isFound ? "/found" : "/lost"}
-          className="text-sm text-stone-500 transition hover:text-stone-800"
+          className="text-sm text-subtle transition hover:text-ink"
         >
           ← Back to {isFound ? "found" : "lost"} items
         </Link>
@@ -59,7 +59,7 @@ export default async function PostPage({
         {created && (
           <p
             role="status"
-            className="mt-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900"
+            className="mt-3 rounded-lg border border-line bg-success-subtle px-4 py-3 text-sm text-success"
           >
             Posted. It&rsquo;s now visible on the {isFound ? "Found" : "Lost"} board.
           </p>
@@ -70,13 +70,13 @@ export default async function PostPage({
             <span
               className={
                 isFound
-                  ? "rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800"
-                  : "rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-900"
+                  ? "rounded-full bg-success-subtle px-2.5 py-0.5 text-xs font-medium text-success"
+                  : "rounded-full bg-warning-subtle px-2.5 py-0.5 text-xs font-medium text-warning"
               }
             >
               {isFound ? "Found" : "Lost"}
             </span>
-            <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-medium text-stone-700">
+            <span className="rounded-full bg-sunken px-2.5 py-0.5 text-xs font-medium text-ink">
               {CATEGORY_LABELS[post.category]}
             </span>
             {post.status === "RESOLVED" && (
@@ -86,11 +86,11 @@ export default async function PostPage({
             )}
           </div>
 
-          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-stone-900">
+          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-ink">
             {post.title}
           </h1>
 
-          <p className="mt-1 text-sm text-stone-500">
+          <p className="mt-1 text-sm text-subtle">
             Posted by {post.author.name ?? "a student"} ·{" "}
             <time dateTime={post.createdAt.toISOString()}>{formatDay(post.createdAt)}</time>
           </p>
@@ -107,7 +107,7 @@ export default async function PostPage({
                       src={image.url}
                       alt={`Photo of ${post.title}`}
                       loading="lazy"
-                      className="aspect-square w-full rounded-lg border border-stone-200 object-cover transition hover:opacity-90"
+                      className="aspect-square w-full rounded-lg border border-line object-cover transition hover:opacity-90"
                     />
                   </a>
                 </li>
@@ -115,15 +115,15 @@ export default async function PostPage({
             </ul>
           )}
 
-          <p className="mt-5 whitespace-pre-wrap leading-relaxed text-stone-800">
+          <p className="mt-5 whitespace-pre-wrap leading-relaxed text-ink">
             {post.description}
           </p>
 
-          <dl className="mt-6 grid gap-x-6 gap-y-3 rounded-xl border border-stone-200 bg-white p-4 text-sm sm:grid-cols-2">
+          <dl className="mt-6 grid gap-x-6 gap-y-3 rounded-xl border border-line bg-raised p-4 text-sm sm:grid-cols-2">
             <Detail label={isFound ? "Found at" : "Lost at"}>
               {LOCATION_LABELS[post.location]}
               {post.locationDetail && (
-                <span className="text-stone-500"> — {post.locationDetail}</span>
+                <span className="text-subtle"> — {post.locationDetail}</span>
               )}
             </Detail>
             <Detail label={isFound ? "Date found" : "Date lost"}>
@@ -147,7 +147,7 @@ export default async function PostPage({
           </dl>
 
           {post.isAuthor && isFound && isOpen && (
-            <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-900">
+            <p className="mt-4 rounded-xl border border-line bg-warning-subtle px-4 py-3 text-sm leading-relaxed text-warning">
               <strong className="font-medium">You decide who gets this.</strong>{" "}
               When someone claims it, they&rsquo;ll describe something identifying.
               You&rsquo;re holding the item, so you can judge — and if
@@ -157,7 +157,7 @@ export default async function PostPage({
           )}
 
           {isFound && dropOffs[0] && isOpen && (
-            <p className="mt-4 text-sm leading-relaxed text-stone-500">
+            <p className="mt-4 text-sm leading-relaxed text-subtle">
               Nearest official drop box: {dropOffs[0].point.label}
               {formatDropOffDistance(dropOffs[0].metres)}. {CAMPUS_SAFETY.name} holds
               items for {CAMPUS_SAFETY.retentionDays} days.
@@ -168,11 +168,11 @@ export default async function PostPage({
         {/* --- Possible matches -------------------------------------------- */}
 
         {isOpen && matches.length > 0 && (
-          <section className="mt-8 border-t border-stone-200 pt-6">
-            <h2 className="font-medium text-stone-900">
+          <section className="mt-8 border-t border-line pt-6">
+            <h2 className="font-medium text-ink">
               {isFound ? "People looking for something like this" : "Might these be yours?"}
             </h2>
-            <p className="mt-0.5 mb-3 text-sm text-stone-500">
+            <p className="mt-0.5 mb-3 text-sm text-subtle">
               Suggested automatically from the wording, category, place and dates.
               Worth a look, not a guarantee.
             </p>
@@ -181,19 +181,19 @@ export default async function PostPage({
               {matches.map((match) => (
                 <li
                   key={match.id}
-                  className="rounded-xl border border-stone-200 bg-white p-4"
+                  className="rounded-xl border border-line bg-raised p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <Link href={`/posts/${match.other.id}`} className="min-w-0 flex-1">
                       <p className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand">
+                        <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand-text">
                           {confidenceLabel(match.score, match.textScore)}
                         </span>
-                        <span className="truncate font-medium text-stone-900">
+                        <span className="truncate font-medium text-ink">
                           {match.other.title}
                         </span>
                       </p>
-                      <p className="mt-1.5 text-xs text-stone-500">
+                      <p className="mt-1.5 text-xs text-subtle">
                         {LOCATION_LABELS[match.other.location]}
                         {" · "}
                         {match.daysApart === 0
@@ -209,7 +209,7 @@ export default async function PostPage({
                         <input type="hidden" name="postId" value={post.id} />
                         <button
                           type="submit"
-                          className="shrink-0 rounded-md px-2 py-1 text-xs text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
+                          className="shrink-0 rounded-md px-2 py-1 text-xs text-subtle transition hover:bg-sunken hover:text-ink"
                         >
                           Not it
                         </button>
@@ -228,8 +228,8 @@ export default async function PostPage({
           myClaim ||
           (!post.isAuthor && isOpen) ||
           (post.isAuthor && pendingClaims.length > 0)) && (
-          <section className="mt-8 border-t border-stone-200 pt-6">
-            <h2 className="mb-1 font-medium text-stone-900">
+          <section className="mt-8 border-t border-line pt-6">
+            <h2 className="mb-1 font-medium text-ink">
               {post.isAuthor
                 ? "Claims on this item"
                 : isFound
@@ -237,14 +237,14 @@ export default async function PostPage({
                   : "Seen this?"}
             </h2>
             {post.isAuthor && pendingClaims.length > 0 && (
-              <p className="mb-3 text-sm text-stone-500">
+              <p className="mb-3 text-sm text-subtle">
                 Does what they describe match the item you have? Approve only if
                 you&rsquo;re satisfied — otherwise reply below and ask them
                 something more specific first.
               </p>
             )}
             {!post.isAuthor && !isFound && (
-              <p className="mb-3 text-sm text-stone-500">
+              <p className="mb-3 text-sm text-subtle">
                 If you&rsquo;ve found this or know where it is, message them
                 directly.
               </p>
@@ -259,7 +259,7 @@ export default async function PostPage({
                 <input type="hidden" name="postId" value={post.id} />
                 <button
                   type="submit"
-                  className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-100"
+                  className="rounded-lg border border-line-strong bg-raised px-4 py-2 text-sm font-medium text-ink transition hover:bg-sunken"
                 >
                   Message {post.author.name ?? "them"}
                 </button>
@@ -272,23 +272,23 @@ export default async function PostPage({
               pendingClaims.map((claim) => (
                 <div
                   key={claim.id}
-                  className="mb-3 rounded-xl border border-stone-200 bg-white p-4"
+                  className="mb-3 rounded-xl border border-line bg-raised p-4"
                 >
-                  <p className="text-sm text-stone-500">
-                    <span className="font-medium text-stone-800">
+                  <p className="text-sm text-subtle">
+                    <span className="font-medium text-ink">
                       {claim.claimant.name ?? "A student"}
                     </span>{" "}
                     · {formatDay(claim.createdAt)}
                   </p>
-                  <p className="mt-2 whitespace-pre-wrap text-stone-800">{claim.answer}</p>
+                  <p className="mt-2 whitespace-pre-wrap text-ink">{claim.answer}</p>
 
-                  <div className="mt-3 flex gap-2 border-t border-stone-100 pt-3">
+                  <div className="mt-3 flex gap-2 border-t border-line pt-3">
                     <form action={decideClaim}>
                       <input type="hidden" name="claimId" value={claim.id} />
                       <input type="hidden" name="decision" value="approve" />
                       <button
                         type="submit"
-                        className="rounded-lg bg-brand px-3.5 py-1.5 text-sm font-medium text-white transition hover:bg-brand-dark"
+                        className="rounded-lg bg-brand px-3.5 py-1.5 text-sm font-medium text-white transition hover:bg-brand-hover"
                       >
                         That&rsquo;s them — approve
                       </button>
@@ -298,7 +298,7 @@ export default async function PostPage({
                       <input type="hidden" name="decision" value="reject" />
                       <button
                         type="submit"
-                        className="rounded-lg border border-stone-300 px-3.5 py-1.5 text-sm font-medium text-stone-700 transition hover:bg-stone-100"
+                        className="rounded-lg border border-line-strong px-3.5 py-1.5 text-sm font-medium text-ink transition hover:bg-sunken"
                       >
                         Doesn&rsquo;t match
                       </button>
@@ -312,13 +312,13 @@ export default async function PostPage({
         {/* --- Author controls --------------------------------------------- */}
 
         {post.isAuthor && (
-          <section className="mt-8 border-t border-stone-200 pt-6">
+          <section className="mt-8 border-t border-line pt-6">
             <form action={setPostResolved} className="flex flex-wrap items-center gap-3">
               <input type="hidden" name="postId" value={post.id} />
               <input type="hidden" name="resolved" value={isOpen ? "true" : "false"} />
               <button
                 type="submit"
-                className="rounded-lg border border-stone-300 px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-100"
+                className="rounded-lg border border-line-strong px-4 py-2 text-sm font-medium text-ink transition hover:bg-sunken"
               >
                 {isOpen
                   ? isFound
@@ -326,7 +326,7 @@ export default async function PostPage({
                     : "Mark as found"
                   : "Reopen this post"}
               </button>
-              <span className="text-sm text-stone-500">
+              <span className="text-sm text-subtle">
                 {isOpen
                   ? "Closes the post and takes it off the board."
                   : "This post is closed."}
@@ -340,15 +340,15 @@ export default async function PostPage({
         )}
 
         {!post.isAuthor && (
-          <section className="mt-8 border-t border-stone-200 pt-6">
+          <section className="mt-8 border-t border-line pt-6">
             <ReportButton postId={post.id} />
           </section>
         )}
 
         {/* --- Replies ------------------------------------------------------ */}
 
-        <section className="mt-8 border-t border-stone-200 pt-6">
-          <h2 className="font-medium text-stone-900">
+        <section className="mt-8 border-t border-line pt-6">
+          <h2 className="font-medium text-ink">
             {post.comments.length === 0
               ? "No replies yet"
               : `${post.comments.length} ${post.comments.length === 1 ? "reply" : "replies"}`}
@@ -358,13 +358,13 @@ export default async function PostPage({
             <ul className="mt-4 space-y-4">
               {post.comments.map((comment) => (
                 <li key={comment.id} className="text-sm">
-                  <p className="text-stone-500">
-                    <span className="font-medium text-stone-800">
+                  <p className="text-subtle">
+                    <span className="font-medium text-ink">
                       {comment.author.name ?? "A student"}
                     </span>{" "}
                     · {formatDay(comment.createdAt)}
                   </p>
-                  <p className="mt-1 whitespace-pre-wrap text-stone-800">{comment.body}</p>
+                  <p className="mt-1 whitespace-pre-wrap text-ink">{comment.body}</p>
                 </li>
               ))}
             </ul>
@@ -373,7 +373,7 @@ export default async function PostPage({
           {isOpen ? (
             <CommentForm postId={post.id} />
           ) : (
-            <p className="mt-4 text-sm text-stone-500">
+            <p className="mt-4 text-sm text-subtle">
               This post is closed, so replies are turned off.
             </p>
           )}
@@ -385,9 +385,9 @@ export default async function PostPage({
 
 function MyClaimStatus({ status }: { status: "PENDING" | "APPROVED" | "REJECTED" }) {
   const styles = {
-    PENDING: "border-stone-200 bg-stone-50 text-stone-700",
-    APPROVED: "border-green-200 bg-green-50 text-green-900",
-    REJECTED: "border-stone-200 bg-stone-50 text-stone-600",
+    PENDING: "border-line bg-sunken text-ink",
+    APPROVED: "border-line bg-success-subtle text-success",
+    REJECTED: "border-line bg-sunken text-muted",
   } as const;
 
   const messages = {
@@ -416,8 +416,8 @@ function formatDropOffDistance(metres: number | null): string {
 function Detail({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wide text-stone-400">{label}</dt>
-      <dd className="mt-0.5 text-stone-800">{children}</dd>
+      <dt className="text-xs uppercase tracking-wide text-subtle">{label}</dt>
+      <dd className="mt-0.5 text-ink">{children}</dd>
     </div>
   );
 }

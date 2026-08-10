@@ -36,12 +36,12 @@ export default async function SignInErrorPage({
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-6 py-12">
-      <h1 className="text-2xl font-semibold tracking-tight text-stone-900">{title}</h1>
-      <p className="mt-2 text-stone-600">{body}</p>
+      <h1 className="text-2xl font-semibold tracking-tight text-ink">{title}</h1>
+      <p className="mt-2 text-muted">{body}</p>
 
       <Link
         href="/signin"
-        className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-brand px-4 py-2.5 font-medium text-white transition hover:bg-brand-dark"
+        className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-brand px-4 py-2.5 font-medium text-white transition hover:bg-brand-hover"
       >
         Back to sign in
       </Link>
