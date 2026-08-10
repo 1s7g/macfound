@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { isModerator } from "@/lib/admin";
 import { unreadMessageCount } from "@/lib/messages";
 import { unreadCount } from "@/lib/notifications";
@@ -53,6 +54,7 @@ export async function Header({
               <path d="M12 16h.01" />
             </NavIcon>
           )}
+          <ThemeToggle />
           <Link
             href="/me"
             title={user.name ?? user.email}

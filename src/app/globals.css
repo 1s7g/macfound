@@ -80,93 +80,94 @@
   --radius-card: 0.875rem;
   --radius-control: 0.625rem;
 
-  /* Shadows carry the "subtle depth" of the direction. Kept very low-opacity;
-     dark mode overrides them below, because black-on-dark reads as nothing. */
-  --shadow-card: 0 1px 2px oklch(0 0 0 / 0.04), 0 1px 3px oklch(0 0 0 / 0.06);
-  --shadow-raised: 0 2px 4px oklch(0 0 0 / 0.04), 0 4px 12px oklch(0 0 0 / 0.08);
+  /* Shadows carry the "subtle depth" of the direction. Kept very low-opacity.
+     Composed from theme-aware colour stops (set in the semantic layer) rather
+     than redefined per theme: each theme paints the layers it wants and sets
+     the rest to `transparent`. Black shadows are invisible on a dark surface,
+     where a hairline inset highlight is what actually reads as elevation. */
+  --shadow-card:
+    0 1px 0 var(--shadow-card-highlight) inset,
+    0 1px 2px var(--shadow-card-near),
+    0 1px 3px var(--shadow-card-far);
+  --shadow-raised:
+    0 1px 0 var(--shadow-raised-highlight) inset,
+    0 2px 4px var(--shadow-raised-near),
+    0 4px 12px var(--shadow-raised-mid),
+    0 8px 24px var(--shadow-raised-far);
 }
 
-/* --- Semantic layer: light ------------------------------------------------ */
+/* --- Semantic layer -------------------------------------------------------
+ *
+ * Both themes live in one block. `light-dark()` picks its first argument when
+ * the element's color-scheme resolves to light and its second when it resolves
+ * to dark, so every value is written exactly once — which is the whole reason
+ * a manual toggle is cheap here. Switching themes is a single declaration
+ * (color-scheme, below); nothing else in this file or the app knows about it.
+ *
+ * Values that are identical in both themes are left as plain vars rather than
+ * a light-dark() with two matching arguments, so a reader can tell at a glance
+ * which tokens actually change.
+ */
 
 :root {
-  color-scheme: light;
+  /* `light dark` means "follow the system"; the [data-theme] rules below pin
+     it when someone chooses explicitly. */
+  color-scheme: light dark;
 
-  --surface: var(--color-mf-neutral-50);
-  --surface-raised: var(--color-mf-neutral-0);
-  --surface-sunken: var(--color-mf-neutral-100);
-  --surface-inverse: var(--color-mf-neutral-900);
+  --surface: light-dark(var(--color-mf-neutral-50), var(--color-mf-neutral-950));
+  --surface-raised: light-dark(var(--color-mf-neutral-0), var(--color-mf-neutral-900));
+  --surface-sunken: light-dark(var(--color-mf-neutral-100), var(--color-mf-neutral-850));
+  --surface-inverse: light-dark(var(--color-mf-neutral-900), var(--color-mf-neutral-100));
 
-  --border: var(--color-mf-neutral-200);
-  --border-strong: var(--color-mf-neutral-300);
+  --border: light-dark(var(--color-mf-neutral-200), oklch(1 0 0 / 0.09));
+  --border-strong: light-dark(var(--color-mf-neutral-300), oklch(1 0 0 / 0.16));
 
-  --text: var(--color-mf-neutral-900);
-  --text-muted: var(--color-mf-neutral-600);
+  --text: light-dark(var(--color-mf-neutral-900), var(--color-mf-neutral-100));
+  --text-muted: light-dark(var(--color-mf-neutral-600), var(--color-mf-neutral-400));
   --text-subtle: var(--color-mf-neutral-500);
-  --text-inverse: var(--color-mf-neutral-0);
+  --text-inverse: light-dark(var(--color-mf-neutral-0), var(--color-mf-neutral-950));
 
+  /* Solid fills keep the true maroon in both themes. White on #7A003C is
+     legible against any page colour, and lifting the fill up the scale turned
+     the primary button hot pink — recognisably not McMaster. Only text-sized
+     brand colour needs lightening, because thin glyphs at brand-700 disappear
+     into a near-black surface. */
   --brand: var(--color-mf-brand-700);
-  --brand-hover: var(--color-mf-brand-800);
-  --brand-text: var(--color-mf-brand-700);
-  --brand-subtle: var(--color-mf-brand-50);
-  --brand-border: var(--color-mf-brand-200);
+  --brand-hover: light-dark(var(--color-mf-brand-800), var(--color-mf-brand-600));
+  --brand-text: light-dark(var(--color-mf-brand-700), var(--color-mf-brand-300));
+  --brand-subtle: light-dark(var(--color-mf-brand-50), oklch(0.408 0.163 358 / 0.25));
+  --brand-border: light-dark(var(--color-mf-brand-200), oklch(0.52 0.193 358 / 0.45));
   --on-brand: var(--color-mf-neutral-0);
 
-  --success: var(--color-mf-green-700);
-  --success-subtle: var(--color-mf-green-100);
-  --warning: var(--color-mf-amber-900);
-  --warning-subtle: var(--color-mf-amber-100);
-  --danger: var(--color-mf-red-700);
-  --danger-subtle: var(--color-mf-red-100);
+  --success: light-dark(var(--color-mf-green-700), var(--color-mf-green-400));
+  --success-subtle: light-dark(var(--color-mf-green-100), oklch(0.48 0.13 155 / 0.2));
+  --warning: light-dark(var(--color-mf-amber-900), var(--color-mf-amber-400));
+  --warning-subtle: light-dark(var(--color-mf-amber-100), oklch(0.55 0.13 70 / 0.2));
+  --danger: light-dark(var(--color-mf-red-700), var(--color-mf-red-400));
+  --danger-subtle: light-dark(var(--color-mf-red-100), oklch(0.5 0.19 27 / 0.22));
+
+  /* Layers the other theme doesn't want are set transparent — see the shadow
+     composition in @theme above. */
+  --shadow-card-highlight: light-dark(transparent, oklch(1 0 0 / 0.04));
+  --shadow-card-near: light-dark(oklch(0 0 0 / 0.04), oklch(0 0 0 / 0.5));
+  --shadow-card-far: light-dark(oklch(0 0 0 / 0.06), transparent);
+  --shadow-raised-highlight: light-dark(transparent, oklch(1 0 0 / 0.06));
+  --shadow-raised-near: light-dark(oklch(0 0 0 / 0.04), transparent);
+  --shadow-raised-mid: light-dark(oklch(0 0 0 / 0.08), transparent);
+  --shadow-raised-far: light-dark(transparent, oklch(0 0 0 / 0.55));
 }
 
-/* --- Semantic layer: dark ------------------------------------------------- */
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-
-    --surface: var(--color-mf-neutral-950);
-    --surface-raised: var(--color-mf-neutral-900);
-    --surface-sunken: var(--color-mf-neutral-850);
-    --surface-inverse: var(--color-mf-neutral-100);
-
-    --border: oklch(1 0 0 / 0.09);
-    --border-strong: oklch(1 0 0 / 0.16);
-
-    --text: var(--color-mf-neutral-100);
-    --text-muted: var(--color-mf-neutral-400);
-    --text-subtle: var(--color-mf-neutral-500);
-    --text-inverse: var(--color-mf-neutral-950);
-
-    /* Solid fills keep the true maroon. White on #7A003C is legible against
-       any page colour, and lifting the fill up the scale turned the primary
-       button hot pink — recognisably not McMaster. Only text-sized brand
-       colour needs lightening, because thin glyphs at brand-700 disappear
-       into a near-black surface. */
-    --brand: var(--color-mf-brand-700);
-    --brand-hover: var(--color-mf-brand-600);
-    --brand-text: var(--color-mf-brand-300);
-    --brand-subtle: oklch(0.408 0.163 358 / 0.25);
-    --brand-border: oklch(0.52 0.193 358 / 0.45);
-    --on-brand: var(--color-mf-neutral-0);
-
-    --success: var(--color-mf-green-400);
-    --success-subtle: oklch(0.48 0.13 155 / 0.2);
-    --warning: var(--color-mf-amber-400);
-    --warning-subtle: oklch(0.55 0.13 70 / 0.2);
-    --danger: var(--color-mf-red-400);
-    --danger-subtle: oklch(0.5 0.19 27 / 0.22);
-
-    /* Black shadows are invisible on a dark surface; a hairline highlight is
-       what actually reads as elevation there. */
-    --shadow-card: 0 1px 0 oklch(1 0 0 / 0.04) inset, 0 1px 2px oklch(0 0 0 / 0.5);
-    --shadow-raised: 0 1px 0 oklch(1 0 0 / 0.06) inset, 0 8px 24px oklch(0 0 0 / 0.55);
-  }
+/* The manual override, in full. Flipping color-scheme re-resolves every
+   light-dark() above — there is no second copy of the palette to maintain.
+   `data-theme` is set by a tiny blocking script in the root layout, so the
+   chosen theme is already on <html> before the first paint. */
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
-/* A manual theme toggle would add a :root[data-theme="dark"] block mirroring
-   the above. Deliberately not written yet — two copies of twenty variables
-   drift the moment one is edited, and there's no toggle to justify it. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
 
 /* --- Expose the semantic layer as Tailwind utilities ---------------------- */
 /* `inline` makes the generated utilities reference the variable rather than
@@ -228,6 +229,32 @@ body {
 *:focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: 2px;
+}
+
+/* The theme toggle renders both glyphs and lets CSS reveal one, rather than
+   picking in JavaScript. The server has no way to know the visitor's theme, so
+   choosing at render time would either mismatch on hydration or flash the wrong
+   icon; this is correct in the initial HTML and needs no JS at all. The sun
+   means "switch to light", so it shows while dark. */
+[data-theme-icon="sun"] {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) [data-theme-icon="sun"] {
+    display: block;
+  }
+  :root:not([data-theme="light"]) [data-theme-icon="moon"] {
+    display: none;
+  }
+}
+
+:root[data-theme="dark"] [data-theme-icon="sun"] {
+  display: block;
+}
+
+:root[data-theme="dark"] [data-theme-icon="moon"] {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
