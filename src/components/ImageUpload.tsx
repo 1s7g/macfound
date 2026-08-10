@@ -90,7 +90,7 @@ export function ImageUpload({ disabled }: { disabled?: boolean }) {
                 type="button"
                 onClick={() => remove(image.url)}
                 aria-label={`Remove ${image.name}`}
-                className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-inverse text-sm leading-none text-white transition hover:opacity-90"
+                className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-inverse text-sm leading-none text-ink-inverse transition hover:opacity-90"
               >
                 ×
               </button>
@@ -107,7 +107,7 @@ export function ImageUpload({ disabled }: { disabled?: boolean }) {
           multiple
           disabled={disabled || busy}
           onChange={(event) => handleFiles(event.target.files)}
-          className="block w-full cursor-pointer rounded-lg border border-line-strong bg-raised px-3 py-2 text-sm text-muted outline-none transition file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-inverse file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:opacity-90 focus:border-brand focus:ring-2 focus:ring-brand/25 disabled:opacity-60"
+          className="block w-full cursor-pointer rounded-lg border border-line-strong bg-raised px-3 py-2 text-sm text-muted outline-none transition file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-inverse file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink-inverse hover:file:opacity-90 focus:border-brand focus:ring-2 focus:ring-brand/25 disabled:opacity-60"
         />
       )}
 

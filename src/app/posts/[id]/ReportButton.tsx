@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 
+import { Button } from "@/components/ui";
 import { REPORT_REASON_LABELS, REPORT_REASONS } from "@/lib/report-reasons";
 import { reportPost, type ActionState } from "./actions";
 
@@ -78,13 +79,9 @@ export function ReportButton({ postId }: { postId: string }) {
       )}
 
       <div className="mt-3 flex gap-2">
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-lg bg-inverse px-3.5 py-1.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-60"
-        >
+        <Button type="submit" disabled={pending} size="sm">
           {pending ? "Sending…" : "Send report"}
-        </button>
+        </Button>
         <button
           type="button"
           onClick={() => setOpen(false)}
