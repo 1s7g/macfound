@@ -1,5 +1,8 @@
 import Link from "next/link";
 
+import { BellGlyph, MessagesGlyph, NavGlyph } from "@/components/icons";
+import { ThemeToggle } from "@/components/ThemeToggle";
+
 /**
  * Loading placeholders.
  *
@@ -32,10 +35,12 @@ export function Skeleton({ className = "" }: { className?: string }) {
 /**
  * A stand-in for the real header.
  *
- * The wordmark and board switch are real markup rather than grey blocks: they
- * never depend on data, so blanking them out would be a downgrade the user can
- * see. Only the parts that need a query — unread badges, the avatar — are
- * placeholders.
+ * Draws the real wordmark, board switch and icons rather than grey blocks, and
+ * is never deferred — the header has to stay put while the content below it
+ * swaps, or every navigation blinks the whole page chrome. Nothing here needs a
+ * query; only the unread badges and the avatar's letter do, and those are
+ * simply left off. The result is close enough to the real header that the swap
+ * isn't visible.
  */
 export function HeaderSkeleton() {
   return (
@@ -52,10 +57,27 @@ export function HeaderSkeleton() {
             Found
           </span>
         </div>
-        <div className="ml-auto flex items-center gap-2">
-          <Skeleton className="h-[18px] w-[18px] rounded-full" />
-          <Skeleton className="h-[18px] w-[18px] rounded-full" />
-          <Skeleton className="h-7 w-7 rounded-full" />
+        {/* aria-hidden sits on the decorative pieces individually, not on the
+            wrapper: the toggle inside is focusable, and hiding a focusable
+            element from assistive tech while leaving it tabbable strands anyone
+            navigating by keyboard on a control their screen reader won't
+            announce. */}
+        <div className="ml-auto flex items-center gap-0.5">
+          <span aria-hidden className="flex h-8 w-8 items-center justify-center text-muted">
+            <NavGlyph>
+              <MessagesGlyph />
+            </NavGlyph>
+          </span>
+          <span aria-hidden className="flex h-8 w-8 items-center justify-center text-muted">
+            <NavGlyph>
+              <BellGlyph />
+            </NavGlyph>
+          </span>
+          {/* The real toggle, not a placeholder — it reads the theme off <html>
+              and needs no query, so leaving it out would shift the icons beside
+              it every time a page loaded. */}
+          <ThemeToggle />
+          <span aria-hidden className="ml-1.5 h-7 w-7 rounded-full bg-brand" />
         </div>
       </div>
     </header>
@@ -80,7 +102,7 @@ export function FeedSkeleton() {
   return (
     <>
       <HeaderSkeleton />
-      <main className="mx-auto w-full max-w-4xl px-4 py-6">
+      <main className="deferred-skeleton mx-auto w-full max-w-4xl px-4 py-6">
         <div className="flex items-center justify-between">
           <Skeleton className="h-8 w-24" />
           <Skeleton className="h-8 w-24 rounded-control" />
@@ -108,7 +130,7 @@ export function ListSkeleton({ rows = 4 }: { rows?: number }) {
   return (
     <>
       <HeaderSkeleton />
-      <main className="mx-auto w-full max-w-4xl px-4 py-6">
+      <main className="deferred-skeleton mx-auto w-full max-w-4xl px-4 py-6">
         <Skeleton className="h-7 w-40" />
         <ul className="mt-5 space-y-2.5">
           {Array.from({ length: rows }, (_, i) => (

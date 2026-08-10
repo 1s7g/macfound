@@ -239,6 +239,34 @@ body {
   outline-offset: 2px;
 }
 
+/* Hold a loading skeleton back until the wait is worth showing.
+ *
+ * A Suspense fallback renders the instant a navigation starts, so a query that
+ * returns in 40ms puts a skeleton on screen for 40ms — which reads as a flicker
+ * rather than as feedback, and makes a fast page feel less responsive than one
+ * that simply swapped. Anything under ~100ms already feels instantaneous.
+ *
+ * `both` fill mode holds the element at `from` during the delay, so a quick
+ * navigation never paints the skeleton at all; a genuinely slow one (a cold
+ * serverless start, a distant database) still gets it after 300ms.
+ *
+ * The reduced-motion rule below overrides animation-duration but not delay, so
+ * the deferral survives — it collapses to an instant appearance, not to a
+ * flicker restored.
+ */
+.deferred-skeleton {
+  animation: deferred-skeleton-in 120ms ease-out 300ms both;
+}
+
+@keyframes deferred-skeleton-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* The theme toggle renders both glyphs and lets CSS reveal one, rather than
    picking in JavaScript. The server has no way to know the visitor's theme, so
    choosing at render time would either mismatch on hydration or flash the wrong

@@ -8,7 +8,7 @@ export default function Loading() {
   return (
     <>
       <HeaderSkeleton />
-      <main className="mx-auto w-full max-w-4xl px-4 py-6">
+      <main className="deferred-skeleton mx-auto w-full max-w-4xl px-4 py-6">
         <Skeleton className="h-4 w-36" />
 
         <div className="mt-5 grid gap-x-8 gap-y-8 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start">
