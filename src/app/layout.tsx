@@ -51,6 +51,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Script id="theme" strategy="beforeInteractive">
           {themeScript}
         </Script>
+
+        {/* Every page puts the wordmark, board switch and four header controls
+            ahead of its content, which a keyboard or screen-reader user would
+            otherwise tab through on every single navigation. Visible only once
+            focused. */}
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-control focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-on-brand"
+        >
+          Skip to content
+        </a>
+
         {children}
       </body>
     </html>

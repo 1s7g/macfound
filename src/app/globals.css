@@ -42,7 +42,13 @@
   --color-mf-neutral-200: oklch(0.925 0.004 60);
   --color-mf-neutral-300: oklch(0.869 0.005 60);
   --color-mf-neutral-400: oklch(0.708 0.007 60);
+  /* 450 and 550 exist for one reason: --text-subtle at 500 measured 4.37:1 on
+     the light page background and 4.10:1 on dark cards, either side of the 4.5
+     WCAG AA needs for body text. The two themes need it moved in opposite
+     directions, so each gets the nearest step that clears the threshold. */
+  --color-mf-neutral-450: oklch(0.61 0.008 60);
   --color-mf-neutral-500: oklch(0.565 0.008 60);
+  --color-mf-neutral-550: oklch(0.555 0.008 60);
   --color-mf-neutral-600: oklch(0.451 0.008 60);
   --color-mf-neutral-700: oklch(0.37 0.007 60);
   --color-mf-neutral-800: oklch(0.269 0.006 60);
@@ -124,7 +130,9 @@
 
   --text: light-dark(var(--color-mf-neutral-900), var(--color-mf-neutral-100));
   --text-muted: light-dark(var(--color-mf-neutral-600), var(--color-mf-neutral-400));
-  --text-subtle: var(--color-mf-neutral-500);
+  /* One of the few tokens tuned for contrast rather than picked off the scale
+     by eye — see the note on neutral-450/550. */
+  --text-subtle: light-dark(var(--color-mf-neutral-550), var(--color-mf-neutral-450));
   --text-inverse: light-dark(var(--color-mf-neutral-0), var(--color-mf-neutral-950));
 
   /* Solid fills keep the true maroon in both themes. White on #7A003C is

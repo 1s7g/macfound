@@ -18,7 +18,7 @@ export default async function LostPage({
   return (
     <>
       <Header user={user} active="lost" />
-      <main className="mx-auto w-full max-w-3xl px-4 py-6">
+      <main id="main" className="mx-auto w-full max-w-4xl px-4 py-6">
         <Feed type="LOST" basePath="/lost" filters={filters} page={page} />
       </main>
     </>

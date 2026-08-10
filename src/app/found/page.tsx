@@ -18,7 +18,7 @@ export default async function FoundPage({
   return (
     <>
       <Header user={user} active="found" />
-      <main className="mx-auto w-full max-w-3xl px-4 py-6">
+      <main id="main" className="mx-auto w-full max-w-4xl px-4 py-6">
         <Feed type="FOUND" basePath="/found" filters={filters} page={page} />
       </main>
     </>

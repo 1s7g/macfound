@@ -10,10 +10,13 @@ import { CATEGORY_LABELS, LOCATION_LABELS, POST_STATUS_LABELS } from "@/lib/voca
 
 export const metadata: Metadata = { title: "Your posts · MacFound" };
 
+// text-muted rather than text-subtle on EXPIRED: subtle measures 4.33:1 against
+// the sunken fill, under the 4.5 AA needs for text this size. It also matches
+// the neutral Badge tone, which pairs sunken with muted for the same reason.
 const STATUS_STYLES = {
   OPEN: "bg-sunken text-ink",
   RESOLVED: "bg-brand text-on-brand",
-  EXPIRED: "bg-sunken text-subtle",
+  EXPIRED: "bg-sunken text-muted",
   REMOVED: "bg-danger-subtle text-danger",
 } as const;
 
@@ -28,7 +31,7 @@ export default async function MyPostsPage() {
     <>
       <Header user={user} />
 
-      <main className="mx-auto w-full max-w-4xl px-4 py-6">
+      <main id="main" className="mx-auto w-full max-w-4xl px-4 py-6">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold tracking-tight text-ink">
             {user.name ?? user.email}

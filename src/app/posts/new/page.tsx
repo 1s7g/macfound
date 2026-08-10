@@ -24,7 +24,7 @@ export default async function NewPostPage({
     <>
       <Header user={user} active={isFound ? "found" : "lost"} />
 
-      <main className="mx-auto w-full max-w-2xl px-4 py-6">
+      <main id="main" className="mx-auto w-full max-w-2xl px-4 py-6">
         <Link
           href={isFound ? "/found" : "/lost"}
           className="text-sm text-subtle transition hover:text-ink"

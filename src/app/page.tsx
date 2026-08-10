@@ -10,7 +10,7 @@ export default async function Home() {
   const stats = await getStats();
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col justify-center px-6 py-16">
+    <main id="main" className="mx-auto flex min-h-dvh w-full max-w-lg flex-col justify-center px-6 py-16">
       <h1 className="text-5xl font-bold tracking-tight text-ink sm:text-6xl">
         MacFound
       </h1>

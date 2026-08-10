@@ -39,7 +39,7 @@ export default async function EnterCodePage({
     process.env.NODE_ENV !== "production" && !process.env.AUTH_RESEND_KEY;
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-6 py-12">
+    <main id="main" className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-6 py-12">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight text-ink">
           {isDevMailFallback ? "Enter your code" : "Check your email"}

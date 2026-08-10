@@ -33,7 +33,7 @@ export default async function EditPostPage({
   return (
     <>
       <Header user={user} active={post.type === "FOUND" ? "found" : "lost"} />
-      <main className="mx-auto w-full max-w-2xl px-4 py-6">
+      <main id="main" className="mx-auto w-full max-w-2xl px-4 py-6">
         <Link href={`/posts/${post.id}`} className="text-sm text-subtle transition hover:text-ink">
           ← Back to post
         </Link>

@@ -29,7 +29,7 @@ export default async function ConversationPage({
     <>
       <Header user={user} />
 
-      <main className="mx-auto flex w-full max-w-2xl flex-col px-4 py-6">
+      <main id="main" className="mx-auto flex w-full max-w-2xl flex-col px-4 py-6">
         <Link
           href="/messages"
           className="text-sm text-subtle transition hover:text-ink"

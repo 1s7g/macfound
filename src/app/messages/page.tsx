@@ -16,7 +16,7 @@ export default async function MessagesPage() {
     <>
       <Header user={user} />
 
-      <main className="mx-auto w-full max-w-2xl px-4 py-6">
+      <main id="main" className="mx-auto w-full max-w-4xl px-4 py-6">
         <h1 className="text-xl font-semibold tracking-tight text-ink">Messages</h1>
 
         {conversations.length === 0 ? (

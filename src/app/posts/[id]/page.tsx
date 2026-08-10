@@ -59,7 +59,7 @@ export default async function PostPage({
     <>
       <Header user={user} active={isFound ? "found" : "lost"} />
 
-      <main className="mx-auto w-full max-w-5xl px-4 py-6">
+      <main id="main" className="mx-auto w-full max-w-4xl px-4 py-6">
         <Link
           href={isFound ? "/found" : "/lost"}
           className="inline-block text-sm text-subtle transition-colors hover:text-ink"
@@ -79,7 +79,7 @@ export default async function PostPage({
         {/* Explicit placement so the discussion starts directly under the
             description on desktop rather than waiting for the taller sidebar,
             while DOM order still puts the actions above it on mobile. */}
-        <div className="mt-5 grid gap-x-8 gap-y-8 lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-start">
+        <div className="mt-5 grid gap-x-8 gap-y-8 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start">
           {/* --- Content ---------------------------------------------------- */}
           <article className="min-w-0 lg:col-start-1 lg:row-start-1">
             <div className="flex flex-wrap items-center gap-2">
