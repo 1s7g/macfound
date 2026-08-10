@@ -24,9 +24,20 @@ const REQUIRED_VARS = [
   "BLOB_READ_WRITE_TOKEN",
 ] as const;
 
+/**
+ * Present-but-not-required. Reported separately so a missing one is visible
+ * without flipping the whole deployment to unhealthy — the app runs fine with
+ * no moderator configured, it just has no moderator.
+ */
+const OPTIONAL_VARS = ["ADMIN_EMAILS"] as const;
+
 export async function GET() {
   const config = Object.fromEntries(
     REQUIRED_VARS.map((name) => [name, Boolean(process.env[name])]),
+  );
+
+  const optional = Object.fromEntries(
+    OPTIONAL_VARS.map((name) => [name, Boolean(process.env[name])]),
   );
 
   let database: { reachable: boolean; error?: string } = { reachable: false };
@@ -45,7 +56,7 @@ export async function GET() {
   const healthy = Object.values(config).every(Boolean) && database.reachable;
 
   return NextResponse.json(
-    { healthy, config, database, environment: process.env.VERCEL_ENV ?? "local" },
+    { healthy, config, optional, database, environment: process.env.VERCEL_ENV ?? "local" },
     { status: healthy ? 200 : 503 },
   );
 }
