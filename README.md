@@ -152,7 +152,14 @@ reachable, without exposing any values.
 |---|---|
 | `npm run dev` | Dev server |
 | `npm run db:seed` | Seed realistic posts |
+| `npm run db:deploy` | Apply pending migrations |
 | `npm run match:report` | Re-run the matcher over all posts and print the ranking |
+
+Deploys run `vercel-build`, which applies migrations before building. Plain
+`build` deliberately doesn't, so a local build needs no database — but that
+split is also how schema changes once reached production without the migrations
+backing them, and every signed-in page returned a 500. Migrating as part of the
+deploy makes the two impossible to ship apart.
 
 ## Roadmap
 
