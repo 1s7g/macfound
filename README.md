@@ -8,6 +8,26 @@ Lost & found for McMaster University students, with an automatic matching engine
 
 ---
 
+## Screenshots
+
+A lost ring, alongside the found post the matcher surfaced on its own — same
+building, same category, eight days apart, scored as a strong match. Nobody
+searched for this; it was waiting when the owner opened their post.
+
+![Post detail for "Silver ring, sentimental", showing a strong match against a found post titled "Silver ring found by the sinks"](docs/screenshots/post-with-match-dark.png)
+
+The two boards, in dark and light:
+
+| Lost | Found |
+| --- | --- |
+| ![The lost items board, dark theme](docs/screenshots/feed-lost-dark.png) | ![The found items board, light theme](docs/screenshots/feed-found-light.png) |
+
+Reporting something you've lost:
+
+![The new post form, with fields for title, description, category, date, building and photos](docs/screenshots/new-post-dark.png)
+
+---
+
 ## The problem
 
 Lost property on campus lives in Snapchat stories and Instagram reposts that vanish in 24
