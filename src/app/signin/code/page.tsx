@@ -90,7 +90,7 @@ export default async function EnterCodePage({
             maxLength={6}
             autoComplete="one-time-code"
             placeholder="000000"
-            className="w-full rounded-control border border-line-strong bg-raised px-3.5 py-2.5 text-center font-mono text-2xl tracking-[0.4em] text-ink outline-none transition placeholder:text-subtle focus:border-brand"
+            className="w-full rounded-control border border-line-strong bg-raised px-3.5 py-2.5 text-center font-mono text-2xl tracking-[0.4em] text-ink transition-colors placeholder:text-subtle"
           />
         </div>
 

@@ -107,7 +107,7 @@ export function ImageUpload({ disabled }: { disabled?: boolean }) {
           multiple
           disabled={disabled || busy}
           onChange={(event) => handleFiles(event.target.files)}
-          className="block w-full cursor-pointer rounded-lg border border-line-strong bg-raised px-3 py-2 text-sm text-muted outline-none transition file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-inverse file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink-inverse hover:file:opacity-90 focus:border-brand focus:ring-2 focus:ring-brand/25 disabled:opacity-60"
+          className="block w-full cursor-pointer rounded-control border border-line-strong bg-raised px-3 py-2 text-sm text-muted transition-colors file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-inverse file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-ink-inverse hover:file:opacity-90 disabled:opacity-60"
         />
       )}
 

@@ -208,12 +208,26 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Outline colour is one of the properties Tailwind's `transition-colors`
+   animates, and its resting value is `currentColor` — so a focus ring faded in
+   from the text colour (near-white) to maroon, reading as a white flash every
+   time you clicked a field. Pinning the colour while unfocused leaves nothing
+   to animate, so the ring appears already maroon. :where() keeps specificity at
+   zero, so this never has to be fought. */
+:where(*) {
+  outline-color: var(--brand);
+}
+
 /* One consistent focus ring everywhere, rather than per-component guesses.
-   :focus-visible only, so clicking a button doesn't leave a ring behind. */
+   :focus-visible only, so clicking a button doesn't leave a ring behind.
+
+   Deliberately no border-radius here. It used to set 2px, which — being
+   unlayered, and so beating every Tailwind utility regardless of specificity —
+   squared off the corners of anything focused: inputs snapped from 10px to 2px.
+   The ring follows the element's own rounding without being told. */
 *:focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: 2px;
-  border-radius: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {

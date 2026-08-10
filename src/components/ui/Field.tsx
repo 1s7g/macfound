@@ -37,16 +37,21 @@ export function Field({
   );
 }
 
+/*
+ * Focus is left to the global :focus-visible ring in globals.css rather than
+ * recoloured here. These controls used to do both — suppress the ring with
+ * `outline-none` and turn the border maroon — but an unlayered global rule
+ * beats a Tailwind utility whatever its specificity, so the suppression never
+ * applied and a focused field drew two concentric maroon edges.
+ */
 const CONTROL =
   "w-full rounded-control border bg-raised px-3.5 text-ink transition-colors " +
-  "placeholder:text-subtle focus:outline-none focus-visible:outline-none";
+  "placeholder:text-subtle";
 
 function controlClass(invalid?: boolean, extra?: string) {
   return [
     CONTROL,
-    invalid
-      ? "border-danger focus:border-danger"
-      : "border-line-strong focus:border-brand",
+    invalid ? "border-danger" : "border-line-strong",
     extra,
   ]
     .filter(Boolean)

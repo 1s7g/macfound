@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Button, Select } from "@/components/ui";
+import { Button, Input, Select } from "@/components/ui";
 import { CATEGORIES, CATEGORY_LABELS, LOCATION_GROUPS, LOCATION_LABELS } from "@/lib/vocabulary";
 import type { Category, CampusLocation } from "@/generated/prisma/enums";
 
@@ -27,13 +27,13 @@ export function FeedFilters({
 
   return (
     <form method="GET" action={basePath} className="flex flex-col gap-2 sm:flex-row">
-      <input
+      <Input
         type="search"
         name="q"
         defaultValue={query ?? ""}
         placeholder="Search titles and descriptions…"
         aria-label="Search posts"
-        className="h-10 min-w-0 flex-1 rounded-control border border-line-strong bg-raised px-3.5 text-sm text-ink transition-colors placeholder:text-subtle focus:border-brand focus:outline-none"
+        className="min-w-0 flex-1 text-sm"
       />
 
       <Select

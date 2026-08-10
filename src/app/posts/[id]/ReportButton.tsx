@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 
-import { Button } from "@/components/ui";
+import { Button, Textarea } from "@/components/ui";
 import { REPORT_REASON_LABELS, REPORT_REASONS } from "@/lib/report-reasons";
 import { reportPost, type ActionState } from "./actions";
 
@@ -64,13 +64,7 @@ export function ReportButton({ postId }: { postId: string }) {
       <label htmlFor="detail" className="mt-3 block text-sm font-medium text-ink">
         Anything else? (optional)
       </label>
-      <textarea
-        id="detail"
-        name="detail"
-        rows={2}
-        maxLength={500}
-        className="mt-1 w-full rounded-control border border-line-strong bg-raised px-3 py-2 text-sm text-ink outline-none transition focus:border-brand"
-      />
+      <Textarea id="detail" name="detail" rows={2} maxLength={500} className="mt-1 text-sm" />
 
       {state.error && (
         <p role="alert" className="mt-1.5 text-sm text-danger">
