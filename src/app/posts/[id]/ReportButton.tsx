@@ -40,7 +40,7 @@ export function ReportButton({ postId }: { postId: string }) {
   }
 
   return (
-    <form action={formAction} className="rounded-xl border border-line bg-raised p-4">
+    <form action={formAction} className="rounded-card border border-line bg-raised p-4">
       <input type="hidden" name="postId" value={postId} />
 
       <p className="text-sm font-medium text-ink">What&rsquo;s wrong with it?</p>
@@ -69,7 +69,7 @@ export function ReportButton({ postId }: { postId: string }) {
         name="detail"
         rows={2}
         maxLength={500}
-        className="mt-1 w-full rounded-lg border border-line-strong px-3 py-2 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/25"
+        className="mt-1 w-full rounded-control border border-line-strong bg-raised px-3 py-2 text-sm text-ink outline-none transition focus:border-brand"
       />
 
       {state.error && (
@@ -82,13 +82,9 @@ export function ReportButton({ postId }: { postId: string }) {
         <Button type="submit" disabled={pending} size="sm">
           {pending ? "Sending…" : "Send report"}
         </Button>
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          className="rounded-lg px-3 py-1.5 text-sm text-subtle transition hover:bg-sunken"
-        >
+        <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
           Cancel
-        </button>
+        </Button>
       </div>
     </form>
   );

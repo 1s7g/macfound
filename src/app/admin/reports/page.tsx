@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { Header } from "@/components/Header";
 import { formatDay } from "@/components/PostCard";
+import { Button } from "@/components/ui";
 import { isModerator } from "@/lib/admin";
 import { listOpenReports, REPORT_REASON_LABELS } from "@/lib/reports";
 import { requireUser } from "@/lib/session";
@@ -32,13 +33,13 @@ export default async function ReportsPage() {
         </p>
 
         {reports.length === 0 ? (
-          <p className="mt-6 rounded-xl border border-dashed border-line-strong bg-raised p-8 text-center text-muted">
+          <p className="mt-6 rounded-card border border-dashed border-line-strong bg-raised p-8 text-center text-muted">
             Nothing to review.
           </p>
         ) : (
           <ul className="mt-5 space-y-3">
             {reports.map((report) => (
-              <li key={report.id} className="rounded-xl border border-line bg-raised p-4">
+              <li key={report.id} className="rounded-card border border-line bg-raised p-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-danger-subtle px-2.5 py-0.5 text-xs font-medium text-danger">
                     {REPORT_REASON_LABELS[report.reason]}
@@ -102,23 +103,17 @@ export default async function ReportsPage() {
                       <input type="hidden" name="reportId" value={report.id} />
                       <input type="hidden" name="postId" value={report.post.id} />
                       <input type="hidden" name="action" value="remove" />
-                      <button
-                        type="submit"
-                        className="rounded-lg bg-danger px-3.5 py-1.5 text-sm font-medium text-white transition hover:opacity-90"
-                      >
+                      <Button type="submit" variant="danger" size="sm">
                         Take post down
-                      </button>
+                      </Button>
                     </form>
                   )}
                   <form action={moderateReport}>
                     <input type="hidden" name="reportId" value={report.id} />
                     <input type="hidden" name="action" value="dismiss" />
-                    <button
-                      type="submit"
-                      className="rounded-lg border border-line-strong px-3.5 py-1.5 text-sm font-medium text-ink transition hover:bg-sunken"
-                    >
+                    <Button type="submit" variant="secondary" size="sm">
                       Dismiss
-                    </button>
+                    </Button>
                   </form>
                 </div>
               </li>

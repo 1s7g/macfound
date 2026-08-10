@@ -55,9 +55,8 @@ export default async function ConversationPage({
         </div>
 
         {conversation.messages.length === 0 ? (
-          <p className="mt-6 rounded-xl border border-dashed border-line-strong bg-raised p-6 text-center text-sm leading-relaxed text-muted">
-            No messages yet. Say hello — mention which item you mean and how
-            you&rsquo;d like to arrange the handoff.
+          <p className="mt-6 rounded-card border border-dashed border-line-strong bg-raised p-6 text-center text-sm leading-relaxed text-muted">
+            No messages yet. Say hello and arrange the handoff.
           </p>
         ) : (
           <ul className="mt-5 space-y-3">
@@ -98,9 +97,8 @@ export default async function ConversationPage({
         <MessageComposer conversationId={conversation.id} />
 
         <p className="mt-6 border-t border-line pt-4 text-xs leading-relaxed text-subtle">
-          Meet somewhere public and busy to hand an item over — a library desk or
-          the student centre. Don&rsquo;t share your address, and don&rsquo;t send
-          money to anyone claiming to have your item.
+          Meet somewhere public to hand an item over. Don&rsquo;t share your
+          address or send money to anyone claiming to have your item.
         </p>
       </main>
     </>

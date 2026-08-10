@@ -241,8 +241,7 @@ export default async function PostPage({
                     : "Might these be yours?"}
                 </h2>
                 <p className="mt-1 mb-3 text-sm text-subtle">
-                  Suggested from the wording, category, place and dates. Worth a
-                  look, not a guarantee.
+                  Suggested by wording, place and dates. Worth a look, not a guarantee.
                 </p>
 
                 <ul className="space-y-2">
@@ -291,9 +290,8 @@ export default async function PostPage({
                   {pendingClaims.length} {pendingClaims.length === 1 ? "claim" : "claims"} to review
                 </h2>
                 <p className="mt-1 mb-3 text-sm text-subtle">
-                  Does what they describe match the item you have? Approve only if
-                  you&rsquo;re satisfied — otherwise reply below and ask for
-                  something more specific first.
+                  Does what they describe match the item you have? Approve only
+                  if you&rsquo;re sure — otherwise reply and ask for more detail.
                 </p>
 
                 <ul className="space-y-3">

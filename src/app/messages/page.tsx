@@ -20,10 +20,9 @@ export default async function MessagesPage() {
         <h1 className="text-xl font-semibold tracking-tight text-ink">Messages</h1>
 
         {conversations.length === 0 ? (
-          <p className="mt-6 rounded-xl border border-dashed border-line-strong bg-raised p-8 text-center leading-relaxed text-muted">
-            No conversations yet. Open a post and use{" "}
-            <span className="font-medium text-ink">Message</span> to get in
-            touch about an item.
+          <p className="mt-6 rounded-card border border-dashed border-line-strong bg-raised p-8 text-center leading-relaxed text-muted">
+            No conversations yet. Open a post and tap{" "}
+            <span className="font-medium text-ink">Message</span> to get in touch.
           </p>
         ) : (
           <ul className="mt-5 space-y-2">
@@ -31,9 +30,9 @@ export default async function MessagesPage() {
               <li key={conversation.id}>
                 <Link
                   href={`/messages/${conversation.id}`}
-                  className={`block rounded-xl border p-4 transition hover:border-line-strong ${
+                  className={`block rounded-card border p-4 transition hover:border-line-strong ${
                     conversation.unread > 0
-                      ? "border-brand/30 bg-brand/5"
+                      ? "border-brand-border bg-brand-subtle"
                       : "border-line bg-raised"
                   }`}
                 >
@@ -61,7 +60,7 @@ export default async function MessagesPage() {
                   )}
 
                   {conversation.unread > 0 && (
-                    <span className="mt-2 inline-block rounded-full bg-brand px-2 py-0.5 text-xs font-medium text-white">
+                    <span className="mt-2 inline-block rounded-full bg-brand px-2 py-0.5 text-xs font-medium text-on-brand">
                       {conversation.unread} new
                     </span>
                   )}

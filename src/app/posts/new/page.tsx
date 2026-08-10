@@ -32,14 +32,9 @@ export default async function NewPostPage({
           ← Back to {isFound ? "found" : "lost"} items
         </Link>
 
-        <h1 className="mt-3 text-xl font-semibold tracking-tight text-ink">
+        <h1 className="mt-3 mb-6 text-xl font-semibold tracking-tight text-ink">
           {isFound ? "Post something you found" : "Report something you lost"}
         </h1>
-        <p className="mt-1 mb-6 text-sm leading-relaxed text-muted">
-          {isFound
-            ? "Describe it well enough that the owner recognises it — but leave one small detail out, so you can tell a real owner from a chancer."
-            : "The more specific you are, the better the odds someone recognises it."}
-        </p>
 
         <PostForm
           type={type}

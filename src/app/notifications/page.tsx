@@ -39,7 +39,7 @@ export default async function NotificationsPage() {
             >
               <button
                 type="submit"
-                className="rounded-lg border border-line-strong px-3 py-1.5 text-sm text-ink transition hover:bg-sunken"
+                className="rounded-control px-2.5 py-1.5 text-sm text-subtle transition hover:bg-sunken hover:text-ink"
               >
                 Mark all read
               </button>
@@ -48,9 +48,9 @@ export default async function NotificationsPage() {
         </div>
 
         {notifications.length === 0 ? (
-          <p className="mt-6 rounded-xl border border-dashed border-line-strong bg-raised p-8 text-center text-muted">
-            Nothing yet. You&rsquo;ll hear from us when someone replies to a post,
-            claims an item, or a possible match turns up.
+          <p className="mt-6 rounded-card border border-dashed border-line-strong bg-raised p-8 text-center text-muted">
+            Nothing yet. We&rsquo;ll tell you when someone replies, claims an
+            item, or a possible match turns up.
           </p>
         ) : (
           <ul className="mt-5 space-y-2">
@@ -60,10 +60,10 @@ export default async function NotificationsPage() {
                 <li key={n.id}>
                   <Link
                     href={payload.href}
-                    className={`block rounded-xl border p-4 transition hover:border-line-strong ${
+                    className={`block rounded-card border p-4 transition hover:border-line-strong ${
                       n.readAt
                         ? "border-line bg-raised"
-                        : "border-brand/30 bg-brand/5"
+                        : "border-brand-border bg-brand-subtle"
                     }`}
                   >
                     <p className="flex items-center gap-2 text-sm font-medium text-ink">

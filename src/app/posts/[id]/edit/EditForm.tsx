@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 
+import { Button, Field, Input, Select, Textarea } from "@/components/ui";
 import { CATEGORIES, CATEGORY_LABELS, LOCATION_GROUPS, LOCATION_LABELS } from "@/lib/vocabulary";
 import { saveEdit, type EditState } from "../actions";
 
@@ -33,51 +34,51 @@ export function EditForm({
       <input type="hidden" name="postId" value={post.id} />
       <input type="hidden" name="type" value={post.type} />
 
-      <Field label={isFound ? "What did you find?" : "What did you lose?"} name="title" error={state.errors?.title}>
-        <input
+      <Field label={isFound ? "What did you find?" : "What did you lose?"} htmlFor="title" error={state.errors?.title}>
+        <Input
           id="title" name="title" type="text" required maxLength={120}
           defaultValue={v.title ?? post.title}
-          className={inputClass(state.errors?.title)}
+          invalid={Boolean(state.errors?.title)}
         />
       </Field>
 
-      <Field label="Description" name="description" error={state.errors?.description}>
-        <textarea
+      <Field label="Description" htmlFor="description" error={state.errors?.description}>
+        <Textarea
           id="description" name="description" required rows={4} maxLength={2000}
           defaultValue={v.description ?? post.description}
-          className={inputClass(state.errors?.description)}
+          invalid={Boolean(state.errors?.description)}
         />
       </Field>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Category" name="category" error={state.errors?.category}>
-          <select
+        <Field label="Category" htmlFor="category" error={state.errors?.category}>
+          <Select
             key={`category-${v.category ?? post.category}`}
             id="category" name="category" required
             defaultValue={v.category ?? post.category}
-            className={inputClass(state.errors?.category)}
+            invalid={Boolean(state.errors?.category)}
           >
             {CATEGORIES.map((value) => (
               <option key={value} value={value}>{CATEGORY_LABELS[value]}</option>
             ))}
-          </select>
+          </Select>
         </Field>
 
-        <Field label={isFound ? "Date found" : "Date lost"} name="occurredOn" error={state.errors?.occurredOn}>
-          <input
+        <Field label={isFound ? "Date found" : "Date lost"} htmlFor="occurredOn" error={state.errors?.occurredOn}>
+          <Input
             id="occurredOn" name="occurredOn" type="date" required max={today}
             defaultValue={v.occurredOn ?? post.occurredOn}
-            className={inputClass(state.errors?.occurredOn)}
+            invalid={Boolean(state.errors?.occurredOn)}
           />
         </Field>
       </div>
 
-      <Field label={isFound ? "Where did you find it?" : "Where did you lose it?"} name="location" error={state.errors?.location}>
-        <select
+      <Field label={isFound ? "Where did you find it?" : "Where did you lose it?"} htmlFor="location" error={state.errors?.location}>
+        <Select
           key={`location-${v.location ?? post.location}`}
           id="location" name="location" required
           defaultValue={v.location ?? post.location}
-          className={inputClass(state.errors?.location)}
+          invalid={Boolean(state.errors?.location)}
         >
           {LOCATION_GROUPS.map((group) => (
             <optgroup key={group.label} label={group.label}>
@@ -86,14 +87,14 @@ export function EditForm({
               ))}
             </optgroup>
           ))}
-        </select>
+        </Select>
       </Field>
 
-      <Field label="Exactly where? (optional)" name="locationDetail" error={state.errors?.locationDetail}>
-        <input
+      <Field label="Exactly where? (optional)" htmlFor="locationDetail" error={state.errors?.locationDetail}>
+        <Input
           id="locationDetail" name="locationDetail" type="text" maxLength={160}
           defaultValue={v.locationDetail ?? post.locationDetail ?? ""}
-          className={inputClass(state.errors?.locationDetail)}
+          invalid={Boolean(state.errors?.locationDetail)}
         />
       </Field>
 
@@ -102,44 +103,17 @@ export function EditForm({
       )}
 
       <p className="text-xs text-subtle">
-        Photos can&rsquo;t be changed after posting yet. Delete and repost if you
-        need different ones.
+        Photos can&rsquo;t be changed yet. Delete and repost to swap them.
       </p>
 
       <div className="flex items-center gap-3">
-        <button
-          type="submit" disabled={pending}
-          className="rounded-lg bg-brand px-4 py-2.5 font-medium text-white transition hover:bg-brand-hover disabled:opacity-60"
-        >
+        <Button type="submit" disabled={pending}>
           {pending ? "Saving…" : "Save changes"}
-        </button>
+        </Button>
         <Link href={`/posts/${post.id}`} className="text-sm text-subtle transition hover:text-ink">
           Cancel
         </Link>
       </div>
     </form>
   );
-}
-
-function Field({
-  label, name, error, children,
-}: {
-  label: string; name: string; error?: string; children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <label htmlFor={name} className="mb-1.5 block text-sm font-medium text-ink">{label}</label>
-      {children}
-      {error && <p role="alert" className="mt-1.5 text-sm text-danger">{error}</p>}
-    </div>
-  );
-}
-
-function inputClass(error?: string): string {
-  return [
-    "w-full rounded-lg border bg-raised px-3.5 py-2.5 text-ink outline-none transition focus:ring-2",
-    error
-      ? "border-danger focus:border-danger"
-      : "border-line-strong focus:border-brand focus:ring-brand/25",
-  ].join(" ");
 }

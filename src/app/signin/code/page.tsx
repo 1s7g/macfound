@@ -90,7 +90,7 @@ export default async function EnterCodePage({
             maxLength={6}
             autoComplete="one-time-code"
             placeholder="000000"
-            className="w-full rounded-lg border border-line-strong bg-raised px-3.5 py-2.5 text-center font-mono text-2xl tracking-[0.4em] text-ink outline-none transition placeholder:text-subtle focus:border-brand focus:ring-2 focus:ring-brand/25"
+            className="w-full rounded-control border border-line-strong bg-raised px-3.5 py-2.5 text-center font-mono text-2xl tracking-[0.4em] text-ink outline-none transition placeholder:text-subtle focus:border-brand"
           />
         </div>
 
@@ -102,7 +102,7 @@ export default async function EnterCodePage({
 
         <button
           type="submit"
-          className="w-full rounded-lg bg-brand px-4 py-2.5 font-medium text-white transition hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand/40"
+          className="w-full rounded-control bg-brand px-4 py-2.5 font-medium text-on-brand shadow-card transition hover:bg-brand-hover"
         >
           Sign in
         </button>

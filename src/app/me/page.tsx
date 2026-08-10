@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { Header } from "@/components/Header";
 import { formatDay } from "@/components/PostCard";
+import { signOut } from "@/lib/auth";
 import { getMyPosts } from "@/lib/posts";
 import { requireUser } from "@/lib/session";
 import { CATEGORY_LABELS, LOCATION_LABELS, POST_STATUS_LABELS } from "@/lib/vocabulary";
@@ -11,7 +12,7 @@ export const metadata: Metadata = { title: "Your posts · MacFound" };
 
 const STATUS_STYLES = {
   OPEN: "bg-sunken text-ink",
-  RESOLVED: "bg-brand text-white",
+  RESOLVED: "bg-brand text-on-brand",
   EXPIRED: "bg-sunken text-subtle",
   REMOVED: "bg-danger-subtle text-danger",
 } as const;
@@ -27,22 +28,39 @@ export default async function MyPostsPage() {
     <>
       <Header user={user} />
 
-      <main className="mx-auto w-full max-w-3xl px-4 py-6">
-        <h1 className="text-xl font-semibold tracking-tight text-ink">Your posts</h1>
+      <main className="mx-auto w-full max-w-4xl px-4 py-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold tracking-tight text-ink">
+            {user.name ?? user.email}
+          </h1>
+          <form
+            action={async () => {
+              "use server";
+              await signOut({ redirectTo: "/" });
+            }}
+          >
+            <button
+              type="submit"
+              className="rounded-control px-3 py-1.5 text-sm text-subtle transition-colors hover:bg-sunken hover:text-ink"
+            >
+              Sign out
+            </button>
+          </form>
+        </div>
         <p className="mt-0.5 text-sm text-subtle">
           {posts.length === 0
-            ? "Nothing yet."
+            ? "No posts yet."
             : `${posts.length} total · ${open} open · ${reunited} reunited`}
         </p>
 
         {posts.length === 0 ? (
-          <div className="mt-6 rounded-xl border border-dashed border-line-strong bg-raised p-8 text-center">
+          <div className="mt-6 rounded-card border border-dashed border-line-strong bg-raised p-8 text-center">
             <p className="text-muted">You haven&rsquo;t posted anything yet.</p>
             <div className="mt-4 flex justify-center gap-2">
-              <Link href="/posts/new?type=lost" className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-hover">
+              <Link href="/posts/new?type=lost" className="rounded-control bg-brand px-4 py-2 text-sm font-medium text-on-brand transition hover:bg-brand-hover">
                 Report something lost
               </Link>
-              <Link href="/posts/new?type=found" className="rounded-lg border border-line-strong px-4 py-2 text-sm font-medium text-ink transition hover:bg-sunken">
+              <Link href="/posts/new?type=found" className="rounded-control border border-line-strong px-4 py-2 text-sm font-medium text-ink transition hover:bg-sunken">
                 Post something found
               </Link>
             </div>
@@ -50,7 +68,7 @@ export default async function MyPostsPage() {
         ) : (
           <ul className="mt-5 space-y-2.5">
             {posts.map((post) => (
-              <li key={post.id} className="rounded-xl border border-line bg-raised p-4">
+              <li key={post.id} className="rounded-card border border-line bg-raised p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
@@ -67,7 +85,7 @@ export default async function MyPostsPage() {
                     </Link>
 
                     <p className="mt-1 text-xs text-subtle">
-                      {LOCATION_LABELS[post.location]} · posted {formatDay(post.createdAt)}
+                      {LOCATION_LABELS[post.location]} · {formatDay(post.createdAt)}
                       {post._count.claims > 0 && ` · ${post._count.claims} claim${post._count.claims === 1 ? "" : "s"}`}
                       {post._count.comments > 0 && ` · ${post._count.comments} repl${post._count.comments === 1 ? "y" : "ies"}`}
                     </p>
@@ -85,7 +103,7 @@ export default async function MyPostsPage() {
                       Edit
                     </Link>
                     <Link href={`/posts/${post.id}`} className="text-subtle hover:text-ink">
-                      Manage
+                      View
                     </Link>
                   </div>
                 )}

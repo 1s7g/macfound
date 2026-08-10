@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { ImageUpload } from "@/components/ImageUpload";
+import { Button, Field, Input, Select, Textarea } from "@/components/ui";
 import { CATEGORIES, CATEGORY_LABELS, LOCATION_GROUPS, LOCATION_LABELS } from "@/lib/vocabulary";
 import { submitPost, type PostFormState } from "./actions";
 
@@ -27,11 +28,10 @@ export function PostForm({
 
       <Field
         label={isFound ? "What did you find?" : "What did you lose?"}
-        name="title"
+        htmlFor="title"
         error={state.errors?.title}
-        hint="A short summary — 'Black Hydro Flask with stickers'"
       >
-        <input
+        <Input
           id="title"
           name="title"
           type="text"
@@ -39,43 +39,42 @@ export function PostForm({
           maxLength={120}
           autoFocus
           defaultValue={v.title}
-          className={inputClass(state.errors?.title)}
+          placeholder="Black Hydro Flask with stickers"
+          invalid={Boolean(state.errors?.title)}
         />
       </Field>
 
       <Field
         label="Description"
-        name="description"
+        htmlFor="description"
         error={state.errors?.description}
-        hint="Colour, brand, size, wear and tear, anything distinctive."
+        hint="Colour, brand, size, anything distinctive."
       >
-        <textarea
+        <Textarea
           id="description"
           name="description"
           required
           rows={4}
           maxLength={2000}
           defaultValue={v.description}
-          className={inputClass(state.errors?.description)}
+          invalid={Boolean(state.errors?.description)}
         />
       </Field>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Category" name="category" error={state.errors?.category}>
+        <Field label="Category" htmlFor="category" error={state.errors?.category}>
           {/*
             key forces a remount when the echoed value changes. React applies
             defaultValue only at mount, so without this a validation error on
-            any other field silently clears the user's selection — and picking
-            again from a 46-item location list is exactly the friction that
-            makes people give up on a form.
+            any other field silently clears the user's selection.
           */}
-          <select
+          <Select
             key={`category-${v.category ?? ""}`}
             id="category"
             name="category"
             required
             defaultValue={v.category ?? ""}
-            className={inputClass(state.errors?.category)}
+            invalid={Boolean(state.errors?.category)}
           >
             <option value="" disabled>
               Choose one…
@@ -85,39 +84,39 @@ export function PostForm({
                 {CATEGORY_LABELS[value]}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
 
         <Field
           label={isFound ? "Date found" : "Date lost"}
-          name="occurredOn"
+          htmlFor="occurredOn"
           error={state.errors?.occurredOn}
         >
-          <input
+          <Input
             id="occurredOn"
             name="occurredOn"
             type="date"
             required
             max={today}
             defaultValue={v.occurredOn ?? today}
-            className={inputClass(state.errors?.occurredOn)}
+            invalid={Boolean(state.errors?.occurredOn)}
           />
         </Field>
       </div>
 
       <Field
         label={isFound ? "Where did you find it?" : "Where did you lose it?"}
-        name="location"
+        htmlFor="location"
         error={state.errors?.location}
         hint="Pick the closest building — nearby spots still match."
       >
-        <select
+        <Select
           key={`location-${v.location ?? ""}`}
           id="location"
           name="location"
           required
           defaultValue={v.location ?? ""}
-          className={inputClass(state.errors?.location)}
+          invalid={Boolean(state.errors?.location)}
         >
           <option value="" disabled>
             Choose a place…
@@ -131,29 +130,29 @@ export function PostForm({
               ))}
             </optgroup>
           ))}
-        </select>
+        </Select>
       </Field>
 
       <Field
         label="Exactly where? (optional)"
-        name="locationDetail"
+        htmlFor="locationDetail"
         error={state.errors?.locationDetail}
-        hint="e.g. '3rd floor, near the printers'"
       >
-        <input
+        <Input
           id="locationDetail"
           name="locationDetail"
           type="text"
           maxLength={160}
           defaultValue={v.locationDetail}
-          className={inputClass(state.errors?.locationDetail)}
+          placeholder="3rd floor, near the printers"
+          invalid={Boolean(state.errors?.locationDetail)}
         />
       </Field>
 
       <ImageUpload disabled={pending} />
 
       {isFound && nearestDropOffHint && (
-        <p className="rounded-xl border border-line bg-warning-subtle p-4 text-xs leading-relaxed text-warning">
+        <p className="rounded-card border border-line bg-warning-subtle p-4 text-xs leading-relaxed text-warning">
           {nearestDropOffHint}
         </p>
       )}
@@ -164,53 +163,9 @@ export function PostForm({
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-full rounded-lg bg-brand px-4 py-2.5 font-medium text-white transition hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand/40 disabled:opacity-60 sm:w-auto"
-      >
+      <Button type="submit" disabled={pending} className="w-full sm:w-auto">
         {pending ? "Posting…" : isFound ? "Post found item" : "Post lost item"}
-      </button>
+      </Button>
     </form>
   );
-}
-
-function Field({
-  label,
-  name,
-  hint,
-  error,
-  children,
-}: {
-  label: string;
-  name: string;
-  hint?: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <label htmlFor={name} className="mb-1.5 block text-sm font-medium text-ink">
-        {label}
-      </label>
-      {children}
-      {error ? (
-        <p role="alert" className="mt-1.5 text-sm text-danger">
-          {error}
-        </p>
-      ) : (
-        hint && <p className="mt-1.5 text-xs leading-relaxed text-subtle">{hint}</p>
-      )}
-    </div>
-  );
-}
-
-function inputClass(error?: string): string {
-  return [
-    "w-full rounded-lg border bg-raised px-3.5 py-2.5 text-ink outline-none transition",
-    "placeholder:text-subtle focus:ring-2",
-    error
-      ? "border-danger focus:border-danger"
-      : "border-line-strong focus:border-brand focus:ring-brand/25",
-  ].join(" ");
 }

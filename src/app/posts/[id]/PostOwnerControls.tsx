@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 
+import { Button, ButtonLink } from "@/components/ui";
 import { removeOwnPost } from "./actions";
 
 /**
@@ -23,30 +23,27 @@ export function PostOwnerControls({
 
   if (confirming) {
     return (
-      <div className="rounded-xl border border-line bg-danger-subtle p-4">
+      <div className="rounded-card border border-line bg-danger-subtle p-4">
         <p className="text-sm font-medium text-danger">Delete this post?</p>
         <p className="mt-1 text-sm leading-relaxed text-danger">
-          This removes the post, its photos, replies and any claims. It
-          can&rsquo;t be undone. If the item turned up, mark it resolved instead
-          — that keeps the record and counts towards items reunited.
+          This removes the post, its photos, replies and claims — permanently.
+          If the item turned up, mark it resolved instead.
         </p>
         <div className="mt-3 flex gap-2">
           <form action={removeOwnPost}>
             <input type="hidden" name="postId" value={postId} />
-            <button
-              type="submit"
-              className="rounded-lg bg-danger px-3.5 py-1.5 text-sm font-medium text-white transition hover:opacity-90"
-            >
+            <Button type="submit" variant="danger" size="sm">
               Yes, delete it
-            </button>
+            </Button>
           </form>
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={() => setConfirming(false)}
-            className="rounded-lg border border-line-strong px-3.5 py-1.5 text-sm font-medium text-danger transition hover:bg-danger-subtle"
           >
             Keep it
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -55,17 +52,14 @@ export function PostOwnerControls({
   return (
     <div className="flex flex-wrap items-center gap-3">
       {isOpen && (
-        <Link
-          href={`/posts/${postId}/edit`}
-          className="rounded-lg border border-line-strong bg-raised px-4 py-2 text-sm font-medium text-ink transition hover:bg-sunken"
-        >
+        <ButtonLink href={`/posts/${postId}/edit`} variant="secondary" size="sm">
           Edit post
-        </Link>
+        </ButtonLink>
       )}
       <button
         type="button"
         onClick={() => setConfirming(true)}
-        className="rounded-lg px-3 py-2 text-sm text-subtle transition hover:bg-sunken hover:text-danger"
+        className="rounded-control px-2.5 py-1.5 text-sm text-subtle transition hover:bg-sunken hover:text-danger"
       >
         Delete
       </button>

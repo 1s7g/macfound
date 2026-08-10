@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
+import { Button, Textarea } from "@/components/ui";
 import { sendMessage, type MessageState } from "../actions";
 
 const initialState: MessageState = {};
@@ -34,27 +35,22 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
       <label htmlFor="body" className="sr-only">
         Message
       </label>
-      <textarea
+      <Textarea
         id="body"
         name="body"
         rows={3}
         required
         maxLength={2000}
         placeholder="Write a message…"
-        className="w-full rounded-lg border border-line-strong bg-raised px-3.5 py-2.5 text-ink outline-none transition placeholder:text-subtle focus:border-brand focus:ring-2 focus:ring-brand/25"
       />
       {state.error && (
         <p role="alert" className="mt-1.5 text-sm text-danger">
           {state.error}
         </p>
       )}
-      <button
-        type="submit"
-        disabled={pending}
-        className="mt-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-hover disabled:opacity-60"
-      >
+      <Button type="submit" disabled={pending} className="mt-2">
         {pending ? "Sending…" : "Send"}
-      </button>
+      </Button>
     </form>
   );
 }
