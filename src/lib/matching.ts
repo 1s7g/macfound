@@ -363,9 +363,19 @@ export async function getMatchesForPost(postId: string) {
       locationHit: true,
       sourceId: true,
       candidateId: true,
-      source: { select: { id: true, title: true, type: true, location: true, occurredOn: true } },
+      // One thumbnail each: a match row shows the item, and recognising a
+      // photo is faster than reading a title.
+      source: {
+        select: {
+          id: true, title: true, type: true, location: true, occurredOn: true,
+          images: { select: { url: true }, orderBy: { position: "asc" }, take: 1 },
+        },
+      },
       candidate: {
-        select: { id: true, title: true, type: true, location: true, occurredOn: true },
+        select: {
+          id: true, title: true, type: true, location: true, occurredOn: true,
+          images: { select: { url: true }, orderBy: { position: "asc" }, take: 1 },
+        },
       },
     },
   });

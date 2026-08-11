@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef } from "react";
 
+import { Icon, SendGlyph } from "@/components/icons";
 import { Button, Textarea } from "@/components/ui";
 import { addComment, type ActionState } from "./actions";
 
@@ -37,6 +38,9 @@ export function CommentForm({ postId }: { postId: string }) {
         </p>
       )}
       <Button type="submit" disabled={pending} className="mt-2">
+        <Icon className="h-4 w-4">
+          <SendGlyph />
+        </Icon>
         {pending ? "Posting…" : "Post reply"}
       </Button>
     </form>

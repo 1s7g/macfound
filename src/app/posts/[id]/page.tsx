@@ -4,6 +4,16 @@ import { notFound } from "next/navigation";
 
 import { Header } from "@/components/Header";
 import { formatDay } from "@/components/PostCard";
+import {
+  CalendarGlyph,
+  ChevronRightGlyph,
+  ClockGlyph,
+  Icon,
+  InfoGlyph,
+  MessagesGlyph,
+  PinGlyph,
+  TagGlyph,
+} from "@/components/icons";
 import { Badge, Button, buttonClass, Card } from "@/components/ui";
 import { locationsNear } from "@/lib/campus";
 import { CAMPUS_SAFETY, nearestDropOffPoints } from "@/lib/campus-safety";
@@ -90,13 +100,23 @@ export default async function PostPage({
           {/* --- Content ---------------------------------------------------- */}
           <article className="min-w-0 lg:col-start-1 lg:row-start-1">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge tone={isFound ? "found" : "lost"}>{isFound ? "Found" : "Lost"}</Badge>
+              <Badge tone={isFound ? "found" : "lost"}>
+                <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-current" />
+                {isFound ? "Found" : "Lost"}
+              </Badge>
               {post.status === "RESOLVED" && <Badge tone="resolved">Reunited</Badge>}
               {post.status === "REMOVED" && <Badge tone="danger">Removed</Badge>}
               {post.status === "EXPIRED" && <Badge>Expired</Badge>}
               {/* Short form deliberately: "At Campus Safety Services" wraps the
                   badge row, and the panel below gives the full name anyway. */}
-              {handedIn && <Badge tone="brand">At Campus Safety</Badge>}
+              {handedIn && (
+                <Badge tone="brand">
+                  <Icon className="h-3 w-3">
+                    <PinGlyph />
+                  </Icon>
+                  At Campus Safety
+                </Badge>
+              )}
             </div>
 
             <h1 className="mt-3 text-title font-semibold text-ink sm:text-display">
@@ -104,40 +124,60 @@ export default async function PostPage({
             </h1>
 
             {/*
-              Where and when, as a sentence directly under the title.
+              Where and when, directly under the title.
 
-              These two facts are what decide whether this is your item, and
-              they used to sit in a bordered panel as uppercase label/value
-              rows alongside two others — a spec sheet competing with the
-              action card beside it. Read as a line, they need no labels: the
-              place and the date are self-evidently a place and a date.
+              These two facts decide whether this is your item. They used to sit
+              in a bordered panel as uppercase label/value rows alongside two
+              others — a spec sheet competing with the action card beside it.
+              The icons replace those labels: a pin and a calendar say "place"
+              and "date" faster than the words did, and give the eye something
+              to land on when scanning rather than reading.
             */}
-            <p className="mt-3 text-[15px] leading-relaxed text-ink">
-              {isFound ? "Found at" : "Lost at"}{" "}
-              <span className="font-medium">{LOCATION_LABELS[post.location]}</span>
-              {" · "}
-              <time dateTime={post.occurredOn.toISOString()} className="font-medium">
-                {post.occurredOn.toLocaleDateString("en-CA", {
-                  weekday: "long",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </time>
-            </p>
-
-            {post.locationDetail && (
-              <p className="mt-1 text-sm leading-relaxed text-muted">
-                {post.locationDetail}
+            <div className="mt-3 space-y-1.5 text-[15px] text-ink">
+              <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span className="inline-flex items-center gap-1.5">
+                  <Icon className="h-4 w-4 text-subtle">
+                    <PinGlyph />
+                  </Icon>
+                  {isFound ? "Found at" : "Lost at"}{" "}
+                  <span className="font-medium">{LOCATION_LABELS[post.location]}</span>
+                </span>
+                <span aria-hidden className="text-subtle">
+                  ·
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Icon className="h-4 w-4 text-subtle">
+                    <CalendarGlyph />
+                  </Icon>
+                  <time dateTime={post.occurredOn.toISOString()}>
+                    {post.occurredOn.toLocaleDateString("en-CA", {
+                      weekday: "long",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </time>
+                </span>
               </p>
-            )}
 
-            <p className="mt-3 text-sm text-subtle">
-              {CATEGORY_LABELS[post.category]} · posted by{" "}
-              {post.author.name ?? "a student"}{" "}
-              <time dateTime={post.createdAt.toISOString()}>
-                {formatDay(post.createdAt).toLowerCase()}
-              </time>
-            </p>
+              {post.locationDetail && (
+                <p className="pl-[1.375rem] text-sm leading-relaxed text-muted">
+                  {post.locationDetail}
+                </p>
+              )}
+
+              <p className="flex items-center gap-1.5 text-sm text-subtle">
+                <Icon className="h-4 w-4">
+                  <TagGlyph />
+                </Icon>
+                {CATEGORY_LABELS[post.category]}
+                <span aria-hidden>·</span>
+                Posted by {post.author.name ?? "a student"}
+                <span aria-hidden>·</span>
+                <time dateTime={post.createdAt.toISOString()}>
+                  {formatDay(post.createdAt).toLowerCase()}
+                </time>
+              </p>
+            </div>
 
             {post.images.length > 0 && (
               <ul
@@ -190,13 +230,21 @@ export default async function PostPage({
               </p>
             )}
 
-            {/* A search hint rather than a fact about the item, so it reads as
-                a footnote here instead of a labelled row in a facts panel. */}
+            {/* A search hint rather than a fact about the item — set in a quiet
+                tray so it reads as an aside rather than another sentence of the
+                description. */}
             {nearby.length > 0 && isOpen && (
-              <p className="mt-4 text-sm leading-relaxed text-subtle">
-                Also worth checking nearby:{" "}
-                {nearby.map((l) => LOCATION_LABELS[l]).join(", ")}.
-              </p>
+              <div className="mt-4 flex gap-2.5 rounded-card bg-sunken px-4 py-3">
+                <Icon className="mt-0.5 h-4 w-4 text-subtle">
+                  <InfoGlyph />
+                </Icon>
+                <p className="text-sm leading-relaxed text-muted">
+                  Also worth checking nearby:{" "}
+                  <span className="block text-subtle">
+                    {nearby.map((l) => LOCATION_LABELS[l]).join(", ")}.
+                  </span>
+                </p>
+              </div>
             )}
           </article>
 
@@ -214,34 +262,54 @@ export default async function PostPage({
                 <p className="text-sm font-medium text-ink">
                   Collect it from {CAMPUS_SAFETY.name}
                 </p>
-                {/* Prose rather than three more label/value rows: it's an
-                    address, a reminder and a deadline, which a sentence carries
-                    perfectly well. The deadline is the one number that matters,
-                    so it's the only thing emphasised. */}
-                <p className="text-sm leading-relaxed text-muted">
-                  {CAMPUS_SAFETY.building}. Bring your student card.
-                </p>
-                <p className="text-sm leading-relaxed text-muted">
-                  Held until{" "}
-                  <span className="font-medium text-ink">
-                    {holdsUntil!.toLocaleDateString("en-CA", {
-                      month: "long",
-                      day: "numeric",
-                    })}
+                {/* Two facts, not three label rows: where to go, and how long
+                    you have. The deadline is the only number that matters, so
+                    it's the only thing emphasised. */}
+                <div className="space-y-3 border-b border-line pb-3">
+                  <p className="flex gap-2.5 text-sm leading-relaxed text-muted">
+                    <Icon className="mt-0.5 h-4 w-4 text-subtle">
+                      <PinGlyph />
+                    </Icon>
+                    <span>
+                      <span className="block text-ink">{CAMPUS_SAFETY.building}</span>
+                      Bring your student card.
+                    </span>
+                  </p>
+                </div>
+
+                <p className="flex gap-2.5 text-sm leading-relaxed text-muted">
+                  <Icon className="mt-0.5 h-4 w-4 text-subtle">
+                    <CalendarGlyph />
+                  </Icon>
+                  <span>
+                    Held until{" "}
+                    <span className="font-medium text-ink">
+                      {holdsUntil!.toLocaleDateString("en-CA", {
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </span>
+                    , then disposed of.
                   </span>
-                  , then disposed of.
                 </p>
+
                 <a
                   href={CAMPUS_SAFETY.url}
                   target="_blank"
                   rel="noreferrer"
                   className={buttonClass("primary", "md", "w-full")}
                 >
+                  <Icon className="h-4 w-4">
+                    <ClockGlyph />
+                  </Icon>
                   Hours &amp; contact
                 </a>
                 <form action={startConversation}>
                   <input type="hidden" name="postId" value={post.id} />
                   <Button type="submit" variant="secondary" className="w-full">
+                    <Icon className="h-4 w-4">
+                      <MessagesGlyph />
+                    </Icon>
                     Ask {post.author.name ?? "them"} a question
                   </Button>
                 </form>
@@ -325,25 +393,57 @@ export default async function PostPage({
                   {matches.map((match) => (
                     <li
                       key={match.id}
-                      className="flex items-start justify-between gap-3 rounded-card border border-line bg-raised p-4"
+                      className="flex items-center gap-3 rounded-card border border-line bg-raised p-3 transition-colors hover:border-brand-border"
                     >
-                      <Link href={`/posts/${match.other.id}`} className="min-w-0 flex-1">
-                        <p className="flex flex-wrap items-center gap-2">
-                          <Badge tone="brand">
-                            {confidenceLabel(match.score, match.textScore)}
-                          </Badge>
-                          <span className="truncate font-medium text-ink">
-                            {match.other.title}
+                      <Link
+                        href={`/posts/${match.other.id}`}
+                        className="flex min-w-0 flex-1 items-center gap-3"
+                      >
+                        {/* Recognising a photo is faster than reading a title,
+                            which is the whole job of a match row. */}
+                        {match.other.images[0] ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={match.other.images[0].url}
+                            alt=""
+                            loading="lazy"
+                            className="h-12 w-12 shrink-0 rounded-[10px] object-cover"
+                          />
+                        ) : (
+                          <span
+                            aria-hidden
+                            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] bg-sunken"
+                          >
+                            <Icon className="h-5 w-5 text-subtle/60">
+                              <TagGlyph />
+                            </Icon>
                           </span>
-                        </p>
-                        <p className="mt-1.5 text-xs text-subtle">
-                          {LOCATION_LABELS[match.other.location]}
-                          {" · "}
-                          {match.daysApart === 0
-                            ? "same day"
-                            : `${match.daysApart} day${match.daysApart === 1 ? "" : "s"} apart`}
-                          {match.categoryHit && " · same category"}
-                        </p>
+                        )}
+
+                        <span className="min-w-0 flex-1">
+                          <span className="flex flex-wrap items-center gap-2">
+                            <Badge tone="brand">
+                              {confidenceLabel(match.score, match.textScore)}
+                            </Badge>
+                            <span className="truncate font-medium text-ink">
+                              {match.other.title}
+                            </span>
+                          </span>
+                          <span className="mt-1 block text-xs text-subtle">
+                            {LOCATION_LABELS[match.other.location]}
+                            {" · "}
+                            {match.daysApart === 0
+                              ? "same day"
+                              : `${match.daysApart} day${match.daysApart === 1 ? "" : "s"} apart`}
+                            {match.categoryHit && " · same category"}
+                          </span>
+                        </span>
+
+                        {!post.isAuthor && (
+                          <Icon className="h-4 w-4 text-subtle">
+                            <ChevronRightGlyph />
+                          </Icon>
+                        )}
                       </Link>
 
                       {post.isAuthor && (
@@ -410,6 +510,12 @@ export default async function PostPage({
                   ? "No replies yet"
                   : `${post.comments.length} ${post.comments.length === 1 ? "reply" : "replies"}`}
               </h2>
+
+              {post.comments.length === 0 && isOpen && (
+                <p className="mt-1 text-sm text-subtle">
+                  Be the first to help reunite this item.
+                </p>
+              )}
 
               {post.comments.length > 0 && (
                 <ul className="mt-4 space-y-4">

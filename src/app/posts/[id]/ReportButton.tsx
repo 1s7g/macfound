@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 
+import { FlagGlyph, Icon } from "@/components/icons";
 import { Button, Textarea } from "@/components/ui";
 import { REPORT_REASON_LABELS, REPORT_REASONS } from "@/lib/report-reasons";
 import { reportPost, type ActionState } from "./actions";
@@ -32,8 +33,11 @@ export function ReportButton({ postId }: { postId: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-sm text-subtle underline underline-offset-2 transition hover:text-ink"
+        className="inline-flex items-center gap-1.5 text-sm text-subtle underline underline-offset-2 transition hover:text-ink"
       >
+        <Icon className="h-4 w-4">
+          <FlagGlyph />
+        </Icon>
         Report this post
       </button>
     );
