@@ -91,7 +91,6 @@ export default async function PostPage({
           <article className="min-w-0 lg:col-start-1 lg:row-start-1">
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone={isFound ? "found" : "lost"}>{isFound ? "Found" : "Lost"}</Badge>
-              <Badge>{CATEGORY_LABELS[post.category]}</Badge>
               {post.status === "RESOLVED" && <Badge tone="resolved">Reunited</Badge>}
               {post.status === "REMOVED" && <Badge tone="danger">Removed</Badge>}
               {post.status === "EXPIRED" && <Badge>Expired</Badge>}
@@ -100,12 +99,43 @@ export default async function PostPage({
               {handedIn && <Badge tone="brand">At Campus Safety</Badge>}
             </div>
 
-            <h1 className="mt-3 text-display font-semibold text-ink">{post.title}</h1>
+            <h1 className="mt-3 text-title font-semibold text-ink sm:text-display">
+              {post.title}
+            </h1>
 
-            <p className="mt-2 text-sm text-subtle">
-              {post.author.name ?? "A student"} ·{" "}
+            {/*
+              Where and when, as a sentence directly under the title.
+
+              These two facts are what decide whether this is your item, and
+              they used to sit in a bordered panel as uppercase label/value
+              rows alongside two others — a spec sheet competing with the
+              action card beside it. Read as a line, they need no labels: the
+              place and the date are self-evidently a place and a date.
+            */}
+            <p className="mt-3 text-[15px] leading-relaxed text-ink">
+              {isFound ? "Found at" : "Lost at"}{" "}
+              <span className="font-medium">{LOCATION_LABELS[post.location]}</span>
+              {" · "}
+              <time dateTime={post.occurredOn.toISOString()} className="font-medium">
+                {post.occurredOn.toLocaleDateString("en-CA", {
+                  weekday: "long",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </time>
+            </p>
+
+            {post.locationDetail && (
+              <p className="mt-1 text-sm leading-relaxed text-muted">
+                {post.locationDetail}
+              </p>
+            )}
+
+            <p className="mt-3 text-sm text-subtle">
+              {CATEGORY_LABELS[post.category]} · posted by{" "}
+              {post.author.name ?? "a student"}{" "}
               <time dateTime={post.createdAt.toISOString()}>
-                {formatDay(post.createdAt)}
+                {formatDay(post.createdAt).toLowerCase()}
               </time>
             </p>
 
@@ -159,39 +189,22 @@ export default async function PostPage({
                 items for {CAMPUS_SAFETY.retentionDays} days.
               </p>
             )}
+
+            {/* A search hint rather than a fact about the item, so it reads as
+                a footnote here instead of a labelled row in a facts panel. */}
+            {nearby.length > 0 && isOpen && (
+              <p className="mt-4 text-sm leading-relaxed text-subtle">
+                Also worth checking nearby:{" "}
+                {nearby.map((l) => LOCATION_LABELS[l]).join(", ")}.
+              </p>
+            )}
           </article>
 
           {/* --- Facts and actions ------------------------------------------ */}
+          {/* One card, so there is never a question about where to act. The
+              facts panel that used to sit above this competed with it at equal
+              visual weight; those facts now read as a line under the title. */}
           <aside className="space-y-3 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:sticky lg:top-20">
-            <Card className="divide-y divide-line">
-              <dl className="space-y-3 p-4 text-sm">
-                <Detail label={isFound ? "Found at" : "Lost at"}>
-                  {LOCATION_LABELS[post.location]}
-                  {post.locationDetail && (
-                    <span className="text-subtle"> — {post.locationDetail}</span>
-                  )}
-                </Detail>
-                <Detail label={isFound ? "Date found" : "Date lost"}>
-                  {post.occurredOn.toLocaleDateString("en-CA", {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </Detail>
-                <Detail label={post.status === "RESOLVED" ? "Reunited" : "Expires"}>
-                  {(post.status === "RESOLVED" && post.resolvedAt
-                    ? post.resolvedAt
-                    : expiryDate(post.createdAt)
-                  ).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
-                </Detail>
-                {nearby.length > 0 && (
-                  <Detail label="Also worth checking">
-                    {nearby.map((l) => LOCATION_LABELS[l]).join(", ")}
-                  </Detail>
-                )}
-              </dl>
-            </Card>
-
             {/* Handed in changes the whole ask. There is no custody question and
                 nobody to negotiate with — the item is on a shelf at a fixed
                 address, so the panel becomes directions rather than a claim
@@ -201,19 +214,22 @@ export default async function PostPage({
                 <p className="text-sm font-medium text-ink">
                   Collect it from {CAMPUS_SAFETY.name}
                 </p>
-                <dl className="space-y-2 text-sm">
-                  <Detail label="Where">{CAMPUS_SAFETY.building}</Detail>
-                  <Detail label="Bring">Your student card</Detail>
-                  <Detail label="Held until">
+                {/* Prose rather than three more label/value rows: it's an
+                    address, a reminder and a deadline, which a sentence carries
+                    perfectly well. The deadline is the one number that matters,
+                    so it's the only thing emphasised. */}
+                <p className="text-sm leading-relaxed text-muted">
+                  {CAMPUS_SAFETY.building}. Bring your student card.
+                </p>
+                <p className="text-sm leading-relaxed text-muted">
+                  Held until{" "}
+                  <span className="font-medium text-ink">
                     {holdsUntil!.toLocaleDateString("en-CA", {
-                      month: "short",
+                      month: "long",
                       day: "numeric",
                     })}
-                  </Detail>
-                </dl>
-                <p className="text-xs leading-relaxed text-subtle">
-                  Handed in {formatDay(post.handedInAt!)}. They hold items for{" "}
-                  {CAMPUS_SAFETY.retentionDays} days, then dispose of them.
+                  </span>
+                  , then disposed of.
                 </p>
                 <a
                   href={CAMPUS_SAFETY.url}
@@ -267,10 +283,17 @@ export default async function PostPage({
                       : "Reopen this post"}
                   </Button>
                 </form>
+                {/* Expiry is post admin, not a fact about the item — it only
+                    means something to the person who can act on it, so it lives
+                    here rather than in front of every visitor. */}
                 <p className="text-xs leading-relaxed text-subtle">
-                  {isOpen
-                    ? "Closes the post and counts towards items reunited."
-                    : "This post is closed."}
+                  {post.status === "RESOLVED" && post.resolvedAt
+                    ? `Reunited ${post.resolvedAt.toLocaleDateString("en-CA", { month: "long", day: "numeric" })}.`
+                    : isOpen
+                      ? `Closes the post and counts towards items reunited. Expires ${expiryDate(
+                          post.createdAt,
+                        ).toLocaleDateString("en-CA", { month: "long", day: "numeric" })}.`
+                      : "This post is closed."}
                 </p>
                 <div className="border-t border-line pt-3">
                   <PostOwnerControls postId={post.id} isOpen={isOpen} />
@@ -450,15 +473,4 @@ function formatDropOffDistance(metres: number | null): string {
   if (metres === null) return "";
   if (metres < 25) return " — same building";
   return ` (about ${Math.round(metres / 10) * 10}m away)`;
-}
-
-function Detail({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <dt className="text-[11px] font-medium uppercase tracking-wide text-subtle">
-        {label}
-      </dt>
-      <dd className="mt-0.5 text-ink">{children}</dd>
-    </div>
-  );
 }
