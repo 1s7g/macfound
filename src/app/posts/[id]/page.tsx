@@ -139,7 +139,11 @@ export default async function PostPage({
                   {isFound ? "Found at" : "Lost at"}{" "}
                   <span className="font-medium">{LOCATION_LABELS[post.location]}</span>
                 </span>
-                <span aria-hidden className="text-subtle">
+                {/* Only a separator while the two sit on one line. Narrow
+                    screens wrap them into stacked rows, where a leftover "·"
+                    dangles at the end of the first line — and the icons already
+                    keep the two facts distinct without it. */}
+                <span aria-hidden className="hidden text-subtle sm:inline">
                   ·
                 </span>
                 <span className="inline-flex items-center gap-1.5">
@@ -162,13 +166,17 @@ export default async function PostPage({
                 </p>
               )}
 
+              {/* Category and post age only. The author's name used to sit here
+                  too, but the action panel already carries it ("Ask seed a
+                  question") — at the moment it's actually useful — and three
+                  unlike things under a tag icon read as one fact when they
+                  aren't. Dropping it also stops the post's age sitting beside
+                  the date the item was lost, where the two competed. */}
               <p className="flex items-center gap-1.5 text-sm text-subtle">
                 <Icon className="h-4 w-4">
                   <TagGlyph />
                 </Icon>
                 {CATEGORY_LABELS[post.category]}
-                <span aria-hidden>·</span>
-                Posted by {post.author.name ?? "a student"}
                 <span aria-hidden>·</span>
                 <time dateTime={post.createdAt.toISOString()}>
                   {formatDay(post.createdAt).toLowerCase()}
