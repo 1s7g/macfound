@@ -9,13 +9,11 @@ import {
   ChevronRightGlyph,
   ClockGlyph,
   Icon,
-  InfoGlyph,
   MessagesGlyph,
   PinGlyph,
   TagGlyph,
 } from "@/components/icons";
 import { Badge, Button, buttonClass, Card } from "@/components/ui";
-import { locationsNear } from "@/lib/campus";
 import { CAMPUS_SAFETY, nearestDropOffPoints } from "@/lib/campus-safety";
 import { confidenceLabel, getMatchesForPost } from "@/lib/matching";
 import { expiryDate, getPost } from "@/lib/posts";
@@ -58,7 +56,6 @@ export default async function PostPage({
 
   const isFound = post.type === "FOUND";
   const isOpen = post.status === "OPEN";
-  const nearby = locationsNear(post.location, 150, 3);
   const dropOffs = isFound ? nearestDropOffPoints(post.location, 1) : [];
 
   const pendingClaims = post.claims.filter((c) => c.status === "PENDING");
@@ -230,22 +227,6 @@ export default async function PostPage({
               </p>
             )}
 
-            {/* A search hint rather than a fact about the item — set in a quiet
-                tray so it reads as an aside rather than another sentence of the
-                description. */}
-            {nearby.length > 0 && isOpen && (
-              <div className="mt-4 flex gap-2.5 rounded-card bg-sunken px-4 py-3">
-                <Icon className="mt-0.5 h-4 w-4 text-subtle">
-                  <InfoGlyph />
-                </Icon>
-                <p className="text-sm leading-relaxed text-muted">
-                  Also worth checking nearby:{" "}
-                  <span className="block text-subtle">
-                    {nearby.map((l) => LOCATION_LABELS[l]).join(", ")}.
-                  </span>
-                </p>
-              </div>
-            )}
           </article>
 
           {/* --- Facts and actions ------------------------------------------ */}
