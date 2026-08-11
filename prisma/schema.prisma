@@ -222,6 +222,12 @@ model Post {
   status     PostStatus @default(OPEN)
   resolvedAt DateTime?
 
+  // Set when a finder hands the item to Campus Safety instead of keeping it.
+  // A timestamp rather than a flag: "when" is worth knowing, since the official
+  // desk only holds items for 30 days and the owner needs to beat that.
+  // Meaningless on LOST posts, which is enforced in the form rather than here.
+  handedInAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

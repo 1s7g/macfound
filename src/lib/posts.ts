@@ -51,6 +51,12 @@ export const createPostSchema = z
       .string()
       .min(1, "When did this happen?")
       .refine((value) => !Number.isNaN(Date.parse(value)), "That date isn't valid."),
+    // Checkbox: present in the body only when ticked, hence the coercion.
+    // Only meaningful on FOUND posts; the superRefine below drops it otherwise.
+    handedIn: z
+      .union([z.literal("on"), z.literal("true"), z.literal("")])
+      .optional()
+      .transform((value) => value === "on" || value === "true"),
   })
   .superRefine((value, ctx) => {
     const when = parseLocalDate(value.occurredOn);
@@ -71,6 +77,16 @@ export const createPostSchema = z
         code: "custom",
         path: ["occurredOn"],
         message: `That's more than ${MAX_BACKDATE_DAYS} days ago — too old to post.`,
+      });
+    }
+
+    // "Handed in" describes what a finder did with an item. On a lost report it
+    // would claim the poster gave away something they don't have.
+    if (value.handedIn && value.type !== PostType.FOUND) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["handedIn"],
+        message: "Only a found item can be handed in.",
       });
     }
   });
@@ -148,6 +164,7 @@ export async function createPost(
       location: input.location,
       locationDetail: input.locationDetail?.trim() || null,
       occurredOn: parseLocalDate(input.occurredOn),
+      handedInAt: input.handedIn ? new Date() : null,
     },
     select: { id: true },
   });
@@ -209,6 +226,7 @@ export async function getFeed(
         locationDetail: true,
         occurredOn: true,
         createdAt: true,
+        handedInAt: true,
         images: { select: { url: true }, orderBy: { position: "asc" }, take: 1 },
         _count: { select: { comments: true } },
       },
@@ -240,6 +258,7 @@ export async function getPost(id: string, viewerId: string) {
       status: true,
       createdAt: true,
       resolvedAt: true,
+      handedInAt: true,
       authorId: true,
       author: { select: { id: true, name: true, email: true } },
       images: { select: { id: true, url: true }, orderBy: { position: "asc" } },
@@ -310,7 +329,7 @@ export async function updatePost(
 ) {
   const post = await db.post.findUnique({
     where: { id: postId },
-    select: { id: true, authorId: true },
+    select: { id: true, authorId: true, handedInAt: true },
   });
 
   // Ownership is re-checked here, not just in the UI that renders the button.
@@ -325,6 +344,9 @@ export async function updatePost(
       location: input.location,
       locationDetail: input.locationDetail?.trim() || null,
       occurredOn: parseLocalDate(input.occurredOn),
+      // Preserve the original timestamp when it was already handed in, so
+      // editing the description doesn't reset the clock the owner is racing.
+      handedInAt: input.handedIn ? (post.handedInAt ?? new Date()) : null,
     },
     select: { id: true, type: true },
   });

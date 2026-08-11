@@ -22,6 +22,7 @@ export default async function EditPostPage({
     select: {
       id: true, type: true, title: true, description: true, category: true,
       location: true, locationDetail: true, occurredOn: true, authorId: true, status: true,
+      handedInAt: true,
     },
   });
 

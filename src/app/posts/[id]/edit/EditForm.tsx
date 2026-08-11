@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 
 import { Button, Field, Input, Select, Textarea } from "@/components/ui";
+import { CAMPUS_SAFETY } from "@/lib/campus-safety";
 import { CATEGORIES, CATEGORY_LABELS, LOCATION_GROUPS, LOCATION_LABELS } from "@/lib/vocabulary";
 import { saveEdit, type EditState } from "../actions";
 
@@ -22,6 +23,7 @@ export function EditForm({
     location: string;
     locationDetail: string | null;
     occurredOn: string;
+    handedInAt: Date | null;
   };
   today: string;
 }) {
@@ -97,6 +99,30 @@ export function EditForm({
           invalid={Boolean(state.errors?.locationDetail)}
         />
       </Field>
+
+      {isFound && (
+        <div className="rounded-card border border-line bg-sunken p-4">
+          <label className="flex items-start gap-3 text-sm text-ink">
+            <input
+              type="checkbox"
+              name="handedIn"
+              defaultChecked={
+                state.values ? state.values.handedIn === "on" : Boolean(post.handedInAt)
+              }
+              className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--color-brand)]"
+            />
+            <span>
+              <span className="font-medium">
+                I&rsquo;ve handed this in to {CAMPUS_SAFETY.name}
+              </span>
+              <span className="mt-1 block text-xs leading-relaxed text-subtle">
+                Tick this once you drop it off and the post will tell the owner
+                to collect it rather than message you.
+              </span>
+            </span>
+          </label>
+        </div>
+      )}
 
       {state.formError && (
         <p role="alert" className="text-sm text-danger">{state.formError}</p>

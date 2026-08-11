@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { Header } from "@/components/Header";
 import { formatDay } from "@/components/PostCard";
-import { Badge, Button, Card } from "@/components/ui";
+import { Badge, Button, buttonClass, Card } from "@/components/ui";
 import { locationsNear } from "@/lib/campus";
 import { CAMPUS_SAFETY, nearestDropOffPoints } from "@/lib/campus-safety";
 import { confidenceLabel, getMatchesForPost } from "@/lib/matching";
@@ -55,6 +55,13 @@ export default async function PostPage({
   const myClaim = post.claims.find((c) => c.claimantId === user.id);
   const canClaim = isFound && isOpen && !post.isAuthor && !myClaim;
 
+  // Only a found item can be handed in, but guard on both so a stale row can
+  // never render collection directions on a lost report.
+  const handedIn = isFound && post.handedInAt !== null;
+  const holdsUntil = post.handedInAt
+    ? new Date(post.handedInAt.getTime() + CAMPUS_SAFETY.retentionDays * 86_400_000)
+    : null;
+
   return (
     <>
       <Header user={user} active={isFound ? "found" : "lost"} />
@@ -87,6 +94,10 @@ export default async function PostPage({
               <Badge>{CATEGORY_LABELS[post.category]}</Badge>
               {post.status === "RESOLVED" && <Badge tone="resolved">Reunited</Badge>}
               {post.status === "REMOVED" && <Badge tone="danger">Removed</Badge>}
+              {post.status === "EXPIRED" && <Badge>Expired</Badge>}
+              {/* Short form deliberately: "At Campus Safety Services" wraps the
+                  badge row, and the panel below gives the full name anyway. */}
+              {handedIn && <Badge tone="brand">At Campus Safety</Badge>}
             </div>
 
             <h1 className="mt-3 text-display font-semibold text-ink">{post.title}</h1>
@@ -129,7 +140,10 @@ export default async function PostPage({
             {/* Guidance and the drop-box hint live with the content rather than
                 in the sidebar: they're prose, not actions, and a tall sidebar
                 inflates the grid row and strands the discussion below a gap. */}
-            {post.isAuthor && isFound && isOpen && (
+            {/* Both of these assume the finder still has the item, so neither
+                applies once it's been handed in: there's nobody to judge a
+                claim, and pointing at a drop box they've already used is noise. */}
+            {post.isAuthor && isFound && isOpen && !handedIn && (
               <p className="mt-6 rounded-card border border-line bg-warning-subtle px-4 py-3 text-sm leading-relaxed text-warning">
                 <strong className="font-semibold">You decide who gets this.</strong>{" "}
                 Claimants describe something identifying — you&rsquo;re holding the
@@ -138,7 +152,7 @@ export default async function PostPage({
               </p>
             )}
 
-            {isFound && dropOffs[0] && isOpen && (
+            {isFound && dropOffs[0] && isOpen && !handedIn && (
               <p className="mt-4 text-sm leading-relaxed text-subtle">
                 Nearest drop box: {dropOffs[0].point.label}
                 {formatDropOffDistance(dropOffs[0].metres)}. {CAMPUS_SAFETY.name} holds
@@ -178,7 +192,47 @@ export default async function PostPage({
               </dl>
             </Card>
 
-            {!post.isAuthor && isOpen && (
+            {/* Handed in changes the whole ask. There is no custody question and
+                nobody to negotiate with — the item is on a shelf at a fixed
+                address, so the panel becomes directions rather than a claim
+                form. Messaging stays available for questions, demoted. */}
+            {!post.isAuthor && isOpen && handedIn && (
+              <Card className="space-y-3 p-4">
+                <p className="text-sm font-medium text-ink">
+                  Collect it from {CAMPUS_SAFETY.name}
+                </p>
+                <dl className="space-y-2 text-sm">
+                  <Detail label="Where">{CAMPUS_SAFETY.building}</Detail>
+                  <Detail label="Bring">Your student card</Detail>
+                  <Detail label="Held until">
+                    {holdsUntil!.toLocaleDateString("en-CA", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </Detail>
+                </dl>
+                <p className="text-xs leading-relaxed text-subtle">
+                  Handed in {formatDay(post.handedInAt!)}. They hold items for{" "}
+                  {CAMPUS_SAFETY.retentionDays} days, then dispose of them.
+                </p>
+                <a
+                  href={CAMPUS_SAFETY.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={buttonClass("primary", "md", "w-full")}
+                >
+                  Hours &amp; contact
+                </a>
+                <form action={startConversation}>
+                  <input type="hidden" name="postId" value={post.id} />
+                  <Button type="submit" variant="secondary" className="w-full">
+                    Ask {post.author.name ?? "them"} a question
+                  </Button>
+                </form>
+              </Card>
+            )}
+
+            {!post.isAuthor && isOpen && !handedIn && (
               <Card className="space-y-3 p-4">
                 <p className="text-sm font-medium text-ink">
                   {isFound ? "Is this yours?" : "Seen this?"}

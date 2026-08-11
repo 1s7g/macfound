@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { Badge } from "@/components/ui";
 import type { FeedPost } from "@/lib/posts";
 import { LOCATION_LABELS } from "@/lib/vocabulary";
 
@@ -46,6 +47,15 @@ export function PostCard({ post }: { post: FeedPost }) {
           <p className="mt-1 text-sm text-subtle">
             {LOCATION_LABELS[post.location]} · {formatDay(post.occurredOn)}
           </p>
+
+          {/* Worth the extra line on an otherwise deliberately bare card: it
+              changes what you do next — collect it from a desk rather than
+              message a stranger and arrange a meeting. */}
+          {post.handedInAt && (
+            <p className="mt-1.5">
+              <Badge tone="brand">At Campus Safety</Badge>
+            </p>
+          )}
         </div>
       </Link>
     </li>
