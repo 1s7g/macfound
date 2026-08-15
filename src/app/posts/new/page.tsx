@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Header } from "@/components/Header";
-import { CAMPUS_SAFETY, DROP_OFF_POINTS } from "@/lib/campus-safety";
 import { requireUser } from "@/lib/session";
 import { PostForm } from "./PostForm";
 
@@ -36,15 +35,7 @@ export default async function NewPostPage({
           {isFound ? "Post something you found" : "Report something you lost"}
         </h1>
 
-        <PostForm
-          type={type}
-          today={today}
-          nearestDropOffHint={
-            isFound
-              ? `Don't want to hold onto it? There are ${DROP_OFF_POINTS.length} official drop boxes on campus, and ${CAMPUS_SAFETY.name} keeps items for ${CAMPUS_SAFETY.retentionDays} days. Posting here first still helps — you'll be notified if it matches someone's lost report.`
-              : undefined
-          }
-        />
+        <PostForm type={type} today={today} />
       </main>
     </>
   );

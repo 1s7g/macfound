@@ -13,11 +13,9 @@ const initialState: PostFormState = {};
 export function PostForm({
   type,
   today,
-  nearestDropOffHint,
 }: {
   type: "LOST" | "FOUND";
   today: string;
-  nearestDropOffHint?: string;
 }) {
   const [state, formAction, pending] = useActionState(submitPost, initialState);
   const isFound = type === "FOUND";
@@ -173,12 +171,6 @@ export function PostForm({
             </span>
           </label>
         </div>
-      )}
-
-      {isFound && nearestDropOffHint && (
-        <p className="rounded-card border border-line bg-warning-subtle p-4 text-xs leading-relaxed text-warning">
-          {nearestDropOffHint}
-        </p>
       )}
 
       {state.formError && (
