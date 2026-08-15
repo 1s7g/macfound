@@ -166,21 +166,17 @@ export default async function PostPage({
                 </p>
               )}
 
-              {/* Category and post age only. The author's name used to sit here
-                  too, but the action panel already carries it ("Ask seed a
-                  question") — at the moment it's actually useful — and three
-                  unlike things under a tag icon read as one fact when they
-                  aren't. Dropping it also stops the post's age sitting beside
-                  the date the item was lost, where the two competed. */}
+              {/* Category only. Two dates competed here: the event date above
+                  ("Saturday, August 1") is what identifies the item, while the
+                  post's age ("6 days ago") is only listing freshness — a feed
+                  concern, already done its job by the time anyone reaches this
+                  page. The author's name lived here too; the action panel
+                  carries it where it's actually useful ("Ask seed a question"). */}
               <p className="flex items-center gap-1.5 text-sm text-subtle">
                 <Icon className="h-4 w-4">
                   <TagGlyph />
                 </Icon>
                 {CATEGORY_LABELS[post.category]}
-                <span aria-hidden>·</span>
-                <time dateTime={post.createdAt.toISOString()}>
-                  {formatDay(post.createdAt).toLowerCase()}
-                </time>
               </p>
             </div>
 
