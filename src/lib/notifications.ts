@@ -1,4 +1,7 @@
+import { after } from "next/server";
+
 import { db } from "@/lib/db";
+import { sendNotificationEmail } from "@/lib/email";
 import { NotificationType } from "@/generated/prisma/enums";
 import type { Prisma } from "@/generated/prisma/client";
 
@@ -24,10 +27,114 @@ export async function notify(
   type: NotificationType,
   payload: NotificationPayload,
 ) {
-  return db.notification.create({
+  const notification = await db.notification.create({
     data: { userId, type, payload: payload as unknown as Prisma.InputJsonValue },
   });
+
+  // The email goes out after the response, so a slow mail provider never holds
+  // up the claim or message that caused it. Outside a request (the seed
+  // script) there is no response to wait for, so it simply runs now.
+  const send = () => maybeEmail(userId, notification.id, type, payload);
+  try {
+    after(send);
+  } catch {
+    await send();
+  }
+
+  return notification;
 }
+
+/**
+ * Email the in-app notification too, when it's worth an inbox.
+ *
+ * In-app alone wasn't enough: someone who reports a lost item and closes the
+ * tab never learns the matcher found it, which is the whole point of the app.
+ *
+ * - Claims always email — they're the step a handoff waits on.
+ * - Matches and messages respect the person's settings on /me.
+ * - A conversation emails only for the first unread message: a quick
+ *   back-and-forth shouldn't become ten emails, and one is enough to bring
+ *   someone back to read the rest.
+ */
+async function maybeEmail(
+  userId: string,
+  notificationId: string,
+  type: NotificationType,
+  payload: NotificationPayload,
+): Promise<void> {
+  try {
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { email: true, notifyOnMatch: true, notifyOnMessage: true },
+    });
+    if (!user) return;
+
+    if (type === "MATCH_FOUND" && !user.notifyOnMatch) return;
+    if (type === "NEW_MESSAGE") {
+      if (!user.notifyOnMessage) return;
+      const earlierUnread = await db.notification.count({
+        where: {
+          userId,
+          type: "NEW_MESSAGE",
+          readAt: null,
+          id: { not: notificationId },
+          payload: { path: ["href"], equals: payload.href },
+        },
+      });
+      if (earlierUnread > 0) return;
+    }
+    if (type === "NEW_COMMENT") return; // public replies no longer exist
+
+    const content = EMAIL_CONTENT[type](payload);
+    await sendNotificationEmail({ to: user.email, ...content, action: { ...content.action, href: payload.href } });
+  } catch (error) {
+    console.error("Could not email notification", notificationId, error);
+  }
+}
+
+const quoted = (p: NotificationPayload) => `“${p.title}”`;
+const said = (p: NotificationPayload) =>
+  p.body ? [`${p.actorName ? `${p.actorName}: ` : ""}${p.body}`] : [];
+
+const EMAIL_CONTENT: Record<
+  NotificationType,
+  (p: NotificationPayload) => {
+    subject: string;
+    lines: string[];
+    action: { label: string };
+  }
+> = {
+  MATCH_FOUND: (p) => ({
+    subject: `Possible match for ${quoted(p)}`,
+    lines: [p.body ?? `A new post looks like it could be ${quoted(p)}.`, "Have a look and see if it's the same item."],
+    action: { label: "See the match" },
+  }),
+  CLAIM_SUBMITTED: (p) => ({
+    subject: `Someone claimed ${quoted(p)}`,
+    lines: [`Someone says ${quoted(p)} is theirs and described it:`, ...said(p), "You're holding it, so you decide whether it matches."],
+    action: { label: "Review the claim" },
+  }),
+  CLAIM_APPROVED: (p) => ({
+    subject: `Your claim on ${quoted(p)} was approved`,
+    lines: ["The finder confirmed it's yours.", "Message them to arrange the handoff — meet somewhere public."],
+    action: { label: "Open the post" },
+  }),
+  CLAIM_REJECTED: (p) => ({
+    subject: `Update on your claim for ${quoted(p)}`,
+    lines: ["The finder didn't think the details matched.", "If you're sure it's yours, message them with more detail."],
+    action: { label: "Open the post" },
+  }),
+  NEW_MESSAGE: (p) => ({
+    subject: `New message about ${quoted(p)}`,
+    lines: said(p),
+    action: { label: "Reply" },
+  }),
+  NEW_COMMENT: (p) => ({
+    subject: `New reply on ${quoted(p)}`,
+    lines: said(p),
+    action: { label: "Open the post" },
+  }),
+};
 
 /**
  * Never notify someone about their own action — commenting on your own post

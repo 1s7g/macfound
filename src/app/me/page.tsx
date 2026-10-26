@@ -3,6 +3,8 @@ import Link from "next/link";
 
 import { Header } from "@/components/Header";
 import { MobilePostRow } from "@/components/mobile/MobilePostRow";
+import { db } from "@/lib/db";
+import { EmailSettings } from "./EmailSettings";
 import { formatDay } from "@/components/PostCard";
 import { Badge, type BadgeTone, Button, ButtonLink, EmptyState, PageHeader } from "@/components/ui";
 import { isModerator } from "@/lib/admin";
@@ -22,7 +24,13 @@ const STATUS_TONES: Record<string, BadgeTone> = {
 
 export default async function MyPostsPage() {
   const user = await requireUser("/me");
-  const posts = await getMyPosts(user.id);
+  const [posts, prefs] = await Promise.all([
+    getMyPosts(user.id),
+    db.user.findUniqueOrThrow({
+      where: { id: user.id },
+      select: { notifyOnMatch: true, notifyOnMessage: true },
+    }),
+  ]);
 
   const open = posts.filter((p) => p.status === "OPEN").length;
   const reunited = posts.filter((p) => p.status === "RESOLVED").length;
@@ -158,9 +166,19 @@ export default async function MyPostsPage() {
           </>
         )}
 
+        <section className="mt-8">
+          <h2 className="mb-2.5 font-semibold text-ink">Email me when</h2>
+          <div className="overflow-hidden rounded-card border border-line bg-raised">
+            <EmailSettings
+              notifyOnMatch={prefs.notifyOnMatch}
+              notifyOnMessage={prefs.notifyOnMessage}
+            />
+          </div>
+        </section>
+
         {/* The desktop header carries the moderator link; the phone's tab bar
             has no room for it, so it lives here with Sign out. */}
-        <ul className="mt-8 divide-y divide-line overflow-hidden rounded-card border border-line bg-raised md:hidden">
+        <ul className="mt-4 divide-y divide-line overflow-hidden rounded-card border border-line bg-raised md:hidden">
           {isModerator(user.email) && (
             <li>
               <Link href="/admin/reports" className="block px-4 py-3.5 text-[15px] text-ink">

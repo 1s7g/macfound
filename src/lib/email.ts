@@ -74,3 +74,87 @@ function signInCodeHtml(code: string): string {
   <p style="margin:0;color:#555;font-size:14px">If you didn't request it, you can safely ignore this email.</p>
 </div>`.trim();
 }
+
+// --- Notification emails ---------------------------------------------------
+
+/**
+ * Where links in emails point. Production uses the project's stable domain,
+ * previews their own deployment, and local development the dev server — so a
+ * link clicked from a test email never lands on the live site by accident.
+ */
+export function appUrl(): string {
+  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, "");
+  if (process.env.VERCEL_ENV === "production" && process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return "http://localhost:3000";
+}
+
+export type NotificationEmail = {
+  to: string;
+  subject: string;
+  /** One or two plain sentences; user-written text is escaped before use. */
+  lines: string[];
+  action: { label: string; href: string };
+};
+
+/**
+ * Send one notification email. Never throws: a failed email must not undo the
+ * claim, message or post that triggered it — the in-app notification already
+ * exists, so the worst case is a missed nudge, logged for us to see.
+ */
+export async function sendNotificationEmail(email: NotificationEmail): Promise<void> {
+  const url = `${appUrl()}${email.action.href}`;
+
+  if (!resend) {
+    console.log(`[email, dev only] to ${email.to}: ${email.subject} → ${url}`);
+    return;
+  }
+
+  try {
+    const { error } = await resend.emails.send({
+      from,
+      to: email.to,
+      subject: email.subject,
+      text: [
+        ...email.lines,
+        "",
+        `${email.action.label}: ${url}`,
+        "",
+        `Change which emails you get: ${appUrl()}/me`,
+      ].join("\n"),
+      html: notificationHtml(email.lines, email.action.label, url),
+    });
+    if (error) console.error("Notification email failed:", error);
+  } catch (error) {
+    console.error("Notification email failed:", error);
+  }
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function notificationHtml(lines: string[], label: string, url: string): string {
+  const paragraphs = lines
+    .map((line) => `<p style="margin:0 0 12px;line-height:1.5">${escapeHtml(line)}</p>`)
+    .join("");
+  return `
+<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;color:#111">
+  <h1 style="font-size:20px;margin:0 0 24px">MacFound</h1>
+  ${paragraphs}
+  <p style="margin:24px 0">
+    <a href="${escapeHtml(url)}" style="display:inline-block;background:#7A003C;color:#fff;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:10px">${escapeHtml(label)}</a>
+  </p>
+  <p style="margin:24px 0 0;color:#666;font-size:13px">
+    You're getting this because you use MacFound.
+    <a href="${escapeHtml(`${appUrl()}/me`)}" style="color:#666">Change which emails you get</a>.
+  </p>
+</div>`.trim();
+}
