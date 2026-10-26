@@ -239,9 +239,9 @@ function searchConditions(query: string) {
   });
 }
 
-/** Posts for one side of the board, newest first. */
+/** Open posts, newest first — one side of the board, or both when `type` is omitted. */
 export async function getFeed(
-  type: PostType,
+  type: PostType | undefined,
   filters: FeedFilters = {},
   page = 0,
 ) {
@@ -274,7 +274,6 @@ export async function getFeed(
         createdAt: true,
         handedInAt: true,
         images: { select: { url: true }, orderBy: { position: "asc" }, take: 1 },
-        _count: { select: { comments: true } },
       },
     }),
     db.post.count({ where }),
@@ -308,15 +307,6 @@ export async function getPost(id: string, viewerId: string) {
       authorId: true,
       author: { select: { id: true, name: true, email: true } },
       images: { select: { id: true, url: true }, orderBy: { position: "asc" } },
-      comments: {
-        orderBy: { createdAt: "asc" },
-        select: {
-          id: true,
-          body: true,
-          createdAt: true,
-          author: { select: { id: true, name: true } },
-        },
-      },
       claims: {
         orderBy: { createdAt: "asc" },
         select: {
@@ -440,7 +430,7 @@ export async function getMyPosts(authorId: string) {
       occurredOn: true,
       createdAt: true,
       images: { select: { url: true }, orderBy: { position: "asc" }, take: 1 },
-      _count: { select: { comments: true, claims: true } },
+      _count: { select: { claims: true } },
     },
   });
 }

@@ -33,12 +33,19 @@ export default async function EditPostPage({
 
   return (
     <>
-      <Header user={user} active={post.type === "FOUND" ? "found" : "lost"} />
-      <main id="main" className="mx-auto w-full max-w-2xl px-4 py-6">
-        <Link href={`/posts/${post.id}`} className="text-sm text-subtle transition hover:text-ink">
+      <Header
+        user={user}
+        active={post.type === "FOUND" ? "found" : "lost"}
+        mobile={{ back: { href: `/posts/${post.id}`, label: "Post" }, tabs: false }}
+      />
+      <main id="main" className="mx-auto w-full max-w-2xl px-4 py-4 md:py-6">
+        <Link
+          href={`/posts/${post.id}`}
+          className="hidden text-sm text-subtle transition hover:text-ink md:inline"
+        >
           ← Back to post
         </Link>
-        <h1 className="mt-3 mb-6 text-title font-semibold text-ink">
+        <h1 className="mb-5 text-[1.375rem] font-semibold text-ink md:mt-3 md:mb-6 md:text-title">
           Edit your post
         </h1>
         <EditForm

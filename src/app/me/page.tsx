@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { formatDay } from "@/components/PostCard";
 import { Badge, type BadgeTone, Button, ButtonLink, EmptyState, PageHeader } from "@/components/ui";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { isModerator } from "@/lib/admin";
 import { signOut } from "@/lib/auth";
 import { getMyPosts } from "@/lib/posts";
 import { requireUser } from "@/lib/session";
@@ -29,7 +31,7 @@ export default async function MyPostsPage() {
     <>
       <Header user={user} />
 
-      <main id="main" className="mx-auto w-full max-w-4xl px-4 py-6">
+      <main id="main" className="mx-auto w-full max-w-4xl px-4 py-5 md:py-6">
         <PageHeader
           title={user.name ?? user.email}
           subtitle={
@@ -89,8 +91,6 @@ export default async function MyPostsPage() {
                       {LOCATION_LABELS[post.location]} · {formatDay(post.occurredOn)}
                       {post._count.claims > 0 &&
                         ` · ${post._count.claims} claim${post._count.claims === 1 ? "" : "s"}`}
-                      {post._count.comments > 0 &&
-                        ` · ${post._count.comments} repl${post._count.comments === 1 ? "y" : "ies"}`}
                     </p>
                   </div>
 
@@ -107,6 +107,22 @@ export default async function MyPostsPage() {
             ))}
           </ul>
         )}
+
+        {/* The desktop header carries the theme switch and the moderator link;
+            the phone's tab bar has no room for either, so they live here. */}
+        <ul className="mt-8 divide-y divide-line overflow-hidden rounded-card border border-line bg-raised md:hidden">
+          <li className="flex items-center justify-between px-4 py-2">
+            <span className="text-[15px] text-ink">Appearance</span>
+            <ThemeToggle />
+          </li>
+          {isModerator(user.email) && (
+            <li>
+              <Link href="/admin/reports" className="block px-4 py-3.5 text-[15px] text-ink">
+                Moderation queue
+              </Link>
+            </li>
+          )}
+        </ul>
       </main>
     </>
   );

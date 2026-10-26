@@ -21,54 +21,11 @@ import { ClaimStatus, PostStatus, PostType } from "@/generated/prisma/enums";
 
 export type ActionState = { error?: string; ok?: boolean };
 
-const commentSchema = z
-  .string()
-  .trim()
-  .min(2, "Say a little more than that.")
-  .max(1000, "Keep replies under 1000 characters.");
-
 const claimSchema = z
   .string()
   .trim()
   .min(10, "Describe the detail properly — a few words isn't enough to verify.")
   .max(500, "Keep it under 500 characters.");
-
-export async function addComment(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const user = await requireUser();
-  const postId = String(formData.get("postId") ?? "");
-
-  const parsed = commentSchema.safeParse(formData.get("body"));
-  if (!parsed.success) return { error: parsed.error.issues[0].message };
-
-  const limit = await consume(`comment:${user.id}`, 20, 60 * 60);
-  if (!limit.allowed) return { error: "You're commenting a lot. Try again shortly." };
-
-  const post = await db.post.findUnique({
-    where: { id: postId },
-    select: { id: true, authorId: true, title: true, status: true },
-  });
-  if (!post) return { error: "That post no longer exists." };
-  if (post.status !== PostStatus.OPEN) {
-    return { error: "This post is closed, so replies are turned off." };
-  }
-
-  await db.comment.create({
-    data: { postId: post.id, authorId: user.id, body: parsed.data },
-  });
-
-  await notifyUnlessSelf(post.authorId, user.id, "NEW_COMMENT", {
-    title: post.title,
-    body: parsed.data.slice(0, 140),
-    href: `/posts/${post.id}`,
-    actorName: user.name ?? undefined,
-  });
-
-  revalidatePath(`/posts/${post.id}`);
-  return { ok: true };
-}
 
 /**
  * Claim a found item.

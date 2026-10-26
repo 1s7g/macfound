@@ -239,6 +239,16 @@ body {
   outline-offset: 2px;
 }
 
+/* Phones pin a bar to the bottom of the screen — the tab bar, a post's actions
+   or a chat composer, each marked data-mobile-bar. Pad the page by the tallest
+   of them so the last thing on it can always scroll clear. Driven by :has()
+   rather than per-page padding so a page that drops its bar drops the gap too. */
+@media (max-width: 767px) {
+  body:has([data-mobile-bar]) {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+  }
+}
+
 /* Hold a loading skeleton back until the wait is worth showing.
  *
  * A Suspense fallback renders the instant a navigation starts, so a query that

@@ -31,17 +31,20 @@ export default async function ConversationPage({
 
   return (
     <>
-      <Header user={user} />
+      <Header
+        user={user}
+        mobile={{ back: { href: "/messages", label: "Messages" }, tabs: false }}
+      />
 
-      <main id="main" className="mx-auto flex w-full max-w-2xl flex-col px-4 py-6">
+      <main id="main" className="mx-auto flex w-full max-w-2xl flex-col px-4 py-4 md:py-6">
         <Link
           href="/messages"
-          className="text-sm text-subtle transition hover:text-ink"
+          className="hidden text-sm text-subtle transition hover:text-ink md:inline"
         >
           ← All messages
         </Link>
 
-        <div className="mt-3 border-b border-line pb-4">
+        <div className="border-b border-line pb-4 md:mt-3">
           <h1 className="text-lg font-semibold tracking-tight text-ink">
             {conversation.other.name ?? "A student"}
           </h1>

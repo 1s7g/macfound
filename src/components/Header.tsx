@@ -2,17 +2,29 @@ import Link from "next/link";
 
 import { BellGlyph, MessagesGlyph, NavGlyph, ReportsGlyph } from "@/components/icons";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { MobileTabBar } from "@/components/mobile/MobileTabBar";
+import { MobileTopBar } from "@/components/mobile/MobileTopBar";
 import { isModerator } from "@/lib/admin";
 import { unreadMessageCount } from "@/lib/messages";
 import { unreadCount } from "@/lib/notifications";
 import type { SessionUser } from "@/lib/session";
 
+/**
+ * Page chrome for signed-in pages.
+ *
+ * Desktop keeps the single header row. Phones get a slim top bar plus a tab bar
+ * along the bottom; `mobile` lets a page swap the wordmark for a back link and,
+ * on screens with their own bottom bar (a post's actions, a chat composer),
+ * leave the tabs out so two bars don't stack.
+ */
 export async function Header({
   user,
   active,
+  mobile = {},
 }: {
   user: SessionUser;
   active?: "lost" | "found";
+  mobile?: { back?: { href: string; label: string }; tabs?: boolean };
 }) {
   const moderator = isModerator(user.email);
   const [unread, unreadMessages, openReports] = await Promise.all([
@@ -22,47 +34,53 @@ export async function Header({
   ]);
 
   return (
-    <header className="sticky top-0 z-20 border-b border-line bg-surface/85 backdrop-blur-md">
-      <div className="mx-auto flex h-12 w-full max-w-4xl items-center gap-2 px-4">
-        <Link
-          href="/lost"
-          className="mr-1 text-[15px] font-semibold tracking-tight text-ink"
-        >
-          MacFound
-        </Link>
-
-        <nav className="flex rounded-control bg-sunken p-0.5 text-sm">
-          <NavPill href="/lost" current={active === "lost"}>
-            Lost
-          </NavPill>
-          <NavPill href="/found" current={active === "found"}>
-            Found
-          </NavPill>
-        </nav>
-
-        <div className="ml-auto flex items-center gap-0.5">
-          <NavIcon href="/messages" label="Messages" count={unreadMessages}>
-            <MessagesGlyph />
-          </NavIcon>
-          <NavIcon href="/notifications" label="Notifications" count={unread}>
-            <BellGlyph />
-          </NavIcon>
-          {moderator && (
-            <NavIcon href="/admin/reports" label="Reports" count={openReports} danger>
-              <ReportsGlyph />
-            </NavIcon>
-          )}
-          <ThemeToggle />
+    <>
+      <MobileTopBar back={mobile.back} openReports={moderator ? openReports : undefined} />
+      {mobile.tabs !== false && (
+        <MobileTabBar unreadMessages={unreadMessages} unreadAlerts={unread} />
+      )}
+      <header className="sticky top-0 z-20 hidden border-b border-line bg-surface/85 backdrop-blur-md md:block">
+        <div className="mx-auto flex h-12 w-full max-w-4xl items-center gap-2 px-4">
           <Link
-            href="/me"
-            title={user.name ?? user.email}
-            className="ml-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-brand text-[11px] font-semibold text-on-brand"
+            href="/lost"
+            className="mr-1 text-[15px] font-semibold tracking-tight text-ink"
           >
-            {(user.name ?? user.email).charAt(0).toUpperCase()}
+            MacFound
           </Link>
+
+          <nav className="flex rounded-control bg-sunken p-0.5 text-sm">
+            <NavPill href="/lost" current={active === "lost"}>
+              Lost
+            </NavPill>
+            <NavPill href="/found" current={active === "found"}>
+              Found
+            </NavPill>
+          </nav>
+
+          <div className="ml-auto flex items-center gap-0.5">
+            <NavIcon href="/messages" label="Messages" count={unreadMessages}>
+              <MessagesGlyph />
+            </NavIcon>
+            <NavIcon href="/notifications" label="Notifications" count={unread}>
+              <BellGlyph />
+            </NavIcon>
+            {moderator && (
+              <NavIcon href="/admin/reports" label="Reports" count={openReports} danger>
+                <ReportsGlyph />
+              </NavIcon>
+            )}
+            <ThemeToggle />
+            <Link
+              href="/me"
+              title={user.name ?? user.email}
+              className="ml-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-brand text-[11px] font-semibold text-on-brand"
+            >
+              {(user.name ?? user.email).charAt(0).toUpperCase()}
+            </Link>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }
 

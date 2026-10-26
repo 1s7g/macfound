@@ -3,32 +3,39 @@ import Link from "next/link";
 import { FeedFilters } from "@/components/FeedFilters";
 import { PostCard } from "@/components/PostCard";
 import { ButtonLink, EmptyState, PageHeader } from "@/components/ui";
-import { FEED_PAGE_SIZE, getFeed } from "@/lib/posts";
+import { FEED_PAGE_SIZE, type getFeed } from "@/lib/posts";
 import type { Category, CampusLocation, PostType } from "@/generated/prisma/enums";
 
-export async function Feed({
+export type FeedFiltersValue = { category?: Category; location?: CampusLocation; query?: string };
+export type FeedResult = Awaited<ReturnType<typeof getFeed>>;
+
+/** The desktop board. The page fetches once and hands the same result to the phone view. */
+export function Feed({
   type,
   basePath,
   filters,
   page,
+  feed,
 }: {
-  type: PostType;
+  type?: PostType;
   basePath: string;
-  filters: { category?: Category; location?: CampusLocation; query?: string };
+  filters: FeedFiltersValue;
   page: number;
+  feed: FeedResult;
 }) {
-  const { posts, total } = await getFeed(type, filters, page);
+  const { posts, total } = feed;
   const isLost = type === "LOST";
   const hasFilters = Boolean(filters.category || filters.location || filters.query);
   const lastPage = Math.max(0, Math.ceil(total / FEED_PAGE_SIZE) - 1);
+  const newPostHref = type ? `/posts/new?type=${isLost ? "lost" : "found"}` : "/posts/new";
 
   return (
     <div className="space-y-5">
       <PageHeader
-        title={isLost ? "Lost" : "Found"}
+        title={type ? (isLost ? "Lost" : "Found") : "Everything"}
         action={
-          <ButtonLink href={`/posts/new?type=${isLost ? "lost" : "found"}`} size="sm">
-            {isLost ? "Report lost item" : "Post found item"}
+          <ButtonLink href={newPostHref} size="sm">
+            {type ? (isLost ? "Report lost item" : "Post found item") : "New post"}
           </ButtonLink>
         }
       />
@@ -41,7 +48,7 @@ export async function Feed({
       />
 
       {posts.length === 0 ? (
-        <FeedEmpty isLost={isLost} hasFilters={hasFilters} basePath={basePath} />
+        <FeedEmpty type={type} hasFilters={hasFilters} basePath={basePath} />
       ) : (
         <>
           <ul className="space-y-2.5">
@@ -58,12 +65,12 @@ export async function Feed({
   );
 }
 
-function FeedEmpty({
-  isLost,
+export function FeedEmpty({
+  type,
   hasFilters,
   basePath,
 }: {
-  isLost: boolean;
+  type?: PostType;
   hasFilters: boolean;
   basePath: string;
 }) {
@@ -80,26 +87,27 @@ function FeedEmpty({
     );
   }
 
+  const isLost = type === "LOST";
   return (
     <EmptyState
-      title={isLost ? "Nothing reported lost yet." : "Nothing handed in yet."}
+      title={!type ? "Nothing posted yet." : isLost ? "Nothing reported lost yet." : "Nothing handed in yet."}
       action={
-        <ButtonLink href={`/posts/new?type=${isLost ? "lost" : "found"}`}>
-          {isLost ? "Report a lost item" : "Post a found item"}
+        <ButtonLink href={type ? `/posts/new?type=${isLost ? "lost" : "found"}` : "/posts/new"}>
+          {!type ? "Post an item" : isLost ? "Report a lost item" : "Post a found item"}
         </ButtonLink>
       }
     />
   );
 }
 
-function Pagination({
+export function Pagination({
   basePath,
   filters,
   page,
   lastPage,
 }: {
   basePath: string;
-  filters: { category?: Category; location?: CampusLocation; query?: string };
+  filters: FeedFiltersValue;
   page: number;
   lastPage: number;
 }) {

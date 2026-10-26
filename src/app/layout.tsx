@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
@@ -20,6 +20,15 @@ export const metadata: Metadata = {
   },
   description:
     "Report lost items and post found ones at McMaster University. Sign in with your McMaster email.",
+};
+
+// viewport-fit=cover lets the phone tab bar reach the bottom edge and pad itself
+// clear of the home indicator with env(safe-area-inset-bottom), rather than the
+// browser leaving a blank strip under it.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 /*
