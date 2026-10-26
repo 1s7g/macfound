@@ -1,7 +1,14 @@
 import { z } from "zod";
 
 import { db } from "@/lib/db";
-import { POST_RETENTION_DAYS } from "@/lib/vocabulary";
+import {
+  CATEGORIES,
+  CATEGORY_LABELS,
+  CATEGORY_SEARCH_TERMS,
+  LOCATION_LABELS,
+  LOCATIONS,
+  POST_RETENTION_DAYS,
+} from "@/lib/vocabulary";
 import {
   Category,
   CampusLocation,
@@ -180,34 +187,73 @@ export type FeedFilters = {
 
 export const FEED_PAGE_SIZE = 20;
 
+// Words that carry no meaning in a lost-and-found search. "lost my airpods"
+// should search for airpods, not demand that a found post says "lost" or "my".
+const SEARCH_STOPWORDS = new Set([
+  "a", "an", "the", "my", "your", "of", "on", "in", "at", "by", "with", "and",
+  "or", "for", "to", "from", "near", "it", "is", "i", "lost", "found", "left",
+]);
+
 /**
- * Posts for one side of the board, newest first.
+ * Turn free text into one condition per meaningful word, all of which must hold.
  *
- * Text search is a case-insensitive substring match for now. At the scale this
- * will run at — hundreds of open posts — that's indistinguishable from anything
- * cleverer. Proper full-text search (tsvector + GIN) arrives with the matching
- * engine, which needs it for scoring rather than filtering.
+ * A word matches if it appears in the title or description, or names the
+ * post's category or building. Matching the whole phrase as one substring meant
+ * "water bottle" found nothing unless a post contained exactly those two words
+ * in that order — and missed every bottle filed under the Water Bottles category.
  */
+function searchConditions(query: string) {
+  const words = query
+    .toLowerCase()
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((word) => word.length > 0 && !SEARCH_STOPWORDS.has(word))
+    .slice(0, 8);
+
+  return words.map((word) => {
+    // Crude plural folding: "bottles" should find "bottle", "keys" find "key".
+    const stem = word.length > 3 && word.endsWith("s") ? word.slice(0, -1) : word;
+
+    const categories = CATEGORIES.filter((category) =>
+      [CATEGORY_LABELS[category].toLowerCase(), ...CATEGORY_SEARCH_TERMS[category]].some(
+        (term) =>
+          term === stem ||
+          (stem.length >= 3 && term.startsWith(stem)) ||
+          (term.length >= 3 && stem.startsWith(term)),
+      ),
+    );
+    const locations =
+      stem.length >= 3
+        ? LOCATIONS.filter((location) =>
+            LOCATION_LABELS[location].toLowerCase().includes(stem),
+          )
+        : [];
+
+    return {
+      OR: [
+        { title: { contains: stem, mode: "insensitive" as const } },
+        { description: { contains: stem, mode: "insensitive" as const } },
+        ...(categories.length > 0 ? [{ category: { in: categories } }] : []),
+        ...(locations.length > 0 ? [{ location: { in: locations } }] : []),
+      ],
+    };
+  });
+}
+
+/** Posts for one side of the board, newest first. */
 export async function getFeed(
   type: PostType,
   filters: FeedFilters = {},
   page = 0,
 ) {
   const query = filters.query?.trim();
+  const conditions = query ? searchConditions(query) : [];
 
   const where = {
     type,
     status: PostStatus.OPEN,
     ...(filters.category ? { category: filters.category } : {}),
     ...(filters.location ? { location: filters.location } : {}),
-    ...(query
-      ? {
-          OR: [
-            { title: { contains: query, mode: "insensitive" as const } },
-            { description: { contains: query, mode: "insensitive" as const } },
-          ],
-        }
-      : {}),
+    ...(conditions.length > 0 ? { AND: conditions } : {}),
   };
 
   const [posts, total] = await Promise.all([
@@ -290,10 +336,6 @@ export async function getPost(id: string, viewerId: string) {
 
   const isAuthor = post.authorId === viewerId;
 
-  // Strip the verification answer here rather than merely hiding it in the UI.
-  // It must never reach a non-author's browser: it arrives in the server
-  // component payload, so "don't render it" would still ship it in the HTML
-  // stream where anyone can read it from view-source.
   // Other people's claim answers are stripped here rather than hidden in the
   // UI. A server component's props are streamed to the browser inside the RSC
   // payload, so "don't render it" still ships them to anyone who opens
@@ -303,6 +345,9 @@ export async function getPost(id: string, viewerId: string) {
     claims: isAuthor
       ? post.claims
       : post.claims.filter((claim) => claim.claimantId === viewerId),
+    // Whether the finder has already picked an owner. Everyone may know that
+    // much — it's why the claim button disappeared — just not who or why.
+    ownerConfirmed: post.claims.some((claim) => claim.status === "APPROVED"),
     isAuthor,
   };
 }

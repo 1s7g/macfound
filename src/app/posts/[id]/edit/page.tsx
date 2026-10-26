@@ -38,7 +38,7 @@ export default async function EditPostPage({
         <Link href={`/posts/${post.id}`} className="text-sm text-subtle transition hover:text-ink">
           ← Back to post
         </Link>
-        <h1 className="mt-3 mb-6 text-xl font-semibold tracking-tight text-ink">
+        <h1 className="mt-3 mb-6 text-title font-semibold text-ink">
           Edit your post
         </h1>
         <EditForm

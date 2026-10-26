@@ -5,3 +5,4 @@ export type { BadgeTone } from "./Badge";
 export { Card } from "./Card";
 export { EmptyState } from "./EmptyState";
 export { Field, Input, Select, Textarea } from "./Field";
+export { PageHeader } from "./PageHeader";

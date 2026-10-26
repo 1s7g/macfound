@@ -30,7 +30,7 @@ const POSTS = [
   { type: "LOST", title: "Silver ring, sentimental", description: "Thin silver band with a small engraving on the inside. Took it off while washing my hands and forgot it.", category: "JEWELLERY", location: "MDCL", locationDetail: "second floor washroom", occurredOn: daysAgo(8) },
   { type: "FOUND", title: "Blue umbrella left on the bus", description: "Someone left a compact blue umbrella on the 51. Brought it to campus with me.", category: "OTHER", location: "HSR_BUS", occurredOn: daysAgo(1) },
   { type: "LOST", title: "Laptop charger — Dell 65W", description: "Black Dell charger with a white cable tie around it. Left it plugged in under a desk.", category: "ELECTRONICS", location: "ITB", locationDetail: "computer lab", occurredOn: daysAgo(3) },
-  { type: "FOUND", title: "Green Jansport backpack in the Refectory", description: "Green Jansport left under a table at lunch. Didn't open it beyond checking for a name.", category: "BAGS", location: "REFECTORY", occurredOn: daysAgo(2) },
+  { type: "FOUND", title: "Green Jansport backpack at the Phoenix", description: "Green Jansport left under a table at lunch. Didn't open it beyond checking for a name.", category: "BAGS", location: "REFECTORY", occurredOn: daysAgo(2) },
 ] as const;
 
 async function main() {

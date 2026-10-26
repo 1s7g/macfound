@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { Header } from "@/components/Header";
 import { getConversation, markConversationRead } from "@/lib/messages";
+import { markReadForHref } from "@/lib/notifications";
 import { requireUser } from "@/lib/session";
 import { MessageComposer } from "./MessageComposer";
 
@@ -21,7 +22,10 @@ export default async function ConversationPage({
   const conversation = await getConversation(id, user.id);
   if (!conversation) notFound();
 
-  await markConversationRead(id, user.id);
+  await Promise.all([
+    markConversationRead(id, user.id),
+    markReadForHref(user.id, `/messages/${id}`),
+  ]);
 
   const isFound = conversation.post.type === "FOUND";
 

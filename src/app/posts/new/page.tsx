@@ -26,12 +26,12 @@ export default async function NewPostPage({
       <main id="main" className="mx-auto w-full max-w-2xl px-4 py-6">
         <Link
           href={isFound ? "/found" : "/lost"}
-          className="text-sm text-subtle transition hover:text-ink"
+          className="inline-block text-sm text-subtle transition-colors hover:text-ink"
         >
           ← Back to {isFound ? "found" : "lost"} items
         </Link>
 
-        <h1 className="mt-3 mb-6 text-xl font-semibold tracking-tight text-ink">
+        <h1 className="mt-3 mb-6 text-title font-semibold text-ink">
           {isFound ? "Post something you found" : "Report something you lost"}
         </h1>
 

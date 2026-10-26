@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { FeedFilters } from "@/components/FeedFilters";
 import { PostCard } from "@/components/PostCard";
-import { ButtonLink, EmptyState } from "@/components/ui";
+import { ButtonLink, EmptyState, PageHeader } from "@/components/ui";
 import { FEED_PAGE_SIZE, getFeed } from "@/lib/posts";
 import type { Category, CampusLocation, PostType } from "@/generated/prisma/enums";
 
@@ -24,17 +24,14 @@ export async function Feed({
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-title font-semibold text-ink">
-          {isLost ? "Lost" : "Found"}
-        </h1>
-        <ButtonLink
-          href={`/posts/new?type=${isLost ? "lost" : "found"}`}
-          size="sm"
-        >
-          New post
-        </ButtonLink>
-      </div>
+      <PageHeader
+        title={isLost ? "Lost" : "Found"}
+        action={
+          <ButtonLink href={`/posts/new?type=${isLost ? "lost" : "found"}`} size="sm">
+            {isLost ? "Report lost item" : "Post found item"}
+          </ButtonLink>
+        }
+      />
 
       <FeedFilters
         basePath={basePath}

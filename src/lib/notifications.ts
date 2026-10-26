@@ -56,6 +56,35 @@ export async function listNotifications(userId: string, take = 50) {
   });
 }
 
+/**
+ * Mark one notification read and return where it points. Scoped to its owner,
+ * so a guessed id belonging to someone else matches nothing.
+ */
+export async function markRead(userId: string, id: string): Promise<string | null> {
+  const notification = await db.notification.findFirst({
+    where: { id, userId },
+    select: { payload: true, readAt: true },
+  });
+  if (!notification) return null;
+
+  if (!notification.readAt) {
+    await db.notification.update({ where: { id }, data: { readAt: new Date() } });
+  }
+  return asPayload(notification.payload).href;
+}
+
+/**
+ * Clear every notification that points at a page the person is now looking at.
+ * Reading the thread or the post is reading the news about it, however you got
+ * there — the bell shouldn't keep nagging about something already seen.
+ */
+export async function markReadForHref(userId: string, href: string): Promise<void> {
+  await db.notification.updateMany({
+    where: { userId, readAt: null, payload: { path: ["href"], equals: href } },
+    data: { readAt: new Date() },
+  });
+}
+
 export async function markAllRead(userId: string): Promise<void> {
   await db.notification.updateMany({
     where: { userId, readAt: null },

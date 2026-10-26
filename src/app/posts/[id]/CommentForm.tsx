@@ -30,14 +30,14 @@ export function CommentForm({ postId }: { postId: string }) {
         rows={3}
         required
         maxLength={1000}
-        placeholder="Seen this? Know whose it is? Say so here."
+        placeholder="Write a reply…"
       />
       {state.error && (
         <p role="alert" className="mt-1.5 text-sm text-danger">
           {state.error}
         </p>
       )}
-      <Button type="submit" disabled={pending} className="mt-2">
+      <Button type="submit" variant="secondary" size="sm" disabled={pending} className="mt-2">
         <Icon className="h-4 w-4">
           <SendGlyph />
         </Icon>

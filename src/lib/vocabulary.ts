@@ -17,6 +17,24 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   OTHER: "Other",
 };
 
+// Words people type into the feed search when they mean a category rather than
+// a specific item. Someone searching "water bottle" wants the lost Hydro Flask
+// even though its post never says "water" or "bottle" — the category does.
+// Only generic nouns belong here: "airpods" must not pull in every charger
+// filed under Electronics, so specific items are left to the text match.
+export const CATEGORY_SEARCH_TERMS: Record<Category, string[]> = {
+  ELECTRONICS: ["electronic", "device", "gadget"],
+  BAGS: ["bag", "backpack"],
+  WATER_BOTTLE: ["water", "bottle"],
+  KEYS_AND_CARDS: ["key", "card", "wallet"],
+  CLOTHING: ["clothing", "clothes"],
+  JEWELLERY: ["jewellery", "jewelry"],
+  BOOKS_AND_NOTES: ["book", "notes"],
+  SPORTS_EQUIPMENT: ["sport", "equipment"],
+  EYEWEAR: ["glasses", "eyewear"],
+  OTHER: [],
+};
+
 // Labels lean toward what students actually say, with the formal name in
 // parentheses only where the abbreviation alone would be ambiguous.
 export const LOCATION_LABELS: Record<CampusLocation, string> = {

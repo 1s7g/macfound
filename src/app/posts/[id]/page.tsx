@@ -13,9 +13,11 @@ import {
   PinGlyph,
   TagGlyph,
 } from "@/components/icons";
-import { Badge, Button, buttonClass, Card } from "@/components/ui";
+import { Badge, Button, ButtonLink, buttonClass, Card } from "@/components/ui";
 import { CAMPUS_SAFETY, nearestDropOffPoints } from "@/lib/campus-safety";
+import { db } from "@/lib/db";
 import { confidenceLabel, getMatchesForPost } from "@/lib/matching";
+import { markReadForHref } from "@/lib/notifications";
 import { expiryDate, getPost } from "@/lib/posts";
 import { requireUser } from "@/lib/session";
 import { CATEGORY_LABELS, LOCATION_LABELS } from "@/lib/vocabulary";
@@ -52,7 +54,10 @@ export default async function PostPage({
   const post = await getPost(id, user.id);
   if (!post) notFound();
 
-  const matches = await getMatchesForPost(post.id);
+  const [matches] = await Promise.all([
+    getMatchesForPost(post.id),
+    markReadForHref(user.id, `/posts/${post.id}`),
+  ]);
 
   const isFound = post.type === "FOUND";
   const isOpen = post.status === "OPEN";
@@ -60,7 +65,21 @@ export default async function PostPage({
 
   const pendingClaims = post.claims.filter((c) => c.status === "PENDING");
   const myClaim = post.claims.find((c) => c.claimantId === user.id);
-  const canClaim = isFound && isOpen && !post.isAuthor && !myClaim;
+  const canClaim = isFound && isOpen && !post.isAuthor && !myClaim && !post.ownerConfirmed;
+
+  // The finder's next step once they've picked an owner: meet up, then close.
+  const approvedClaim = post.isAuthor
+    ? post.claims.find((c) => c.status === "APPROVED")
+    : undefined;
+  const handoffThread =
+    approvedClaim && isOpen
+      ? await db.conversation.findUnique({
+          where: {
+            postId_initiatorId: { postId: post.id, initiatorId: approvedClaim.claimantId },
+          },
+          select: { id: true },
+        })
+      : null;
 
   // Only a found item can be handed in, but guard on both so a stale row can
   // never render collection directions on a lost report.
@@ -208,21 +227,9 @@ export default async function PostPage({
               {post.description}
             </p>
 
-            {/* Guidance and the drop-box hint live with the content rather than
-                in the sidebar: they're prose, not actions, and a tall sidebar
-                inflates the grid row and strands the discussion below a gap. */}
-            {/* Both of these assume the finder still has the item, so neither
-                applies once it's been handed in: there's nobody to judge a
-                claim, and pointing at a drop box they've already used is noise. */}
-            {post.isAuthor && isFound && isOpen && !handedIn && (
-              <p className="mt-6 rounded-card border border-line bg-warning-subtle px-4 py-3 text-sm leading-relaxed text-warning">
-                <strong className="font-semibold">You decide who gets this.</strong>{" "}
-                Claimants describe something identifying — you&rsquo;re holding the
-                item, so you can judge. Unsure? Reply and ask about something the
-                description doesn&rsquo;t mention.
-              </p>
-            )}
-
+            {/* The drop-box hint lives with the content rather than in the
+                sidebar: it's prose, not an action. It assumes the finder still
+                has the item, so it goes once the item has been handed in. */}
             {isFound && dropOffs[0] && isOpen && !handedIn && (
               <p className="mt-4 text-sm leading-relaxed text-subtle">
                 Nearest drop box: {dropOffs[0].point.label}
@@ -307,9 +314,11 @@ export default async function PostPage({
                   {isFound ? "Is this yours?" : "Seen this?"}
                 </p>
                 <p className="text-xs leading-relaxed text-subtle">
-                  {isFound
-                    ? "Claim it and describe something identifying, or just message them."
-                    : "Found it, or know where it is? Message them directly."}
+                  {!isFound
+                    ? "Found it, or know where it is? Message them directly."
+                    : post.ownerConfirmed && !myClaim
+                      ? "The finder has already confirmed the owner."
+                      : "Claim it and describe something identifying, or just message them."}
                 </p>
                 {canClaim && <ClaimForm postId={post.id} />}
                 {myClaim && <MyClaimStatus status={myClaim.status} />}
@@ -324,11 +333,36 @@ export default async function PostPage({
 
             {post.isAuthor && (
               <Card className="space-y-3 p-4">
-                <p className="text-sm font-medium text-ink">Manage</p>
+                <p className="text-sm font-medium text-ink">
+                  {approvedClaim && isOpen
+                    ? `Returning to ${approvedClaim.claimant.name ?? "the owner"}`
+                    : "Manage"}
+                </p>
+                {approvedClaim && isOpen && (
+                  <>
+                    <p className="text-xs leading-relaxed text-subtle">
+                      You confirmed it&rsquo;s theirs. Meet somewhere public, then
+                      mark it returned.
+                    </p>
+                    {handoffThread && (
+                      <ButtonLink
+                        href={`/messages/${handoffThread.id}`}
+                        variant="secondary"
+                        className="w-full"
+                      >
+                        Message {approvedClaim.claimant.name ?? "them"}
+                      </ButtonLink>
+                    )}
+                  </>
+                )}
                 <form action={setPostResolved}>
                   <input type="hidden" name="postId" value={post.id} />
                   <input type="hidden" name="resolved" value={isOpen ? "true" : "false"} />
-                  <Button type="submit" variant="secondary" className="w-full">
+                  <Button
+                    type="submit"
+                    variant={approvedClaim && isOpen ? "primary" : "secondary"}
+                    className="w-full"
+                  >
                     {isOpen
                       ? isFound
                         ? "Mark as returned"
@@ -452,8 +486,9 @@ export default async function PostPage({
                   {pendingClaims.length} {pendingClaims.length === 1 ? "claim" : "claims"} to review
                 </h2>
                 <p className="mt-1 mb-3 text-sm text-subtle">
-                  Does what they describe match the item you have? Approve only
-                  if you&rsquo;re sure — otherwise reply and ask for more detail.
+                  You&rsquo;re holding the item, so you decide. Approve only if
+                  the detail matches — if unsure, message them and ask about
+                  something the post doesn&rsquo;t mention.
                 </p>
 
                 <ul className="space-y-3">
@@ -472,7 +507,7 @@ export default async function PostPage({
                           <input type="hidden" name="claimId" value={claim.id} />
                           <input type="hidden" name="decision" value="approve" />
                           <Button type="submit" size="sm">
-                            That&rsquo;s them — approve
+                            Approve
                           </Button>
                         </form>
                         <form action={decideClaim}>
@@ -492,13 +527,16 @@ export default async function PostPage({
             <section className="border-t border-line pt-6">
               <h2 className="font-semibold text-ink">
                 {post.comments.length === 0
-                  ? "No replies yet"
+                  ? "Replies"
                   : `${post.comments.length} ${post.comments.length === 1 ? "reply" : "replies"}`}
               </h2>
 
+              {/* An invitation to help only makes sense to other people. */}
               {post.comments.length === 0 && isOpen && (
                 <p className="mt-1 text-sm text-subtle">
-                  Be the first to help reunite this item.
+                  {post.isAuthor
+                    ? "No replies yet. You'll get a notification when someone replies."
+                    : "Seen it, or know whose it is? Say so here."}
                 </p>
               )}
 

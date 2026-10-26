@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { ButtonLink } from "@/components/ui";
 import { getStats } from "@/lib/posts";
 import { getUser } from "@/lib/session";
 
@@ -18,12 +18,9 @@ export default async function Home() {
         Lost &amp; found for McMaster students.
       </p>
 
-      <Link
-        href="/signin"
-        className="mt-10 inline-flex w-full items-center justify-center rounded-control bg-brand px-5 py-3 font-medium text-on-brand transition hover:bg-brand-hover sm:w-auto sm:self-start"
-      >
+      <ButtonLink href="/signin" size="lg" className="mt-10 w-full sm:w-auto sm:self-start">
         Sign in with McMaster email
-      </Link>
+      </ButtonLink>
 
       {stats.total > 0 && (
         <dl className="mt-12 flex gap-8 border-t border-line pt-6">
