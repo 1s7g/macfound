@@ -80,6 +80,14 @@ export const POLICY = {
    * 576 guesses per day against 1,000,000 possibilities.
    */
   signInVerifyPerEmail: { limit: 6, windowSeconds: 15 * 60 },
+  /**
+   * Photo uploads, per account. Each upload is a file we pay to store, and
+   * nothing else stopped one account requesting tokens in a loop. Thirty an
+   * hour covers ten posts with three photos each — the post limit — and a
+   * daily cap stops a slow drip adding up.
+   */
+  uploadPerHour: { limit: 30, windowSeconds: 60 * 60 },
+  uploadPerDay: { limit: 100, windowSeconds: 24 * 60 * 60 },
 } as const;
 
 export function signInRequestKey(email: string) {
