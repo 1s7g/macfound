@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { handlers } from "@/lib/auth";
 import { consume, POLICY, signInVerifyKey } from "@/lib/rate-limit";
@@ -14,7 +14,26 @@ import { consume, POLICY, signInVerifyKey } from "@/lib/rate-limit";
 
 const VERIFY_PATH = "/api/auth/callback/mcmaster";
 
-export async function GET(request: NextRequest) {
+/**
+ * In development, point Auth.js at the address the browser actually used.
+ *
+ * Next's dev server reports every request URL as localhost:3000, and Auth.js
+ * builds its post-sign-in redirect from that URL. A phone testing over Wi-Fi
+ * (http://192.168.x.x:3000) was therefore sent to "localhost" after a correct
+ * code — its own loopback, where nothing is running — and retrying spent the
+ * single-use code. Production URLs are already correct, so this is dev-only.
+ */
+function withBrowserHost(request: NextRequest): NextRequest {
+  if (process.env.NODE_ENV !== "development") return request;
+  const host = request.headers.get("host");
+  const url = new URL(request.url);
+  if (!host || url.host === host) return request;
+  url.host = host;
+  return new NextRequest(url, request);
+}
+
+export async function GET(incoming: NextRequest) {
+  const request = withBrowserHost(incoming);
   const url = new URL(request.url);
 
   if (url.pathname === VERIFY_PATH) {
@@ -36,4 +55,6 @@ export async function GET(request: NextRequest) {
   return handlers.GET(request);
 }
 
-export const POST = handlers.POST;
+export async function POST(request: NextRequest) {
+  return handlers.POST(withBrowserHost(request));
+}
