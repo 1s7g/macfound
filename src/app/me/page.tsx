@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Header } from "@/components/Header";
+import { MobilePostRow } from "@/components/mobile/MobilePostRow";
 import { formatDay } from "@/components/PostCard";
 import { Badge, type BadgeTone, Button, ButtonLink, EmptyState, PageHeader } from "@/components/ui";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -27,9 +28,14 @@ export default async function MyPostsPage() {
   const open = posts.filter((p) => p.status === "OPEN").length;
   const reunited = posts.filter((p) => p.status === "RESOLVED").length;
 
+  const signOutAction = async () => {
+    "use server";
+    await signOut({ redirectTo: "/" });
+  };
+
   return (
     <>
-      <Header user={user} />
+      <Header user={user} mobile={{ title: "Profile" }} />
 
       <main id="main" className="mx-auto w-full max-w-4xl px-4 py-5 md:py-6">
         <PageHeader
@@ -37,13 +43,9 @@ export default async function MyPostsPage() {
           subtitle={
             posts.length === 0 ? user.email : `${open} open · ${reunited} reunited`
           }
+          desktopOnly
           action={
-            <form
-              action={async () => {
-                "use server";
-                await signOut({ redirectTo: "/" });
-              }}
-            >
+            <form action={signOutAction}>
               <Button type="submit" variant="ghost" size="sm">
                 Sign out
               </Button>
@@ -51,8 +53,30 @@ export default async function MyPostsPage() {
           }
         />
 
+        {/* Phones: who you are, then your posts under a heading of their own. */}
+        <div className="flex items-center gap-4 md:hidden">
+          <span
+            aria-hidden
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand text-xl font-semibold text-on-brand"
+          >
+            {(user.name ?? user.email).charAt(0).toUpperCase()}
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-lg font-semibold text-ink">{user.name ?? user.email}</p>
+            <p className="truncate text-sm text-muted">{user.email}</p>
+          </div>
+        </div>
+        {posts.length > 0 && (
+          <div className="mt-6 mb-2.5 flex items-baseline justify-between md:hidden">
+            <h2 className="font-semibold text-ink">Your posts</h2>
+            <p className="text-sm text-muted">
+              {open} open · {reunited} reunited
+            </p>
+          </div>
+        )}
+
         {posts.length === 0 ? (
-          <div className="mt-5">
+          <div className="mt-6 md:mt-5">
             <EmptyState
               title="You haven't posted anything yet."
               action={
@@ -66,7 +90,33 @@ export default async function MyPostsPage() {
             />
           </div>
         ) : (
-          <ul className="mt-5 space-y-2.5">
+          <>
+          <ul className="space-y-2.5 md:hidden">
+            {posts.map((post) => (
+              <li key={post.id}>
+                <MobilePostRow
+                  post={post}
+                  extra={
+                    (post.status !== "OPEN" || post._count.claims > 0) && (
+                      <>
+                        {post.status !== "OPEN" && (
+                          <Badge tone={STATUS_TONES[post.status]}>
+                            {POST_STATUS_LABELS[post.status]}
+                          </Badge>
+                        )}
+                        {post._count.claims > 0 && (
+                          <Badge tone="brand">
+                            {post._count.claims} claim{post._count.claims === 1 ? "" : "s"}
+                          </Badge>
+                        )}
+                      </>
+                    )
+                  }
+                />
+              </li>
+            ))}
+          </ul>
+          <ul className="mt-5 hidden space-y-2.5 md:block">
             {posts.map((post) => (
               <li key={post.id}>
                 <Link
@@ -106,6 +156,7 @@ export default async function MyPostsPage() {
               </li>
             ))}
           </ul>
+          </>
         )}
 
         {/* The desktop header carries the theme switch and the moderator link;
@@ -122,6 +173,13 @@ export default async function MyPostsPage() {
               </Link>
             </li>
           )}
+          <li>
+            <form action={signOutAction}>
+              <button type="submit" className="w-full px-4 py-3.5 text-left text-[15px] text-danger">
+                Sign out
+              </button>
+            </form>
+          </li>
         </ul>
       </main>
     </>

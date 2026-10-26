@@ -11,13 +11,18 @@ export function PageHeader({
   title,
   subtitle,
   action,
+  desktopOnly,
 }: {
   title: ReactNode;
   subtitle?: ReactNode;
   action?: ReactNode;
+  /** For pages whose phone top bar already carries the title and action. */
+  desktopOnly?: boolean;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4">
+    <div
+      className={`items-start justify-between gap-4 ${desktopOnly ? "hidden md:flex" : "flex"}`}
+    >
       <div className="min-w-0">
         <h1 className="truncate text-title font-semibold text-ink">{title}</h1>
         {subtitle && <p className="mt-1 text-sm text-subtle">{subtitle}</p>}

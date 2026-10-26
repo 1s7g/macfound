@@ -1,12 +1,10 @@
 import Link from "next/link";
 
 import { FeedEmpty, type FeedFiltersValue, type FeedResult } from "@/components/Feed";
-import { formatDay } from "@/components/PostCard";
-import { CategoryIcon } from "@/components/icons";
 import { MobileFeedFilters } from "@/components/mobile/MobileFeedFilters";
+import { MobilePostRow } from "@/components/mobile/MobilePostRow";
 import { Badge } from "@/components/ui";
 import { FEED_PAGE_SIZE } from "@/lib/posts";
-import { LOCATION_LABELS } from "@/lib/vocabulary";
 import type { PostType } from "@/generated/prisma/enums";
 
 /** The phone board: search, chips, and a list of cards sized for a thumb. */
@@ -46,7 +44,7 @@ export function MobileFeed({
         query={filters.query}
       />
 
-      <p className="mt-4 mb-2 text-sm text-muted">
+      <p className="mt-4 mb-2.5 text-sm text-muted">
         {total === 1 ? "1 item" : `${total} items`}
         {hasFilters && (
           <>
@@ -61,54 +59,13 @@ export function MobileFeed({
       {posts.length === 0 ? (
         <FeedEmpty type={type} hasFilters={hasFilters} basePath={basePath} />
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-2.5">
           {posts.map((post) => (
             <li key={post.id}>
-              <Link
-                href={`/posts/${post.id}`}
-                className="flex items-center gap-3 rounded-card border border-line bg-raised p-3 active:bg-sunken"
-              >
-                {post.images[0] ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={post.images[0].url}
-                    alt=""
-                    loading="lazy"
-                    className="h-16 w-16 shrink-0 rounded-[10px] object-cover"
-                  />
-                ) : (
-                  <span
-                    aria-hidden
-                    className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[10px] bg-sunken text-muted"
-                  >
-                    <CategoryIcon category={post.category} className="h-7 w-7" />
-                  </span>
-                )}
-
-                <span className="min-w-0 flex-1">
-                  <span className="line-clamp-2 text-[15px] leading-snug font-medium text-ink">
-                    {post.title}
-                  </span>
-                  <span className="mt-1.5 flex items-center gap-2 text-sm text-muted">
-                    {/* Only on the mixed list — on Lost or Found every row would say the same thing. */}
-                    {!type && (
-                      <span className="shrink-0">
-                        <Badge tone={post.type === "FOUND" ? "found" : "lost"}>
-                          {post.type === "FOUND" ? "Found" : "Lost"}
-                        </Badge>
-                      </span>
-                    )}
-                    <span className="min-w-0 truncate">
-                      {LOCATION_LABELS[post.location]} · {formatDay(post.occurredOn)}
-                    </span>
-                  </span>
-                  {post.handedInAt && (
-                    <span className="mt-1.5 block">
-                      <Badge tone="brand">At Campus Safety</Badge>
-                    </span>
-                  )}
-                </span>
-              </Link>
+              <MobilePostRow
+                post={post}
+                extra={post.handedInAt && <Badge tone="brand">At Campus Safety</Badge>}
+              />
             </li>
           ))}
         </ul>

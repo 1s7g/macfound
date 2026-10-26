@@ -24,7 +24,12 @@ export async function Header({
 }: {
   user: SessionUser;
   active?: "lost" | "found";
-  mobile?: { back?: { href: string; label: string }; tabs?: boolean };
+  mobile?: {
+    back?: { href: string; label: string };
+    title?: string;
+    action?: React.ReactNode;
+    tabs?: boolean;
+  };
 }) {
   const moderator = isModerator(user.email);
   const [unread, unreadMessages, openReports] = await Promise.all([
@@ -35,7 +40,12 @@ export async function Header({
 
   return (
     <>
-      <MobileTopBar back={mobile.back} openReports={moderator ? openReports : undefined} />
+      <MobileTopBar
+        back={mobile.back}
+        title={mobile.title}
+        action={mobile.action}
+        openReports={moderator ? openReports : undefined}
+      />
       {mobile.tabs !== false && (
         <MobileTabBar unreadMessages={unreadMessages} unreadAlerts={unread} />
       )}

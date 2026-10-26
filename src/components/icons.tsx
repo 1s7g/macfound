@@ -291,3 +291,11 @@ export function CategoryIcon({
     </Icon>
   );
 }
+
+export function ChevronDownGlyph() {
+  return <path d="m6 9 6 6 6-6" />;
+}
+
+export function CheckGlyph() {
+  return <path d="M20 6 9 17l-5-5" />;
+}

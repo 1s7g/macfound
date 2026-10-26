@@ -348,48 +348,60 @@ export default async function PostPage({
                 </li>
               ))}
             </ul>
-          ) : (
-            <div className="px-4 pt-3">
-              <div
-                aria-hidden
-                className="flex h-36 items-center justify-center rounded-card bg-sunken text-subtle"
-              >
-                <CategoryIcon category={post.category} className="h-12 w-12" />
-              </div>
-            </div>
-          )}
+          ) : null}
 
           <div className="px-4">
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <PostBadges post={post} handedIn={handedIn} />
-              <span className="text-sm text-muted">{CATEGORY_LABELS[post.category]}</span>
+            {/* Without a photo, a small category tile beside the labels says
+                what this is. A full-width grey box with an icon in it just
+                looked like an image that hadn't loaded. */}
+            <div className="mt-4 flex items-center gap-3">
+              {post.images.length === 0 && (
+                <span
+                  aria-hidden
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[10px] bg-sunken text-muted"
+                >
+                  <CategoryIcon category={post.category} className="h-6 w-6" />
+                </span>
+              )}
+              <div className="min-w-0">
+                <p className="text-sm text-muted">{CATEGORY_LABELS[post.category]}</p>
+                <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                  <PostBadges post={post} handedIn={handedIn} />
+                </div>
+              </div>
             </div>
 
-            <h1 className="mt-2 text-[1.625rem] leading-tight font-semibold tracking-tight text-ink">
+            <h1 className="mt-4 text-[1.625rem] leading-tight font-semibold tracking-tight text-ink">
               {post.title}
             </h1>
 
-            <dl className="mt-4 space-y-3 text-base text-ink">
-              <div className="flex gap-3">
-                <dt className="sr-only">{isFound ? "Found at" : "Lost at"}</dt>
+            {/* Place and date as two labelled rows in one card: the two facts
+                that decide whether this is your item, set apart from the prose. */}
+            <dl className="mt-5 divide-y divide-line rounded-card border border-line bg-raised">
+              <div className="flex gap-3 px-4 py-3">
                 <Icon className="mt-0.5 h-5 w-5 text-muted">
                   <PinGlyph />
                 </Icon>
-                <dd>
-                  {LOCATION_LABELS[post.location]}
-                  {post.locationDetail && (
-                    <span className="mt-0.5 block text-sm text-muted">{post.locationDetail}</span>
-                  )}
-                </dd>
+                <div className="min-w-0">
+                  <dt className="text-xs text-muted">{isFound ? "Found at" : "Lost at"}</dt>
+                  <dd className="text-[15px] text-ink">
+                    {LOCATION_LABELS[post.location]}
+                    {post.locationDetail && (
+                      <span className="block text-sm text-muted">{post.locationDetail}</span>
+                    )}
+                  </dd>
+                </div>
               </div>
-              <div className="flex gap-3">
-                <dt className="sr-only">{isFound ? "Found on" : "Lost on"}</dt>
+              <div className="flex gap-3 px-4 py-3">
                 <Icon className="mt-0.5 h-5 w-5 text-muted">
                   <CalendarGlyph />
                 </Icon>
-                <dd>
-                  <time dateTime={post.occurredOn.toISOString()}>{occurredLabel}</time>
-                </dd>
+                <div>
+                  <dt className="text-xs text-muted">{isFound ? "Found on" : "Lost on"}</dt>
+                  <dd className="text-[15px] text-ink">
+                    <time dateTime={post.occurredOn.toISOString()}>{occurredLabel}</time>
+                  </dd>
+                </div>
               </div>
             </dl>
 

@@ -79,7 +79,16 @@ export function PostForm({
     <form action={formAction} className="flex flex-col gap-5">
       <input type="hidden" name="type" value={type} />
 
-      <p className="text-sm font-medium text-muted md:hidden">Step {step} of 2</p>
+      {/* Two segments that fill in as you go — where you are, without reading. */}
+      <div className="md:hidden">
+        <div className="flex gap-1.5" aria-hidden>
+          <span className="h-1 flex-1 rounded-full bg-brand" />
+          <span className={`h-1 flex-1 rounded-full ${step === 2 ? "bg-brand" : "bg-sunken"}`} />
+        </div>
+        <p className="mt-2 text-sm text-muted">
+          {step === 1 ? "Step 1 of 2 · What and where" : "Step 2 of 2 · Details and photos"}
+        </p>
+      </div>
 
       {/* --- Step one: what and where ------------------------------------- */}
       <div

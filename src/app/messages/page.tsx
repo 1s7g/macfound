@@ -15,20 +15,20 @@ export default async function MessagesPage() {
 
   return (
     <>
-      <Header user={user} />
+      <Header user={user} mobile={{ title: "Messages" }} />
 
       <main id="main" className="mx-auto w-full max-w-4xl px-4 py-5 md:py-6">
-        <PageHeader title="Messages" />
+        <PageHeader title="Messages" desktopOnly />
 
         {conversations.length === 0 ? (
-          <div className="mt-5">
+          <div className="md:mt-5">
             <EmptyState title="No conversations yet.">
               Open a post and tap <span className="font-medium text-ink">Message</span>{" "}
               to get in touch.
             </EmptyState>
           </div>
         ) : (
-          <ul className="mt-5 divide-y divide-line overflow-hidden rounded-card border border-line bg-raised">
+          <ul className="divide-y md:mt-5 divide-line overflow-hidden rounded-card border border-line bg-raised">
             {conversations.map((conversation) => {
               const unread = conversation.unread > 0;
               return (
@@ -39,24 +39,40 @@ export default async function MessagesPage() {
                   >
                     <span
                       aria-label={unread ? `${conversation.unread} unread` : undefined}
-                      className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
+                      className={`mt-1.5 hidden h-2 w-2 shrink-0 rounded-full md:block ${
                         unread ? "bg-brand" : "bg-transparent"
                       }`}
                     />
+                    {/* Phones: a face for each thread, like any messaging app. */}
+                    <span
+                      aria-hidden
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-sunken text-[15px] font-semibold text-ink md:hidden"
+                    >
+                      {(conversation.other.name ?? "?").charAt(0).toUpperCase()}
+                    </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-baseline justify-between gap-3">
                         <span
-                          className={`truncate text-sm ${unread ? "font-medium text-ink" : "text-muted"}`}
+                          className={`truncate text-[15px] md:text-sm ${unread ? "font-semibold text-ink md:font-medium" : "text-ink md:text-muted"}`}
                         >
-                          {conversation.other.name ?? "A student"} ·{" "}
-                          {conversation.post.title}
+                          {conversation.other.name ?? "A student"}
+                          <span className="hidden md:inline"> · {conversation.post.title}</span>
                         </span>
-                        <span className="shrink-0 text-xs text-subtle">
+                        <span className="flex shrink-0 items-center gap-1.5 text-xs text-subtle">
                           {formatDay(conversation.lastActivity)}
+                          {unread && (
+                            <span aria-hidden className="h-2 w-2 rounded-full bg-brand md:hidden" />
+                          )}
                         </span>
                       </span>
+                      <span className="block truncate text-xs text-muted md:hidden">
+                        {conversation.post.type === "FOUND" ? "Found" : "Lost"} ·{" "}
+                        {conversation.post.title}
+                      </span>
                       {conversation.lastMessage && (
-                        <span className="mt-0.5 line-clamp-1 block text-sm text-subtle">
+                        <span
+                          className={`mt-0.5 line-clamp-1 block text-sm ${unread ? "text-ink md:text-subtle" : "text-subtle"}`}
+                        >
                           {conversation.lastMessage.senderId === user.id && "You: "}
                           {conversation.lastMessage.body}
                         </span>

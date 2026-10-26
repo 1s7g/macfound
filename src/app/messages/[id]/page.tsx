@@ -33,7 +33,11 @@ export default async function ConversationPage({
     <>
       <Header
         user={user}
-        mobile={{ back: { href: "/messages", label: "Messages" }, tabs: false }}
+        mobile={{
+          back: { href: "/messages", label: "Messages" },
+          title: conversation.other.name ?? "A student",
+          tabs: false,
+        }}
       />
 
       <main id="main" className="mx-auto flex w-full max-w-2xl flex-col px-4 py-4 md:py-6">
@@ -45,10 +49,10 @@ export default async function ConversationPage({
         </Link>
 
         <div className="border-b border-line pb-4 md:mt-3">
-          <h1 className="text-lg font-semibold tracking-tight text-ink">
+          <h1 className="hidden text-lg font-semibold tracking-tight text-ink md:block">
             {conversation.other.name ?? "A student"}
           </h1>
-          <p className="mt-0.5 text-sm text-subtle">
+          <p className="text-sm text-subtle md:mt-0.5">
             About{" "}
             <Link
               href={`/posts/${conversation.post.id}`}
@@ -61,8 +65,14 @@ export default async function ConversationPage({
           </p>
         </div>
 
+        {/* On a phone the composer is pinned over the bottom of the page, so
+            the safety tip goes up top where it will actually be seen. */}
+        <p className="mt-3 rounded-control bg-sunken px-3 py-2 text-xs leading-relaxed text-muted md:hidden">
+          Meet somewhere public. Don&rsquo;t share your address or send money.
+        </p>
+
         {conversation.messages.length === 0 ? (
-          <p className="mt-6 rounded-card border border-dashed border-line-strong bg-raised p-6 text-center text-sm leading-relaxed text-muted">
+          <p className="mt-6 rounded-card border border-dashed border-line-strong bg-raised p-6 text-center text-sm leading-relaxed text-muted max-md:border-0 max-md:bg-transparent max-md:py-12">
             No messages yet. Say hello and arrange the handoff.
           </p>
         ) : (
@@ -103,7 +113,7 @@ export default async function ConversationPage({
 
         <MessageComposer conversationId={conversation.id} />
 
-        <p className="mt-6 border-t border-line pt-4 text-xs leading-relaxed text-subtle">
+        <p className="mt-6 hidden border-t border-line pt-4 text-xs leading-relaxed text-subtle md:block">
           Meet somewhere public to hand an item over. Don&rsquo;t share your
           address or send money to anyone claiming to have your item.
         </p>
