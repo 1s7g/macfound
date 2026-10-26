@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { BellGlyph, MessagesGlyph, NavGlyph, ReportsGlyph } from "@/components/icons";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { MobileTabBar } from "@/components/mobile/MobileTabBar";
 import { MobileTopBar } from "@/components/mobile/MobileTopBar";
 import { isModerator } from "@/lib/admin";
@@ -79,7 +78,6 @@ export async function Header({
                 <ReportsGlyph />
               </NavIcon>
             )}
-            <ThemeToggle />
             <Link
               href="/me"
               title={user.name ?? user.email}

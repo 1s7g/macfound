@@ -5,7 +5,6 @@ import { Header } from "@/components/Header";
 import { MobilePostRow } from "@/components/mobile/MobilePostRow";
 import { formatDay } from "@/components/PostCard";
 import { Badge, type BadgeTone, Button, ButtonLink, EmptyState, PageHeader } from "@/components/ui";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { isModerator } from "@/lib/admin";
 import { signOut } from "@/lib/auth";
 import { getMyPosts } from "@/lib/posts";
@@ -159,13 +158,9 @@ export default async function MyPostsPage() {
           </>
         )}
 
-        {/* The desktop header carries the theme switch and the moderator link;
-            the phone's tab bar has no room for either, so they live here. */}
+        {/* The desktop header carries the moderator link; the phone's tab bar
+            has no room for it, so it lives here with Sign out. */}
         <ul className="mt-8 divide-y divide-line overflow-hidden rounded-card border border-line bg-raised md:hidden">
-          <li className="flex items-center justify-between px-4 py-2">
-            <span className="text-[15px] text-ink">Appearance</span>
-            <ThemeToggle />
-          </li>
           {isModerator(user.email) && (
             <li>
               <Link href="/admin/reports" className="block px-4 py-3.5 text-[15px] text-ink">

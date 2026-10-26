@@ -112,9 +112,12 @@
  *
  * Both themes live in one block. `light-dark()` picks its first argument when
  * the element's color-scheme resolves to light and its second when it resolves
- * to dark, so every value is written exactly once — which is the whole reason
- * a manual toggle is cheap here. Switching themes is a single declaration
- * (color-scheme, below); nothing else in this file or the app knows about it.
+ * to dark, so every value is written exactly once.
+ *
+ * The app is light-only: color-scheme is pinned to `light` below, so only the
+ * first argument of each pair is ever used. The dark values are kept rather
+ * than deleted because bringing dark mode back is then one declaration, not a
+ * second palette to rebuild.
  *
  * Values that are identical in both themes are left as plain vars rather than
  * a light-dark() with two matching arguments, so a reader can tell at a glance
@@ -122,9 +125,9 @@
  */
 
 :root {
-  /* `light dark` means "follow the system"; the [data-theme] rules below pin
-     it when someone chooses explicitly. */
-  color-scheme: light dark;
+  /* Light only, whatever the system prefers. Also keeps native controls
+     (date pickers, scrollbars, form fields) light. */
+  color-scheme: light;
 
   --surface: light-dark(var(--color-mf-neutral-50), var(--color-mf-neutral-950));
   --surface-raised: light-dark(var(--color-mf-neutral-0), var(--color-mf-neutral-900));
@@ -169,18 +172,6 @@
   --shadow-raised-near: light-dark(oklch(0 0 0 / 0.04), transparent);
   --shadow-raised-mid: light-dark(oklch(0 0 0 / 0.08), transparent);
   --shadow-raised-far: light-dark(transparent, oklch(0 0 0 / 0.55));
-}
-
-/* The manual override, in full. Flipping color-scheme re-resolves every
-   light-dark() above — there is no second copy of the palette to maintain.
-   `data-theme` is set by a tiny blocking script in the root layout, so the
-   chosen theme is already on <html> before the first paint. */
-:root[data-theme="light"] {
-  color-scheme: light;
-}
-
-:root[data-theme="dark"] {
-  color-scheme: dark;
 }
 
 /* --- Expose the semantic layer as Tailwind utilities ---------------------- */
@@ -281,32 +272,6 @@ body {
   to {
     opacity: 1;
   }
-}
-
-/* The theme toggle renders both glyphs and lets CSS reveal one, rather than
-   picking in JavaScript. The server has no way to know the visitor's theme, so
-   choosing at render time would either mismatch on hydration or flash the wrong
-   icon; this is correct in the initial HTML and needs no JS at all. The sun
-   means "switch to light", so it shows while dark. */
-[data-theme-icon="sun"] {
-  display: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) [data-theme-icon="sun"] {
-    display: block;
-  }
-  :root:not([data-theme="light"]) [data-theme-icon="moon"] {
-    display: none;
-  }
-}
-
-:root[data-theme="dark"] [data-theme-icon="sun"] {
-  display: block;
-}
-
-:root[data-theme="dark"] [data-theme-icon="moon"] {
-  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

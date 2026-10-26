@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { BellGlyph, MessagesGlyph, NavGlyph } from "@/components/icons";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { MobileTabBar } from "@/components/mobile/MobileTabBar";
 import { MobileTopBar } from "@/components/mobile/MobileTopBar";
 
@@ -80,10 +79,6 @@ export function HeaderSkeleton() {
                 <BellGlyph />
               </NavGlyph>
             </span>
-            {/* The real toggle, not a placeholder — it reads the theme off <html>
-                and needs no query, so leaving it out would shift the icons beside
-                it every time a page loaded. */}
-            <ThemeToggle />
             <span aria-hidden className="ml-1.5 h-7 w-7 rounded-full bg-brand" />
           </div>
         </div>
