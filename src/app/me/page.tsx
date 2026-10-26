@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { MobilePostRow } from "@/components/mobile/MobilePostRow";
 import { db } from "@/lib/db";
+import { DeleteAccount } from "./DeleteAccount";
 import { EmailSettings } from "./EmailSettings";
 import { formatDay } from "@/components/PostCard";
 import { Badge, type BadgeTone, Button, ButtonLink, EmptyState, PageHeader } from "@/components/ui";
@@ -176,24 +177,35 @@ export default async function MyPostsPage() {
           </div>
         </section>
 
-        {/* The desktop header carries the moderator link; the phone's tab bar
-            has no room for it, so it lives here with Sign out. */}
-        <ul className="mt-4 divide-y divide-line overflow-hidden rounded-card border border-line bg-raised md:hidden">
-          {isModerator(user.email) && (
+        <section className="mt-8">
+          <h2 className="mb-2.5 font-semibold text-ink">Account</h2>
+          <ul className="divide-y divide-line overflow-hidden rounded-card border border-line bg-raised">
+            {/* The desktop header already carries the moderator link and Sign
+                out; the phone's tab bar has no room for either. */}
+            {isModerator(user.email) && (
+              <li className="md:hidden">
+                <Link href="/admin/reports" className="block px-4 py-3.5 text-[15px] text-ink">
+                  Moderation queue
+                </Link>
+              </li>
+            )}
             <li>
-              <Link href="/admin/reports" className="block px-4 py-3.5 text-[15px] text-ink">
-                Moderation queue
+              <Link href="/privacy" className="block px-4 py-3.5 text-[15px] text-ink">
+                Privacy
               </Link>
             </li>
-          )}
-          <li>
-            <form action={signOutAction}>
-              <button type="submit" className="w-full px-4 py-3.5 text-left text-[15px] text-danger">
-                Sign out
-              </button>
-            </form>
-          </li>
-        </ul>
+            <li className="md:hidden">
+              <form action={signOutAction}>
+                <button type="submit" className="w-full px-4 py-3.5 text-left text-[15px] text-ink">
+                  Sign out
+                </button>
+              </form>
+            </li>
+            <li>
+              <DeleteAccount />
+            </li>
+          </ul>
+        </section>
       </main>
     </>
   );

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { ALLOWED_EMAIL_DOMAIN, auth } from "@/lib/auth";
@@ -34,7 +35,10 @@ export default async function SignInPage({
 
       <p className="mt-8 text-center text-xs leading-relaxed text-subtle">
         A student project, not affiliated with or endorsed by McMaster
-        University.
+        University.{" "}
+        <Link href="/privacy" className="underline underline-offset-2">
+          Privacy
+        </Link>
       </p>
     </main>
   );
