@@ -50,7 +50,7 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
           required
           maxLength={2000}
           placeholder="Write a message…"
-          className="max-md:h-11 max-md:min-h-11 max-md:resize-none max-md:rounded-full max-md:py-2.5 max-md:[scrollbar-width:none]"
+          className="phone:h-11 phone:min-h-11 phone:resize-none phone:rounded-full phone:py-2.5 phone:[scrollbar-width:none]"
         />
         {state.error && (
           <p role="alert" className="mt-1.5 hidden text-sm text-danger md:block">
@@ -60,7 +60,7 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
         <Button
           type="submit"
           disabled={pending}
-          className="max-md:h-11 max-md:rounded-full max-md:px-5 md:mt-2"
+          className="phone:h-11 phone:rounded-full phone:px-5 md:mt-2"
         >
           {pending ? "Sending…" : "Send"}
         </Button>

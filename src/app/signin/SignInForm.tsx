@@ -29,7 +29,7 @@ export function SignInForm({ domain, next }: { domain: string; next: string }) {
         />
       </Field>
 
-      <Button type="submit" disabled={pending} className="w-full max-md:h-12 max-md:text-base">
+      <Button type="submit" disabled={pending} className="w-full phone:h-12 phone:text-base">
         {pending ? "Sending code…" : "Email me a sign-in code"}
       </Button>
 

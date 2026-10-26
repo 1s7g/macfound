@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Phone-only styles: `phone:` instead of Tailwind's built-in `max-md:`.
+   max-md compiles to `@media not (min-width: 48rem)`, a newer media-query form
+   that older browsers skip; a plain max-width query works everywhere. 767px is
+   one pixel under md (48rem), so the two never overlap. */
+@custom-variant phone (@media (max-width: 767px));
+
 /*
  * MacFound design tokens.
  *

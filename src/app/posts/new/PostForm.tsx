@@ -4,7 +4,7 @@ import { useActionState, useRef, useState } from "react";
 
 import { CategoryIcon } from "@/components/icons";
 import { ImageUpload } from "@/components/ImageUpload";
-import { Button, Field, Input, Select, Textarea } from "@/components/ui";
+import { Button, DateInput, Field, Input, Select, Textarea } from "@/components/ui";
 import { CAMPUS_SAFETY } from "@/lib/campus-safety";
 import { CATEGORIES, CATEGORY_LABELS, LOCATION_GROUPS, LOCATION_LABELS } from "@/lib/vocabulary";
 import type { Category } from "@/generated/prisma/enums";
@@ -190,10 +190,9 @@ export function PostForm({
                 </button>
               ))}
             </div>
-            <Input
+            <DateInput
               id="occurredOn"
               name="occurredOn"
-              type="date"
               required
               max={today}
               value={occurredOn}

@@ -72,7 +72,7 @@ export default async function ConversationPage({
         </p>
 
         {conversation.messages.length === 0 ? (
-          <p className="mt-6 rounded-card border border-dashed border-line-strong bg-raised p-6 text-center text-sm leading-relaxed text-muted max-md:border-0 max-md:bg-transparent max-md:py-12">
+          <p className="mt-6 rounded-card border border-dashed border-line-strong bg-raised p-6 text-center text-sm leading-relaxed text-muted phone:border-0 phone:bg-transparent phone:py-12">
             No messages yet. Say hello and arrange the handoff.
           </p>
         ) : (
