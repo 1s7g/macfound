@@ -1,16 +1,30 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { ButtonLink } from "@/components/ui";
 import { getStats } from "@/lib/posts";
 import { getUser } from "@/lib/session";
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ deleted?: string }>;
+}) {
   if (await getUser()) redirect("/lost");
+  const { deleted } = await searchParams;
 
   const stats = await getStats();
 
   return (
     <main id="main" className="mx-auto flex min-h-dvh w-full max-w-lg flex-col justify-center px-6 py-16">
+      {deleted && (
+        <p
+          role="status"
+          className="mb-8 rounded-control border border-line bg-sunken px-4 py-3 text-sm text-ink"
+        >
+          Your account and everything in it has been deleted.
+        </p>
+      )}
       <h1 className="text-5xl font-bold tracking-tight text-ink sm:text-6xl">
         MacFound
       </h1>
@@ -18,12 +32,9 @@ export default async function Home() {
         Lost &amp; found for McMaster students.
       </p>
 
-      <Link
-        href="/signin"
-        className="mt-10 inline-flex w-full items-center justify-center rounded-control bg-brand px-5 py-3 font-medium text-on-brand transition hover:bg-brand-hover sm:w-auto sm:self-start"
-      >
+      <ButtonLink href="/signin" size="lg" className="mt-10 w-full sm:w-auto sm:self-start">
         Sign in with McMaster email
-      </Link>
+      </ButtonLink>
 
       {stats.total > 0 && (
         <dl className="mt-12 flex gap-8 border-t border-line pt-6">
@@ -34,7 +45,10 @@ export default async function Home() {
       )}
 
       <p className="mt-auto pt-12 text-xs text-subtle">
-        A student project, not affiliated with McMaster University.
+        A student project, not affiliated with McMaster University.{" "}
+        <Link href="/privacy" className="underline underline-offset-2">
+          Privacy
+        </Link>
       </p>
     </main>
   );

@@ -50,14 +50,13 @@ export function ReportButton({ postId }: { postId: string }) {
       <p className="text-sm font-medium text-ink">What&rsquo;s wrong with it?</p>
 
       <div className="mt-2.5 space-y-1.5">
-        {REPORT_REASONS.map((reason, index) => (
+        {REPORT_REASONS.map((reason) => (
           <label key={reason} className="flex items-start gap-2 text-sm text-ink">
             <input
               type="radio"
               name="reason"
               value={reason}
               required
-              defaultChecked={index === 0}
               className="mt-1 accent-[var(--color-brand)]"
             />
             {REPORT_REASON_LABELS[reason]}

@@ -102,7 +102,7 @@ export default async function EnterCodePage({
 
         <button
           type="submit"
-          className="w-full rounded-control bg-brand px-4 py-2.5 font-medium text-on-brand shadow-card transition hover:bg-brand-hover"
+          className="w-full rounded-control bg-brand px-4 py-2.5 font-medium phone:py-3.5 text-on-brand shadow-card transition hover:bg-brand-hover"
         >
           Sign in
         </button>

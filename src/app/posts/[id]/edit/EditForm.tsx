@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 
-import { Button, Field, Input, Select, Textarea } from "@/components/ui";
+import { Button, DateInput, Field, Input, Select, Textarea } from "@/components/ui";
 import { CAMPUS_SAFETY } from "@/lib/campus-safety";
 import { CATEGORIES, CATEGORY_LABELS, LOCATION_GROUPS, LOCATION_LABELS } from "@/lib/vocabulary";
 import { saveEdit, type EditState } from "../actions";
@@ -67,8 +67,8 @@ export function EditForm({
         </Field>
 
         <Field label={isFound ? "Date found" : "Date lost"} htmlFor="occurredOn" error={state.errors?.occurredOn}>
-          <Input
-            id="occurredOn" name="occurredOn" type="date" required max={today}
+          <DateInput
+            id="occurredOn" name="occurredOn" required max={today}
             defaultValue={v.occurredOn ?? post.occurredOn}
             invalid={Boolean(state.errors?.occurredOn)}
           />

@@ -130,3 +130,172 @@ export function SendGlyph() {
 export function ChevronRightGlyph() {
   return <path d="m9 18 6-6-6-6" />;
 }
+
+// --- Phone navigation ------------------------------------------------------
+
+export function SearchGlyph() {
+  return (
+    <>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </>
+  );
+}
+
+export function PlusGlyph() {
+  return <path d="M12 5v14M5 12h14" />;
+}
+
+export function UserGlyph() {
+  return (
+    <>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M20 21a8 8 0 0 0-16 0" />
+    </>
+  );
+}
+
+export function ChevronLeftGlyph() {
+  return <path d="m15 18-6-6 6-6" />;
+}
+
+export function XGlyph() {
+  return <path d="M18 6 6 18M6 6l12 12" />;
+}
+
+// --- Categories --------------------------------------------------------------
+//
+// One glyph per category, drawn where a post has no photo. An empty grey square
+// says "nothing here"; a backpack outline says what the post is about before the
+// title has been read.
+
+function ElectronicsGlyph() {
+  return (
+    <>
+      <rect x="6" y="2" width="12" height="20" rx="2" />
+      <path d="M11 18h2" />
+    </>
+  );
+}
+
+function BagGlyph() {
+  return (
+    <>
+      <path d="M5 10a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z" />
+      <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+      <path d="M9 22v-5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v5" />
+    </>
+  );
+}
+
+function BottleGlyph() {
+  return (
+    <>
+      <path d="M9 2h6" />
+      <path d="M10 2v3l-2 3v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V8l-2-3V2" />
+      <path d="M8 13h8" />
+    </>
+  );
+}
+
+function KeyGlyph() {
+  return (
+    <>
+      <circle cx="7.5" cy="15.5" r="5" />
+      <path d="m11 12 10-10" />
+      <path d="m16 7 3 3" />
+    </>
+  );
+}
+
+function ShirtGlyph() {
+  return (
+    <path d="M20.4 3.5 16 2a4 4 0 0 1-8 0L3.6 3.5a2 2 0 0 0-1.3 2.2l.6 3.5a1 1 0 0 0 1 .8H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.1a1 1 0 0 0 1-.8l.6-3.5a2 2 0 0 0-1.3-2.2z" />
+  );
+}
+
+function GemGlyph() {
+  return (
+    <>
+      <path d="M6 3h12l4 6-10 13L2 9z" />
+      <path d="M2 9h20" />
+      <path d="m11 3-3 6 4 13 4-13-3-6" />
+    </>
+  );
+}
+
+function BookGlyph() {
+  return (
+    <>
+      <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+    </>
+  );
+}
+
+function BallGlyph() {
+  return (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 2a15 15 0 0 0 0 20 15 15 0 0 0 0-20" />
+      <path d="M2 12h20" />
+    </>
+  );
+}
+
+function GlassesGlyph() {
+  return (
+    <>
+      <circle cx="6" cy="15" r="4" />
+      <circle cx="18" cy="15" r="4" />
+      <path d="M14 15a2 2 0 0 0-4 0" />
+      <path d="M2.5 13 5 7c.7-1.3 1.4-2 3-2" />
+      <path d="M21.5 13 19 7c-.7-1.3-1.4-2-3-2" />
+    </>
+  );
+}
+
+function BoxGlyph() {
+  return (
+    <>
+      <path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7z" />
+      <path d="m3.3 7 8.7 5 8.7-5" />
+      <path d="M12 22V12" />
+    </>
+  );
+}
+
+const CATEGORY_GLYPHS = {
+  ELECTRONICS: ElectronicsGlyph,
+  BAGS: BagGlyph,
+  WATER_BOTTLE: BottleGlyph,
+  KEYS_AND_CARDS: KeyGlyph,
+  CLOTHING: ShirtGlyph,
+  JEWELLERY: GemGlyph,
+  BOOKS_AND_NOTES: BookGlyph,
+  SPORTS_EQUIPMENT: BallGlyph,
+  EYEWEAR: GlassesGlyph,
+  OTHER: BoxGlyph,
+} as const;
+
+export function CategoryIcon({
+  category,
+  className = "h-6 w-6",
+}: {
+  category: keyof typeof CATEGORY_GLYPHS;
+  className?: string;
+}) {
+  const Glyph = CATEGORY_GLYPHS[category];
+  return (
+    <Icon className={className}>
+      <Glyph />
+    </Icon>
+  );
+}
+
+export function ChevronDownGlyph() {
+  return <path d="m6 9 6 6 6-6" />;
+}
+
+export function CheckGlyph() {
+  return <path d="M20 6 9 17l-5-5" />;
+}

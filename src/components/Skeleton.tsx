@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 import { BellGlyph, MessagesGlyph, NavGlyph } from "@/components/icons";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { MobileTabBar } from "@/components/mobile/MobileTabBar";
+import { MobileTopBar } from "@/components/mobile/MobileTopBar";
 
 /**
  * Loading placeholders.
@@ -44,43 +45,45 @@ export function Skeleton({ className = "" }: { className?: string }) {
  */
 export function HeaderSkeleton() {
   return (
-    <header className="sticky top-0 z-20 border-b border-line bg-surface/85 backdrop-blur-md">
-      <div className="mx-auto flex h-12 w-full max-w-4xl items-center gap-2 px-4">
-        <Link href="/lost" className="mr-1 text-[15px] font-semibold tracking-tight text-ink">
-          MacFound
-        </Link>
-        <div className="flex rounded-control bg-sunken p-0.5 text-sm">
-          <span className="rounded-[calc(var(--radius-control)-0.15rem)] px-3 py-1 font-medium text-muted">
-            Lost
-          </span>
-          <span className="rounded-[calc(var(--radius-control)-0.15rem)] px-3 py-1 font-medium text-muted">
-            Found
-          </span>
+    <>
+      {/* The phone bars render for real, minus their unread counts — the tab
+          bar vanishing on every navigation would read as the app reloading. */}
+      <MobileTopBar />
+      <MobileTabBar unreadMessages={0} unreadAlerts={0} />
+      <header className="sticky top-0 z-20 hidden border-b border-line bg-surface/85 backdrop-blur-md md:block">
+        <div className="mx-auto flex h-12 w-full max-w-4xl items-center gap-2 px-4">
+          <Link href="/lost" className="mr-1 text-[15px] font-semibold tracking-tight text-ink">
+            MacFound
+          </Link>
+          <div className="flex rounded-control bg-sunken p-0.5 text-sm">
+            <span className="rounded-[calc(var(--radius-control)-0.15rem)] px-3 py-1 font-medium text-muted">
+              Lost
+            </span>
+            <span className="rounded-[calc(var(--radius-control)-0.15rem)] px-3 py-1 font-medium text-muted">
+              Found
+            </span>
+          </div>
+          {/* aria-hidden sits on the decorative pieces individually, not on the
+              wrapper: the toggle inside is focusable, and hiding a focusable
+              element from assistive tech while leaving it tabbable strands anyone
+              navigating by keyboard on a control their screen reader won't
+              announce. */}
+          <div className="ml-auto flex items-center gap-0.5">
+            <span aria-hidden className="flex h-8 w-8 items-center justify-center text-muted">
+              <NavGlyph>
+                <MessagesGlyph />
+              </NavGlyph>
+            </span>
+            <span aria-hidden className="flex h-8 w-8 items-center justify-center text-muted">
+              <NavGlyph>
+                <BellGlyph />
+              </NavGlyph>
+            </span>
+            <span aria-hidden className="ml-1.5 h-7 w-7 rounded-full bg-brand" />
+          </div>
         </div>
-        {/* aria-hidden sits on the decorative pieces individually, not on the
-            wrapper: the toggle inside is focusable, and hiding a focusable
-            element from assistive tech while leaving it tabbable strands anyone
-            navigating by keyboard on a control their screen reader won't
-            announce. */}
-        <div className="ml-auto flex items-center gap-0.5">
-          <span aria-hidden className="flex h-8 w-8 items-center justify-center text-muted">
-            <NavGlyph>
-              <MessagesGlyph />
-            </NavGlyph>
-          </span>
-          <span aria-hidden className="flex h-8 w-8 items-center justify-center text-muted">
-            <NavGlyph>
-              <BellGlyph />
-            </NavGlyph>
-          </span>
-          {/* The real toggle, not a placeholder — it reads the theme off <html>
-              and needs no query, so leaving it out would shift the icons beside
-              it every time a page loaded. */}
-          <ThemeToggle />
-          <span aria-hidden className="ml-1.5 h-7 w-7 rounded-full bg-brand" />
-        </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }
 
@@ -102,7 +105,26 @@ export function FeedSkeleton() {
   return (
     <>
       <HeaderSkeleton />
-      <main className="deferred-skeleton mx-auto w-full max-w-4xl px-4 py-6">
+      <main className="deferred-skeleton px-4 pt-3 md:hidden">
+        <Skeleton className="h-11 rounded-full" />
+        <div className="mt-3 flex gap-2">
+          {Array.from({ length: 4 }, (_, i) => (
+            <Skeleton key={i} className="h-9 w-16 rounded-full" />
+          ))}
+        </div>
+        <ul className="mt-9 space-y-2">
+          {Array.from({ length: 5 }, (_, i) => (
+            <li key={i} className="flex gap-3 rounded-card border border-line bg-raised p-3">
+              <Skeleton className="h-16 w-16 shrink-0 rounded-[10px]" />
+              <div className="min-w-0 flex-1 space-y-2 py-1">
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </main>
+      <main className="deferred-skeleton mx-auto hidden w-full max-w-4xl px-4 py-6 md:block">
         <div className="flex items-center justify-between">
           <Skeleton className="h-8 w-24" />
           <Skeleton className="h-8 w-24 rounded-control" />

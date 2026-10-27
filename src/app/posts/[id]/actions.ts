@@ -21,54 +21,11 @@ import { ClaimStatus, PostStatus, PostType } from "@/generated/prisma/enums";
 
 export type ActionState = { error?: string; ok?: boolean };
 
-const commentSchema = z
-  .string()
-  .trim()
-  .min(2, "Say a little more than that.")
-  .max(1000, "Keep replies under 1000 characters.");
-
 const claimSchema = z
   .string()
   .trim()
   .min(10, "Describe the detail properly — a few words isn't enough to verify.")
   .max(500, "Keep it under 500 characters.");
-
-export async function addComment(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const user = await requireUser();
-  const postId = String(formData.get("postId") ?? "");
-
-  const parsed = commentSchema.safeParse(formData.get("body"));
-  if (!parsed.success) return { error: parsed.error.issues[0].message };
-
-  const limit = await consume(`comment:${user.id}`, 20, 60 * 60);
-  if (!limit.allowed) return { error: "You're commenting a lot. Try again shortly." };
-
-  const post = await db.post.findUnique({
-    where: { id: postId },
-    select: { id: true, authorId: true, title: true, status: true },
-  });
-  if (!post) return { error: "That post no longer exists." };
-  if (post.status !== PostStatus.OPEN) {
-    return { error: "This post is closed, so replies are turned off." };
-  }
-
-  await db.comment.create({
-    data: { postId: post.id, authorId: user.id, body: parsed.data },
-  });
-
-  await notifyUnlessSelf(post.authorId, user.id, "NEW_COMMENT", {
-    title: post.title,
-    body: parsed.data.slice(0, 140),
-    href: `/posts/${post.id}`,
-    actorName: user.name ?? undefined,
-  });
-
-  revalidatePath(`/posts/${post.id}`);
-  return { ok: true };
-}
 
 /**
  * Claim a found item.
@@ -102,6 +59,11 @@ export async function submitClaim(
   if (post.status !== PostStatus.OPEN) return { error: "This item has already been closed." };
   if (post.authorId === user.id) return { error: "You can't claim your own post." };
 
+  const approved = await db.claim.count({
+    where: { postId: post.id, status: ClaimStatus.APPROVED },
+  });
+  if (approved > 0) return { error: "The finder has already confirmed the owner." };
+
   try {
     await db.claim.create({
       data: { postId: post.id, claimantId: user.id, answer: parsed.data },
@@ -122,7 +84,14 @@ export async function submitClaim(
   return { ok: true };
 }
 
-/** Finder approves or rejects a claim. Approving also closes the post. */
+/**
+ * Finder approves or rejects a claim.
+ *
+ * Approving settles who the owner is, not that they have the item back — the
+ * post stays open until the finder marks it returned after the handoff. Closing
+ * it on approval counted items as reunited that were still sitting in someone's
+ * bag, and turned off replies while the two were still arranging to meet.
+ */
 export async function decideClaim(formData: FormData): Promise<void> {
   const user = await requireUser();
   const claimId = String(formData.get("claimId") ?? "");
@@ -153,10 +122,6 @@ export async function decideClaim(formData: FormData): Promise<void> {
     });
 
     if (approve) {
-      await tx.post.update({
-        where: { id: claim.post.id },
-        data: { status: PostStatus.RESOLVED, resolvedAt: new Date() },
-      });
       // Any other pending claims are moot once the item has an owner.
       await tx.claim.updateMany({
         where: { postId: claim.post.id, status: ClaimStatus.PENDING },
@@ -172,7 +137,7 @@ export async function decideClaim(formData: FormData): Promise<void> {
     {
       title: claim.post.title,
       body: approve
-        ? "The finder confirmed it's yours — message them to arrange pickup."
+        ? "The finder confirmed it's yours. Message them to arrange the handoff."
         : "The finder didn't think the details matched.",
       href: `/posts/${claim.post.id}`,
     },
@@ -202,8 +167,50 @@ export async function setPostResolved(formData: FormData): Promise<void> {
     },
   });
 
+  const closed =
+    resolved && post.type === PostType.FOUND ? await closeOwnersLostPosts(post.id) : [];
+
   revalidatePath(`/posts/${post.id}`);
   revalidatePath(post.type === PostType.FOUND ? "/found" : "/lost");
+  for (const id of closed) revalidatePath(`/posts/${id}`);
+  if (closed.length > 0) revalidatePath("/lost");
+  revalidatePath("/me");
+}
+
+/**
+ * Once a found item is handed back, close the owner's own lost report for it.
+ *
+ * Without this the owner's post stayed on the Lost board after they had the
+ * item in hand, waiting for them to remember to close it. Only posts the
+ * matcher paired with this one are touched — the approved claimant may have
+ * lost other things too.
+ */
+async function closeOwnersLostPosts(foundPostId: string): Promise<string[]> {
+  const claim = await db.claim.findFirst({
+    where: { postId: foundPostId, status: ClaimStatus.APPROVED },
+    select: { claimantId: true },
+  });
+  if (!claim) return [];
+
+  const lost = await db.post.findMany({
+    where: {
+      authorId: claim.claimantId,
+      type: PostType.LOST,
+      status: PostStatus.OPEN,
+      OR: [
+        { matchesAsSource: { some: { candidateId: foundPostId } } },
+        { matchesAsCandidate: { some: { sourceId: foundPostId } } },
+      ],
+    },
+    select: { id: true },
+  });
+  if (lost.length === 0) return [];
+
+  await db.post.updateMany({
+    where: { id: { in: lost.map((p) => p.id) } },
+    data: { status: PostStatus.RESOLVED, resolvedAt: new Date() },
+  });
+  return lost.map((p) => p.id);
 }
 
 /**

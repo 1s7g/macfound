@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { Header } from "@/components/Header";
 import { formatDay } from "@/components/PostCard";
+import { EmptyState, PageHeader } from "@/components/ui";
 import { listConversations } from "@/lib/messages";
 import { requireUser } from "@/lib/session";
 
@@ -14,59 +15,73 @@ export default async function MessagesPage() {
 
   return (
     <>
-      <Header user={user} />
+      <Header user={user} mobile={{ title: "Messages" }} />
 
-      <main id="main" className="mx-auto w-full max-w-4xl px-4 py-6">
-        <h1 className="text-xl font-semibold tracking-tight text-ink">Messages</h1>
+      <main id="main" className="mx-auto w-full max-w-4xl px-4 py-5 md:py-6">
+        <PageHeader title="Messages" desktopOnly />
 
         {conversations.length === 0 ? (
-          <p className="mt-6 rounded-card border border-dashed border-line-strong bg-raised p-8 text-center leading-relaxed text-muted">
-            No conversations yet. Open a post and tap{" "}
-            <span className="font-medium text-ink">Message</span> to get in touch.
-          </p>
+          <div className="md:mt-5">
+            <EmptyState title="No conversations yet.">
+              Open a post and tap <span className="font-medium text-ink">Message</span>{" "}
+              to get in touch.
+            </EmptyState>
+          </div>
         ) : (
-          <ul className="mt-5 space-y-2">
-            {conversations.map((conversation) => (
-              <li key={conversation.id}>
-                <Link
-                  href={`/messages/${conversation.id}`}
-                  className={`block rounded-card border p-4 transition hover:border-line-strong ${
-                    conversation.unread > 0
-                      ? "border-brand-border bg-brand-subtle"
-                      : "border-line bg-raised"
-                  }`}
-                >
-                  <div className="flex items-baseline justify-between gap-3">
-                    <p className="truncate font-medium text-ink">
-                      {conversation.other.name ?? "A student"}
-                    </p>
-                    <span className="shrink-0 text-xs text-subtle">
-                      {formatDay(conversation.lastActivity)}
+          <ul className="divide-y md:mt-5 divide-line overflow-hidden rounded-card border border-line bg-raised">
+            {conversations.map((conversation) => {
+              const unread = conversation.unread > 0;
+              return (
+                <li key={conversation.id}>
+                  <Link
+                    href={`/messages/${conversation.id}`}
+                    className="flex gap-3 px-4 py-3.5 transition-colors hover:bg-sunken"
+                  >
+                    <span
+                      aria-label={unread ? `${conversation.unread} unread` : undefined}
+                      className={`mt-1.5 hidden h-2 w-2 shrink-0 rounded-full md:block ${
+                        unread ? "bg-brand" : "bg-transparent"
+                      }`}
+                    />
+                    {/* Phones: a face for each thread, like any messaging app. */}
+                    <span
+                      aria-hidden
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-sunken text-[15px] font-semibold text-ink md:hidden"
+                    >
+                      {(conversation.other.name ?? "?").charAt(0).toUpperCase()}
                     </span>
-                  </div>
-
-                  <p className="mt-0.5 truncate text-sm text-subtle">
-                    {conversation.post.type === "FOUND" ? "Found" : "Lost"} ·{" "}
-                    {conversation.post.title}
-                  </p>
-
-                  {conversation.lastMessage && (
-                    <p className="mt-1.5 line-clamp-1 text-sm text-ink">
-                      {conversation.lastMessage.senderId === user.id && (
-                        <span className="text-subtle">You: </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-baseline justify-between gap-3">
+                        <span
+                          className={`truncate text-[15px] md:text-sm ${unread ? "font-semibold text-ink md:font-medium" : "text-ink md:text-muted"}`}
+                        >
+                          {conversation.other.name ?? "A student"}
+                          <span className="hidden md:inline"> · {conversation.post.title}</span>
+                        </span>
+                        <span className="flex shrink-0 items-center gap-1.5 text-xs text-subtle">
+                          {formatDay(conversation.lastActivity)}
+                          {unread && (
+                            <span aria-hidden className="h-2 w-2 rounded-full bg-brand md:hidden" />
+                          )}
+                        </span>
+                      </span>
+                      <span className="block truncate text-xs text-muted md:hidden">
+                        {conversation.post.type === "FOUND" ? "Found" : "Lost"} ·{" "}
+                        {conversation.post.title}
+                      </span>
+                      {conversation.lastMessage && (
+                        <span
+                          className={`mt-0.5 line-clamp-1 block text-sm ${unread ? "text-ink md:text-subtle" : "text-subtle"}`}
+                        >
+                          {conversation.lastMessage.senderId === user.id && "You: "}
+                          {conversation.lastMessage.body}
+                        </span>
                       )}
-                      {conversation.lastMessage.body}
-                    </p>
-                  )}
-
-                  {conversation.unread > 0 && (
-                    <span className="mt-2 inline-block rounded-full bg-brand px-2 py-0.5 text-xs font-medium text-on-brand">
-                      {conversation.unread} new
                     </span>
-                  )}
-                </Link>
-              </li>
-            ))}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         )}
       </main>

@@ -1,6 +1,7 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 
+import { consume, POLICY } from "@/lib/rate-limit";
 import { getUser } from "@/lib/session";
 
 /**
@@ -30,6 +31,13 @@ export async function POST(request: Request): Promise<NextResponse> {
         // Only verified McMaster accounts may upload anything.
         const user = await getUser();
         if (!user) throw new Error("Sign in to upload photos.");
+
+        const { uploadPerHour, uploadPerDay } = POLICY;
+        const hourly = await consume(`upload:hour:${user.id}`, uploadPerHour.limit, uploadPerHour.windowSeconds);
+        const daily = await consume(`upload:day:${user.id}`, uploadPerDay.limit, uploadPerDay.windowSeconds);
+        if (!hourly.allowed || !daily.allowed) {
+          throw new Error("You've uploaded a lot of photos recently. Try again later.");
+        }
 
         return {
           allowedContentTypes: ["image/jpeg", "image/png", "image/webp"],

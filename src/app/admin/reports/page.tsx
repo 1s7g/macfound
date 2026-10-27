@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { Header } from "@/components/Header";
 import { formatDay } from "@/components/PostCard";
-import { Button } from "@/components/ui";
+import { Badge, Button, EmptyState, PageHeader } from "@/components/ui";
 import { isModerator } from "@/lib/admin";
 import { listOpenReports, REPORT_REASON_LABELS } from "@/lib/reports";
 import { requireUser } from "@/lib/session";
@@ -24,26 +24,22 @@ export default async function ReportsPage() {
     <>
       <Header user={user} />
 
-      <main id="main" className="mx-auto w-full max-w-4xl px-4 py-6">
-        <h1 className="text-xl font-semibold tracking-tight text-ink">
-          Open reports
-        </h1>
-        <p className="mt-0.5 text-sm text-subtle">
-          {reports.length === 0 ? "Queue is clear." : `${reports.length} waiting`}
-        </p>
+      <main id="main" className="mx-auto w-full max-w-4xl px-4 py-5 md:py-6">
+        <PageHeader
+          title="Open reports"
+          subtitle={reports.length === 0 ? undefined : `${reports.length} waiting`}
+        />
 
         {reports.length === 0 ? (
-          <p className="mt-6 rounded-card border border-dashed border-line-strong bg-raised p-8 text-center text-muted">
-            Nothing to review.
-          </p>
+          <div className="mt-5">
+            <EmptyState title="Queue is clear." />
+          </div>
         ) : (
           <ul className="mt-5 space-y-3">
             {reports.map((report) => (
               <li key={report.id} className="rounded-card border border-line bg-raised p-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-danger-subtle px-2.5 py-0.5 text-xs font-medium text-danger">
-                    {REPORT_REASON_LABELS[report.reason]}
-                  </span>
+                  <Badge tone="danger">{REPORT_REASON_LABELS[report.reason]}</Badge>
                   <span className="text-xs text-subtle">
                     from {report.reporter.name ?? report.reporter.email} ·{" "}
                     {formatDay(report.createdAt)}

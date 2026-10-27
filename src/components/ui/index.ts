@@ -4,4 +4,6 @@ export { Badge, CountBadge } from "./Badge";
 export type { BadgeTone } from "./Badge";
 export { Card } from "./Card";
 export { EmptyState } from "./EmptyState";
+export { DateInput } from "./DateInput";
 export { Field, Input, Select, Textarea } from "./Field";
+export { PageHeader } from "./PageHeader";

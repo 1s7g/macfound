@@ -29,28 +29,44 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
     return () => clearInterval(id);
   }, [router]);
 
+  // On a phone the composer is pinned to the bottom like any messaging app, with
+  // the send button beside the box; on desktop it sits under the thread.
   return (
-    <form ref={formRef} action={formAction} className="mt-4">
+    <form
+      ref={formRef}
+      action={formAction}
+      data-mobile-bar
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-md md:static md:z-auto md:mt-4 md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none"
+    >
       <input type="hidden" name="conversationId" value={conversationId} />
       <label htmlFor="body" className="sr-only">
         Message
       </label>
-      <Textarea
-        id="body"
-        name="body"
-        rows={3}
-        required
-        maxLength={2000}
-        placeholder="Write a message…"
-      />
-      {state.error && (
-        <p role="alert" className="mt-1.5 text-sm text-danger">
-          {state.error}
-        </p>
-      )}
-      <Button type="submit" disabled={pending} className="mt-2">
-        {pending ? "Sending…" : "Send"}
-      </Button>
+      <div className="flex items-end gap-2 md:block">
+        <Textarea
+          id="body"
+          name="body"
+          rows={3}
+          required
+          maxLength={2000}
+          placeholder="Write a message…"
+          className="phone:h-11 phone:min-h-11 phone:resize-none phone:rounded-full phone:py-2.5 phone:[scrollbar-width:none]"
+        />
+        {state.error && (
+          <p role="alert" className="mt-1.5 hidden text-sm text-danger md:block">
+            {state.error}
+          </p>
+        )}
+        <Button
+          type="submit"
+          disabled={pending}
+          className="phone:h-11 phone:rounded-full phone:px-5 md:mt-2"
+        >
+          {pending ? "Sending…" : "Send"}
+        </Button>
+      </div>
+      {/* Below the row on a phone; desktop shows it under the box, as before. */}
+      {state.error && <p className="mt-1.5 text-sm text-danger md:hidden">{state.error}</p>}
     </form>
   );
 }
