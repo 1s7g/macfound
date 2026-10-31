@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { describeError, sendAlert } from "@/lib/alerts";
 import { runMaintenance } from "@/lib/maintenance";
 
 /**
@@ -23,6 +24,7 @@ export async function GET(request: Request) {
 
   if (isProduction && !secret) {
     console.error("CRON_SECRET is not set; refusing to run maintenance.");
+    await sendAlert("Nightly maintenance is not configured", "CRON_SECRET is missing, so posts aren't expiring and photos aren't being cleaned up.", "cron-config");
     return NextResponse.json({ error: "Not configured." }, { status: 500 });
   }
 
@@ -36,6 +38,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: true, ...report });
   } catch (error) {
     console.error("Maintenance run failed", error);
+    await sendAlert("Nightly maintenance failed", describeError(error), "cron-failed");
     return NextResponse.json({ error: "Maintenance failed." }, { status: 500 });
   }
 }
