@@ -1,5 +1,7 @@
 import { Resend } from "resend";
 
+import { describeError, sendAlert } from "@/lib/alerts";
+
 /**
  * Email delivery.
  *
@@ -21,6 +23,11 @@ const resend = resendKey ? new Resend(resendKey) : null;
 export async function sendSignInCode(to: string, code: string): Promise<void> {
   if (!resend) {
     if (isProduction) {
+      await sendAlert(
+        "Sign-in emails are failing",
+        "AUTH_RESEND_KEY is not set in production, so no sign-in codes can be sent.",
+        "signin-email",
+      );
       throw new Error(
         "AUTH_RESEND_KEY is not set — refusing to log sign-in codes in production.",
       );
@@ -59,6 +66,9 @@ export async function sendSignInCode(to: string, code: string): Promise<void> {
     // Surface a generic failure upward; the caller must not leak whether the
     // address exists or why delivery failed.
     console.error("Failed to send sign-in code:", error);
+    // Nobody can sign in while this is failing, and the student only sees a
+    // generic message — so the maintainer has to hear about it.
+    await sendAlert("Sign-in emails are failing", describeError(error), "signin-email");
     throw new Error("Could not send sign-in email.");
   }
 }
@@ -126,9 +136,13 @@ export async function sendNotificationEmail(email: NotificationEmail): Promise<v
       ].join("\n"),
       html: notificationHtml(email.lines, email.action.label, url),
     });
-    if (error) console.error("Notification email failed:", error);
+    if (error) {
+      console.error("Notification email failed:", error);
+      await sendAlert("Notification emails are failing", describeError(error), "notification-email");
+    }
   } catch (error) {
     console.error("Notification email failed:", error);
+    await sendAlert("Notification emails are failing", describeError(error), "notification-email");
   }
 }
 
