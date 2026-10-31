@@ -28,6 +28,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  // Matches the page background, so Safari's toolbar and an installed app's
+  // status bar blend into the app rather than framing it in grey.
+  themeColor: "#faf9f7",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
