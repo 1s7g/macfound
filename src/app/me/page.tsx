@@ -183,11 +183,18 @@ export default async function MyPostsPage() {
             {/* The desktop header already carries the moderator link and Sign
                 out; the phone's tab bar has no room for either. */}
             {isModerator(user.email) && (
-              <li className="md:hidden">
-                <Link href="/admin/reports" className="block px-4 py-3.5 text-[15px] text-ink">
-                  Moderation queue
-                </Link>
-              </li>
+              <>
+                <li>
+                  <Link href="/admin/stats" className="block px-4 py-3.5 text-[15px] text-ink">
+                    Stats
+                  </Link>
+                </li>
+                <li className="md:hidden">
+                  <Link href="/admin/reports" className="block px-4 py-3.5 text-[15px] text-ink">
+                    Moderation queue
+                  </Link>
+                </li>
+              </>
             )}
             <li>
               <Link href="/privacy" className="block px-4 py-3.5 text-[15px] text-ink">

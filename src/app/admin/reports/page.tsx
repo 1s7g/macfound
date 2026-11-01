@@ -28,6 +28,11 @@ export default async function ReportsPage() {
         <PageHeader
           title="Open reports"
           subtitle={reports.length === 0 ? undefined : `${reports.length} waiting`}
+          action={
+            <Link href="/admin/stats" className="text-sm font-medium text-brand-text hover:underline">
+              Stats
+            </Link>
+          }
         />
 
         {reports.length === 0 ? (
