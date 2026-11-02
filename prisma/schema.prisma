@@ -436,3 +436,13 @@ model Report {
 
   @@index([resolvedAt, createdAt])
 }
+
+// An address that may not sign in. Keyed by email rather than user id so a ban
+// outlives the account: deleting a troll's account and banning them are
+// separate decisions, and the ban has to stop them signing straight back up.
+model BannedEmail {
+  email     String   @id // normalised: trimmed, lower-case
+  reason    String?
+  bannedBy  String // the moderator's email, for the record
+  createdAt DateTime @default(now())
+}

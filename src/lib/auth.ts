@@ -3,6 +3,7 @@ import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { Provider } from "next-auth/providers";
 
+import { isBanned } from "@/lib/bans";
 import { db } from "@/lib/db";
 import { sendSignInCode } from "@/lib/email";
 
@@ -62,6 +63,9 @@ const mcmasterEmailProvider: Provider = {
     if (!isAllowedEmail(identifier)) {
       throw new Error("Only McMaster email addresses may sign in.");
     }
+    if (await isBanned(identifier)) {
+      throw new Error("This address is banned from MacFound.");
+    }
     await sendSignInCode(identifier, token);
   },
 };
@@ -77,11 +81,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     /** Final gate — rejects a non-McMaster address even if one reached this far. */
-    signIn({ user, email }) {
+    async signIn({ user, email }) {
       // `email.verificationRequest` means this call is the *send* step, not the
-      // verify step; both must be blocked for a disallowed address.
+      // verify step; both must be blocked for a disallowed address. Checking
+      // bans here too means a code sent moments before a ban can't be redeemed.
       void email;
-      return Boolean(user.email && isAllowedEmail(user.email));
+      if (!user.email || !isAllowedEmail(user.email)) return false;
+      return !(await isBanned(user.email));
     },
     session({ session, user }) {
       // Expose the database id so server components can query by it directly.

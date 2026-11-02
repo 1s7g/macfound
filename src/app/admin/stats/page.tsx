@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { AdminNav } from "@/components/AdminNav";
 import { Header } from "@/components/Header";
 import { formatDay } from "@/components/PostCard";
 import { PageHeader } from "@/components/ui";
@@ -29,8 +30,9 @@ export default async function StatsPage() {
 
       <main id="main" className="mx-auto w-full max-w-4xl px-4 py-5 md:py-6">
         <PageHeader title="Stats" subtitle="Live from the database · days in Toronto time" desktopOnly />
+        <AdminNav current="/admin/stats" />
 
-        <dl className="grid grid-cols-2 gap-2.5 md:mt-5 md:grid-cols-4">
+        <dl className="mt-5 grid grid-cols-2 gap-2.5 md:grid-cols-4">
           <Tile
             label="Accounts"
             value={stats.accounts}

@@ -15,9 +15,11 @@ const MESSAGES: Record<string, { title: string; body: string }> = {
     title: "That code didn't work",
     body: "Codes expire after 10 minutes and can only be used once. Request a new one and try again.",
   },
+  // Auth.js reports both a non-McMaster address and a banned one as
+  // AccessDenied, with nothing to tell them apart here, so this covers both.
   AccessDenied: {
-    title: "McMaster email required",
-    body: "MacFound is only open to McMaster students, so you'll need an @mcmaster.ca address to sign in.",
+    title: "You can't sign in with this address",
+    body: "MacFound is only open to McMaster students, so you'll need an @mcmaster.ca address. If you used your McMaster email, this account may have been suspended.",
   },
 };
 
@@ -33,11 +35,21 @@ export default async function SignInErrorPage({
 }) {
   const { reason, error } = await searchParams;
   const { title, body } = MESSAGES[reason ?? error ?? ""] ?? FALLBACK;
+  const contact = process.env.CONTACT_EMAIL;
 
   return (
     <main id="main" className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-6 py-12">
       <h1 className="text-2xl font-semibold tracking-tight text-ink">{title}</h1>
       <p className="mt-2 text-muted">{body}</p>
+      {(reason ?? error) === "AccessDenied" && contact && (
+        <p className="mt-3 text-sm text-muted">
+          Think this is a mistake? Email{" "}
+          <a href={`mailto:${contact}`} className="font-medium text-brand-text underline underline-offset-2">
+            {contact}
+          </a>
+          .
+        </p>
+      )}
 
       <Link
         href="/signin"

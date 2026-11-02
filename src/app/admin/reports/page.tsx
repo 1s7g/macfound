@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AdminNav } from "@/components/AdminNav";
 import { Header } from "@/components/Header";
 import { formatDay } from "@/components/PostCard";
 import { Badge, Button, EmptyState, PageHeader } from "@/components/ui";
@@ -22,18 +23,18 @@ export default async function ReportsPage() {
 
   return (
     <>
-      <Header user={user} />
+      <Header user={user} mobile={{ title: "Reports", back: { href: "/me", label: "Profile" } }} />
 
       <main id="main" className="mx-auto w-full max-w-4xl px-4 py-5 md:py-6">
         <PageHeader
           title="Open reports"
           subtitle={reports.length === 0 ? undefined : `${reports.length} waiting`}
-          action={
-            <Link href="/admin/stats" className="text-sm font-medium text-brand-text hover:underline">
-              Stats
-            </Link>
-          }
+          desktopOnly
         />
+        <AdminNav current="/admin/reports" />
+        {reports.length > 0 && (
+          <p className="mt-4 text-sm text-muted md:hidden">{reports.length} waiting</p>
+        )}
 
         {reports.length === 0 ? (
           <div className="mt-5">
