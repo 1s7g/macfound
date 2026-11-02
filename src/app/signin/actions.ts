@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { ALLOWED_EMAIL_DOMAIN, isAllowedEmail, normalizeEmail, signIn } from "@/lib/auth";
+import { isBanned } from "@/lib/bans";
 import { safeRedirect } from "@/lib/safe-redirect";
 import {
   consume,
@@ -40,6 +41,15 @@ export async function requestSignInCode(
   if (!isAllowedEmail(email)) {
     return {
       error: `MacFound is only open to McMaster students — use your @${ALLOWED_EMAIL_DOMAIN} address.`,
+    };
+  }
+
+  // Said plainly rather than pretending a code was sent: a banned student
+  // should know why, and who to ask if it's a mistake.
+  if (await isBanned(email)) {
+    const contact = process.env.CONTACT_EMAIL;
+    return {
+      error: `This account has been suspended from MacFound.${contact ? ` If you think this is a mistake, email ${contact}.` : ""}`,
     };
   }
 

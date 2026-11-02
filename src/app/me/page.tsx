@@ -180,21 +180,15 @@ export default async function MyPostsPage() {
         <section className="mt-8">
           <h2 className="mb-2.5 font-semibold text-ink">Account</h2>
           <ul className="divide-y divide-line overflow-hidden rounded-card border border-line bg-raised">
-            {/* The desktop header already carries the moderator link and Sign
-                out; the phone's tab bar has no room for either. */}
+            {/* The desktop header already carries Sign out; the phone's tab bar
+                has no room for it. Admin is listed on both. */}
             {isModerator(user.email) && (
-              <>
-                <li>
-                  <Link href="/admin/stats" className="block px-4 py-3.5 text-[15px] text-ink">
-                    Stats
-                  </Link>
-                </li>
-                <li className="md:hidden">
-                  <Link href="/admin/reports" className="block px-4 py-3.5 text-[15px] text-ink">
-                    Moderation queue
-                  </Link>
-                </li>
-              </>
+              <li>
+                <Link href="/admin/reports" className="flex items-baseline justify-between gap-3 px-4 py-3.5 text-[15px] text-ink">
+                  Admin
+                  <span className="text-sm text-muted">Reports · Users · Stats</span>
+                </Link>
+              </li>
             )}
             <li>
               <Link href="/privacy" className="block px-4 py-3.5 text-[15px] text-ink">
