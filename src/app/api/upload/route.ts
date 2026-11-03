@@ -1,6 +1,7 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 
+import { describeError, sendAlert } from "@/lib/alerts";
 import { consume, POLICY } from "@/lib/rate-limit";
 import { getUser } from "@/lib/session";
 
@@ -30,13 +31,13 @@ export async function POST(request: Request): Promise<NextResponse> {
       onBeforeGenerateToken: async () => {
         // Only verified McMaster accounts may upload anything.
         const user = await getUser();
-        if (!user) throw new Error("Sign in to upload photos.");
+        if (!user) throw new ExpectedRefusal("Sign in to upload photos.");
 
         const { uploadPerHour, uploadPerDay } = POLICY;
         const hourly = await consume(`upload:hour:${user.id}`, uploadPerHour.limit, uploadPerHour.windowSeconds);
         const daily = await consume(`upload:day:${user.id}`, uploadPerDay.limit, uploadPerDay.windowSeconds);
         if (!hourly.allowed || !daily.allowed) {
-          throw new Error("You've uploaded a lot of photos recently. Try again later.");
+          throw new ExpectedRefusal("You've uploaded a lot of photos recently. Try again later.");
         }
 
         return {
@@ -57,6 +58,15 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json(result);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Upload failed.";
+    // A refusal we meant (signed out, over the limit) is the user's to see. Anything
+    // else is the upload path itself breaking, and nobody would know: the student
+    // just sees an error, and this route used to swallow it without a log line.
+    if (!(error instanceof ExpectedRefusal)) {
+      await sendAlert("Photo uploads are failing (server)", describeError(error), "upload-server");
+    }
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }
+
+/** A refusal the user should see, as opposed to a failure the maintainer should. */
+class ExpectedRefusal extends Error {}

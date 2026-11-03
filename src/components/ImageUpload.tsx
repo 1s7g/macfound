@@ -1,7 +1,7 @@
 "use client";
 
 import { upload } from "@vercel/blob/client";
-import { useRef, useState } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 
 /**
  * Photo picker for a post.
@@ -18,6 +18,34 @@ import { useRef, useState } from "react";
  */
 
 const MAX_IMAGES = 3;
+
+// Apps that open links in their own built-in browser, where the photo picker
+// is often limited or broken. Shared links mostly get tapped inside these.
+const IN_APP_BROWSER = /Instagram|FBAN|FBAV|Snapchat|musical_ly|BytedanceWebview|LinkedInApp/i;
+
+// Read once on the client; the server can't know, so it renders without the tip.
+const noop = () => () => {};
+function useInAppBrowser(): boolean {
+  return useSyncExternalStore(
+    noop,
+    () => IN_APP_BROWSER.test(navigator.userAgent),
+    () => false,
+  );
+}
+
+/**
+ * Tell the server an upload failed in the browser. The server can't see this
+ * part on its own, so without it a broken picker on some phone stays invisible.
+ * Fire-and-forget: reporting must never get in the way of the student retrying.
+ */
+function reportFailure(message: string, file?: File) {
+  void fetch("/api/upload/report", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, fileType: file?.type ?? "", fileSize: file?.size ?? "" }),
+    keepalive: true,
+  }).catch(() => {});
+}
 const MAX_DIMENSION = 1600;
 const JPEG_QUALITY = 0.82;
 
@@ -30,16 +58,19 @@ export function ImageUpload({ disabled }: { disabled?: boolean }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const remaining = MAX_IMAGES - images.length;
+  const inAppBrowser = useInAppBrowser();
 
   async function handleFiles(files: FileList | null) {
     if (!files?.length) return;
     setError(null);
     setBusy(true);
 
+    let current: File | undefined;
     try {
       const chosen = Array.from(files).slice(0, remaining);
 
       for (const file of chosen) {
+        current = file;
         if (!file.type.startsWith("image/")) {
           setError("Only image files can be uploaded.");
           continue;
@@ -55,8 +86,12 @@ export function ImageUpload({ disabled }: { disabled?: boolean }) {
       }
     } catch (cause) {
       console.error("Upload failed", cause);
+      const message = cause instanceof Error ? cause.message : String(cause);
+      reportFailure(message, current);
       setError(
-        cause instanceof Error ? cause.message : "That upload didn't work. Try again.",
+        inAppBrowser
+          ? "That photo didn't upload. Photos often don't work inside this app's browser — open this page in Safari or Chrome and try again."
+          : "That photo didn't upload. Check your connection and try again.",
       );
     } finally {
       setBusy(false);
@@ -112,6 +147,13 @@ export function ImageUpload({ disabled }: { disabled?: boolean }) {
       )}
 
       {busy && <p className="mt-1.5 text-xs text-subtle">Uploading…</p>}
+
+      {inAppBrowser && !error && (
+        <p className="mt-1.5 text-xs leading-relaxed text-muted">
+          Adding photos may not work inside this app. If it doesn&rsquo;t, open this
+          page in Safari or Chrome.
+        </p>
+      )}
 
       {error && (
         <p role="alert" className="mt-1.5 text-sm text-danger">
